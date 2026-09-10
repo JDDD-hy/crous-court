@@ -29,7 +29,7 @@ DoD：
 
 完成日期：2026-09-10。
 
-## Phase 2：D1 数据与排名核心
+## Phase 2：D1 数据与排名核心（完成）
 
 工作：schema/migration、种子餐厅、Meal/Dish/Serving/Vote、RankingService、读取列表和详情。
 
@@ -40,6 +40,8 @@ DoD：
 - 修改投票与中位数规则测试通过；
 - 主食/小菜隔离；
 - 刷新后数据存在。
+
+完成日期：2026-09-10。
 
 ## Phase 3：身份认证与餐盘上传
 

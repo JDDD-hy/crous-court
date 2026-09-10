@@ -1,0 +1,33 @@
+export type Tier = 1 | 2 | 3 | 4 | 5;
+export type VerdictStatus = "pending" | "provisional" | "official";
+
+export type Verdict = {
+  tier: Tier | null;
+  voteCount: number;
+  status: VerdictStatus;
+  distribution: [number, number, number, number, number];
+};
+
+export function calculateVerdict(targets: readonly number[]): Verdict {
+  const sorted = [...targets].sort((a, b) => a - b);
+  if (sorted.some((tier) => !Number.isInteger(tier) || tier < 1 || tier > 5)) {
+    throw new RangeError("target tier must be an integer from 1 to 5");
+  }
+
+  const voteCount = sorted.length;
+  const distribution: Verdict["distribution"] = [0, 0, 0, 0, 0];
+  for (const tier of sorted) distribution[tier - 1] += 1;
+
+  return {
+    tier: voteCount ? sorted[Math.floor(voteCount / 2)] as Tier : null,
+    voteCount,
+    status: voteCount >= 15 ? "official" : voteCount >= 5 ? "provisional" : "pending",
+    distribution,
+  };
+}
+
+export function compareVerdicts(a: Verdict, b: Verdict) {
+  if (a.tier === null) return b.tier === null ? 0 : 1;
+  if (b.tier === null) return -1;
+  return a.tier - b.tier || b.voteCount - a.voteCount;
+}
