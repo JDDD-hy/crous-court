@@ -6,7 +6,7 @@ Télécom Paris / Palaiseau 学生的 CROUS 菜品社区审判网站。
 
 ## 当前状态
 
-Phase 0 已完成：v1 范围冻结，官方 Sites starter、真实项目配置和本地运行验证已建立。尚未进入 Phase 1。
+Phase 1 已完成：首页、投稿页和 Dish 详情页的高保真静态原型可本地操作；全部数据与写入均为浏览器内模拟，尚未进入 Phase 2 的 D1 数据与排名核心。
 
 ## 开发前必读
 

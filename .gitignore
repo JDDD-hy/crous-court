@@ -44,3 +44,5 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+# User-owned source photos; only sanitized derivatives belong in public/.
+/pic/
