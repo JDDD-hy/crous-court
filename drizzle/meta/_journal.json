@@ -15,6 +15,13 @@
       "when": 1789108415200,
       "tag": "0001_sad_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789109748509,
+      "tag": "0002_broad_dust",
+      "breakpoints": true
     }
   ]
 }

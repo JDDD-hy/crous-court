@@ -6,9 +6,11 @@ Télécom Paris / Palaiseau 学生的 CROUS 菜品社区审判网站。
 
 ## 当前状态
 
-Phase 3 已完成：ChatGPT 登录写入边界、浏览器端 EXIF/GPS 清理、服务端图片复验、R2 图片与 D1 投稿记录已接通；同日多次投稿按稳定案号排序。社区投票写入、补名治理和 AI 辅助审核仍按后续阶段延期。
+Phase 3 已完成并按最新决定修订：公共浏览、邮箱六位验证码登录、浏览器端 EXIF/GPS 清理、服务端图片复验、R2 图片与 D1 投稿记录已接通；同日多次投稿按稳定案号排序。社区投票写入、补名治理和 AI 辅助审核仍按后续阶段延期。
 
 本地 D1 首次运行顺序：`npm run build` → `npm run db:migrate:local` → `npm run db:fixtures:local` → `npm start`。fixture 只用于本地开发，不含真实用户或生产种子内容。
+
+本地邮箱登录会在页面显示一次性验收验证码；该模式只允许回环地址。生产需在 Sites 服务端配置 `AUTH_HMAC_SECRET`、`RESEND_API_KEY`、`OTP_FROM_EMAIL`，且不得提交到 Git。
 
 ## 开发前必读
 

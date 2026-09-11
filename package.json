@@ -9,10 +9,11 @@
     "install:ci": "node scripts/install-ci.mjs",
     "dev": "node scripts/run-framework.mjs dev",
     "build": "node scripts/run-framework.mjs build",
-    "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/crous-court --ip 127.0.0.1 --inspector-port 0",
+    "start": "node scripts/start-local.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "test:db": "node --experimental-strip-types scripts/verify-phase2-db.mjs",
+    "test:auth": "node scripts/verify-phase3-auth.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "node ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local --persist-to .wrangler/crous-court --config dist/server/wrangler.json",
     "db:fixtures:local": "node ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --persist-to .wrangler/crous-court --config dist/server/wrangler.json --file db/fixtures.sql --yes"

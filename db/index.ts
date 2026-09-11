@@ -13,6 +13,12 @@ export function getDb() {
 }
 
 export function getBindings() {
-  if (!env.DB || !env.BUCKET) throw new Error("D1 or R2 binding is unavailable");
-  return { db: env.DB, bucket: env.BUCKET };
+  const db = getRawDb();
+  if (!env.BUCKET) throw new Error("R2 binding is unavailable");
+  return { db, bucket: env.BUCKET };
+}
+
+export function getRawDb() {
+  if (!env.DB) throw new Error("D1 binding is unavailable");
+  return env.DB;
 }

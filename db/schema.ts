@@ -5,8 +5,33 @@ const createdAt = () => text("created_at").notNull().default(sql`CURRENT_TIMESTA
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
+  emailDigest: text("email_digest"),
   createdAt: createdAt(),
-});
+}, (table) => [uniqueIndex("users_email_digest_unique").on(table.emailDigest)]);
+
+export const emailOtpChallenges = sqliteTable("email_otp_challenges", {
+  id: text("id").primaryKey(),
+  emailDigest: text("email_digest").notNull(),
+  codeDigest: text("code_digest").notNull(),
+  ipDigest: text("ip_digest").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  consumedAt: integer("consumed_at"),
+  sessionId: text("session_id"),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  index("email_otp_challenges_email_created_idx").on(table.emailDigest, table.createdAt),
+  index("email_otp_challenges_ip_created_idx").on(table.ipDigest, table.createdAt),
+  check("email_otp_challenges_attempts_check", sql`${table.attempts} between 0 and 5`),
+]);
+
+export const authSessions = sqliteTable("auth_sessions", {
+  tokenDigest: text("token_digest").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: integer("expires_at").notNull(),
+  createdAt: integer("created_at").notNull(),
+  revokedAt: integer("revoked_at"),
+}, (table) => [index("auth_sessions_user_idx").on(table.userId)]);
 
 export const venues = sqliteTable("venues", {
   id: text("id").primaryKey(),

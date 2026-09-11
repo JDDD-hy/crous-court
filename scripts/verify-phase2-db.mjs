@@ -29,7 +29,7 @@ run(["d1", "migrations", "apply", ...base]);
 run(["d1", "execute", ...base, "--file", path.join(projectRoot, "db", "fixtures.sql"), "--yes"]);
 
 const tables = execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' AND name NOT LIKE 'sqlite_%' ORDER BY name").map((row) => row.name);
-for (const table of ["daily_case_counters", "dishes", "meal_items", "meals", "photos", "servings", "users", "venues", "votes"]) assert.ok(tables.includes(table));
+for (const table of ["auth_sessions", "daily_case_counters", "dishes", "email_otp_challenges", "meal_items", "meals", "photos", "servings", "users", "venues", "votes"]) assert.ok(tables.includes(table));
 
 assert.deepEqual(execute("SELECT id, canonical_name, nickname, display_number, active FROM venues ORDER BY id"), [
   { id: "venue-escoffier", canonical_name: "Escoffier", nickname: "学校 CROUS / Télécom 附近", display_number: 0, active: 1 },

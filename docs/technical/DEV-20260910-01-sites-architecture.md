@@ -6,7 +6,7 @@
 
 本项目包含持久化、上传、认证和多页面，必须走 OpenAI Sites capability path，不使用纯静态 one-shot。
 
-目标运行形态：Cloudflare Worker 兼容 ESM；使用 Sites 管理 D1、R2、身份认证和部署绑定。
+目标运行形态：Cloudflare Worker 兼容 ESM；使用 Sites 管理 D1、R2 和部署绑定，应用在 D1 中管理邮箱验证码与会话。
 
 ## 2. 前端
 
@@ -79,7 +79,16 @@ votes
 
 Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/GPS 的规范 JPEG 与缩略图；原始文件不离开浏览器。服务端再次按文件签名、结构、大小、像素数和元数据段校验，经 R2 写入成功后用 D1 `batch` 原子分配案号并写入 Meal、Photo、Dish、Serving、MealItem 和投稿者第一票；D1 失败时删除已写 R2 对象。
 
-写接口 `POST /api/uploads` 只信任 Sites 转发的 ChatGPT 用户头；匿名请求返回 401，跨站请求返回 403，同一用户十分钟最多发布五次。`GET /api/photos/:id` 只返回 active Meal 的规范图并设置 `nosniff`。
+写接口 `POST /api/uploads` 只信任服务端邮箱会话；匿名请求返回 401，跨站请求返回 403，同一用户十分钟最多发布五次。`GET /api/photos/:id` 只返回 active Meal 的规范图并设置 `nosniff`。
+
+### 5.1 邮箱验证码认证
+
+- `email_otp_challenges` 只保存邮箱、客户端地址和六位码的 HMAC 摘要；验证码 10 分钟过期、最多尝试 5 次，同邮箱 15 分钟最多 5 封、同地址最多 10 封；
+- `auth_sessions` 只保存 256-bit 随机会话令牌的 SHA-256 摘要；浏览器 Cookie 使用 HttpOnly、SameSite=Lax，生产使用 Secure 与 `__Host-` 前缀，30 天过期；
+- 登录成功原子消费验证码并复用同一邮箱对应的随机 User ID；验证码不可重放；退出时服务端撤销会话；
+- 生产发信使用 Resend HTTP API，`AUTH_HMAC_SECRET`、`RESEND_API_KEY`、`OTP_FROM_EMAIL` 只放 Sites 服务端配置；HMAC secret 必须长期保存，轮换会使既有邮箱映射无法复用；
+- 本地模式只在显式 `AUTH_MODE=local` 且请求来自 `localhost/127.0.0.1` 时回显随机验证码，非回环地址失败关闭；
+- 所有认证和上传写请求校验同源，响应和日志不得包含邮箱、验证码、API key 或会话令牌。
 
 ## 6. AI 延后方案
 

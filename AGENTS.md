@@ -17,7 +17,7 @@
 4. 未确认的产品决策写入对应 REQ/BIZ 的 Open Decisions，不自行补成事实。
 5. 每个 Phase 必须满足 DoD 后才能进入下一 Phase。
 6. 数据库、身份认证、上传与部署属于 Sites capability path；遵循 Sites 当前能力与配置，不以纯静态站替代。
-7. 任何 OpenAI API key、支付配置和管理凭证只保存在服务器端 secret，禁止进入客户端、仓库或日志。
+7. 任何 OpenAI/Resend API key、认证 HMAC secret、支付配置和管理凭证只保存在服务器端 secret，禁止进入客户端、仓库或日志。
 8. AI 识菜不是 v1 阻塞项；无 API key 时必须完整支持“未知菜品 + 社区补名”。
 
 ## 3. 技术栈
@@ -27,7 +27,7 @@
 - Tailwind CSS 与 starter 已安装的 shadcn/ui primitives
 - Sites D1：结构化数据
 - Sites R2：用户图片及缩略图
-- Sites 托管身份认证：上传、投票、举报和管理权限
+- D1 邮箱验证码与服务端会话；Resend 仅负责验证码邮件投递
 - GSAP：MotionPathPlugin、Flip；尊重 `prefers-reduced-motion`
 - Canvas 2D：轻量像素碎裂/坠落彩蛋
 - 可选后续：Three.js + Rapier，仅用于延迟加载的 Pixel Voxel 特效
