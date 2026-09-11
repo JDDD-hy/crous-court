@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db";
-import { dishes, servings, venues, votes } from "../db/schema";
+import { dishes, mealItems, meals, photos, servings, venues, votes } from "../db/schema";
 import type { DishCategory, DishDetail, DishSummary } from "./dish-types";
 import { calculateVerdict, compareVerdicts, type Tier } from "./ranking";
 
@@ -25,7 +25,12 @@ export async function listRankings(category?: DishCategory): Promise<DishSummary
       initialTier: servings.initialTier,
       venueName: venues.canonicalName,
       venueNickname: venues.nickname,
-    }).from(servings).innerJoin(venues, eq(servings.venueId, venues.id))
+      photoId: photos.id,
+    }).from(servings)
+      .innerJoin(venues, eq(servings.venueId, venues.id))
+      .innerJoin(mealItems, eq(mealItems.servingId, servings.id))
+      .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
+      .leftJoin(photos, eq(photos.mealId, meals.id))
       .where(and(inArray(servings.dishId, ids), eq(servings.status, "active")))
       .orderBy(desc(servings.servedOn)),
   ]);
@@ -41,25 +46,27 @@ export async function listRankings(category?: DishCategory): Promise<DishSummary
     if (!servingByDish.has(serving.dishId)) servingByDish.set(serving.dishId, serving);
   }
 
-  return dishRows.map((dish) => {
+  return dishRows.flatMap((dish) => {
     const verdict = calculateVerdict(targetsByDish.get(dish.id) ?? []);
     const serving = servingByDish.get(dish.id);
-    return {
+    if (!serving) return [];
+    return [{
       verdict,
       dish: {
         id: dish.id,
         name: dish.canonicalNameFr ?? `神秘菜品 #${dish.id.slice(-4)}`,
         zh: dish.canonicalNameZh ?? (dish.originalDescription || "等待群众认菜"),
-        venue: serving ? `${serving.venueNickname} · ${serving.venueName}` : "暂无出餐记录",
-        date: serving?.date ?? "",
-        image: imageByDish[dish.id] ?? "/file.svg",
+        venue: `${serving.venueNickname} · ${serving.venueName}`,
+        date: serving.date,
+        image: serving.photoId ? `/api/photos/${serving.photoId}` : imageByDish[dish.id] ?? "/file.svg",
         tier: verdict.tier,
         initialTier: (serving?.initialTier as Tier | undefined) ?? null,
         votes: verdict.voteCount,
+        distribution: verdict.distribution,
         category: dish.category,
         status: verdict.status,
       } satisfies DishSummary,
-    };
+    }];
   }).sort((a, b) => compareVerdicts(a.verdict, b.verdict) || a.dish.id.localeCompare(b.dish.id))
     .map((entry) => entry.dish);
 }
@@ -70,27 +77,32 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
   if (!summary) return null;
 
   const db = getDb();
-  const [voteRows, servingRows] = await Promise.all([
-    db.select({ targetTier: votes.targetTier }).from(votes).where(eq(votes.dishId, id)),
-    db.select({
+  const servingRows = await db.select({
       id: servings.id,
       date: servings.servedOn,
       initialTier: servings.initialTier,
       venueName: venues.canonicalName,
       venueNickname: venues.nickname,
-    }).from(servings).innerJoin(venues, eq(servings.venueId, venues.id))
+    }).from(servings)
+      .innerJoin(venues, eq(servings.venueId, venues.id))
+      .innerJoin(mealItems, eq(mealItems.servingId, servings.id))
+      .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
       .where(and(eq(servings.dishId, id), eq(servings.status, "active")))
-      .orderBy(desc(servings.servedOn)),
-  ]);
-  const verdict = calculateVerdict(voteRows.map((vote) => vote.targetTier));
+      .orderBy(desc(servings.servedOn));
+  const uniqueServings = [...new Map(servingRows.map((serving) => [serving.id, serving])).values()];
   return {
     ...summary,
-    distribution: verdict.distribution,
-    servings: servingRows.map((serving) => ({
+    servings: uniqueServings.map((serving) => ({
       id: serving.id,
       date: serving.date,
       venue: `${serving.venueNickname} · ${serving.venueName}`,
       initialTier: serving.initialTier as Tier,
     })),
   };
+}
+
+export async function getUserVote(dishId: string, userId: string): Promise<Tier | null> {
+  const row = await getDb().select({ targetTier: votes.targetTier }).from(votes)
+    .where(and(eq(votes.dishId, dishId), eq(votes.userId, userId))).limit(1);
+  return (row[0]?.targetTier as Tier | undefined) ?? null;
 }

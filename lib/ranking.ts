@@ -31,3 +31,13 @@ export function compareVerdicts(a: Verdict, b: Verdict) {
   if (b.tier === null) return -1;
   return a.tier - b.tier || b.voteCount - a.voteCount;
 }
+
+export function previewVote(distribution: Verdict["distribution"], previous: Tier | null, next: Tier): Verdict {
+  const targets = distribution.flatMap((count, index) => Array<Tier>(count).fill((index + 1) as Tier));
+  if (previous !== null) {
+    const index = targets.indexOf(previous);
+    if (index >= 0) targets.splice(index, 1);
+  }
+  targets.push(next);
+  return calculateVerdict(targets);
+}

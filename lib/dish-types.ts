@@ -12,11 +12,11 @@ export type DishSummary = {
   tier: Tier | null;
   initialTier: Tier | null;
   votes: number;
+  distribution: [number, number, number, number, number];
   category: DishCategory;
   status: VerdictStatus;
 };
 
 export type DishDetail = DishSummary & {
-  distribution: [number, number, number, number, number];
   servings: Array<{ id: string; date: string; venue: string; initialTier: Tier }>;
 };

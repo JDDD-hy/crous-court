@@ -1,10 +1,14 @@
 import { DishPrototype } from "@/components/crous/DishPrototype";
-import { getDishDetail } from "@/lib/ranking-service";
+import { getEmailUser } from "@/lib/auth/email-auth";
+import { getDishDetail, getUserVote } from "@/lib/ranking-service";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function DishPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const dish = await getDishDetail(id);
+  const [dish, user] = await Promise.all([getDishDetail(id), getEmailUser()]);
   if (!dish) notFound();
-  return <DishPrototype dish={dish} />;
+  const myVote = user ? await getUserVote(dish.id, user.userId) : null;
+  return <DishPrototype key={`${dish.id}:${dish.tier}:${dish.votes}:${myVote}`} dish={dish} authenticated={Boolean(user)} myVote={myVote} />;
 }

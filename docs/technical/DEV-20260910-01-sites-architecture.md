@@ -27,7 +27,7 @@
 
 ## 4. 数据表
 
-Phase 2 已落地 `users`、`venues`、`meals`、`dishes`、`servings`、`meal_items`、`votes`。Phase 3 新增 `photos`、`daily_case_counters`、食堂序号及 Meal 案号；补名、去重和举报表留到 Phase 5。
+Phase 2 已落地 `users`、`venues`、`meals`、`dishes`、`servings`、`meal_items`、`votes`。Phase 3 新增 `photos`、`daily_case_counters`、食堂序号及 Meal 案号；Phase 4 新增 `vote_rate_limits`。补名、去重和举报表留到 Phase 5。
 
 ```text
 venues
@@ -60,6 +60,9 @@ meal_items
 votes
   id, dish_id, user_id, target_tier, created_at, updated_at
   UNIQUE(dish_id, user_id)
+
+vote_rate_limits
+  user_id, window_started_at, attempts
 ```
 
 分类值 v1 固定为 `main` 和 `side`；更细的 starter/dairy/dessert/fruit 作为元数据预留，不建立独立排行榜。
@@ -80,6 +83,8 @@ votes
 Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/GPS 的规范 JPEG 与缩略图；原始文件不离开浏览器。服务端再次按文件签名、结构、大小、像素数和元数据段校验，经 R2 写入成功后用 D1 `batch` 原子分配案号并写入 Meal、Photo、Dish、Serving、MealItem 和投稿者第一票；D1 失败时删除已写 R2 对象。
 
 写接口 `POST /api/uploads` 只信任服务端邮箱会话；匿名请求返回 401，跨站请求返回 403，同一用户十分钟最多发布五次。`GET /api/photos/:id` 只返回 active Meal 的规范图并设置 `nosniff`。
+
+写接口 `POST /api/dishes/:id/vote` 接受 `{ targetTier: 1..5 }`，只允许登录用户对存在 active Meal/Serving 的 Dish 投票。数据库以 `UNIQUE(dish_id,user_id)` 和单条 UPSERT 保证改票不增票；每用户固定窗口一分钟最多 30 次请求。成功返回权威 Dish 与 `myVote`，匿名、跨站、非法等级、不可见 Dish 和超限分别返回 401/403/400/404/429。
 
 ### 5.1 邮箱验证码认证
 
