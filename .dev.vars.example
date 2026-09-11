@@ -3,7 +3,6 @@
 AUTH_MODE=local-resend
 AUTH_HMAC_SECRET=change-me
 RESEND_API_KEY=replace-with-your-resend-api-key
-OTP_FROM_EMAIL=CROUS法庭 <onboarding@resend.dev>
+OTP_FROM_EMAIL=CROUS法庭 <login@crouscourt.fun>
 
-# Without a verified domain, Resend only delivers to its account owner's email.
-# After domain verification, replace the sender with login@your-domain.
+# `crouscourt.fun` is the verified sender domain; keep the local file private.

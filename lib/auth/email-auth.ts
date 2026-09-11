@@ -4,6 +4,8 @@ import { getRawDb } from "@/db";
 
 const OTP_TTL_SECONDS = 10 * 60;
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+const EMAIL_SEND_LIMIT = 3;
+const EMAIL_SEND_WINDOW_SECONDS = 60 * 60;
 const LOCAL_COOKIE = "crous_session";
 const SECURE_COOKIE = "__Host-crous_session";
 
@@ -24,10 +26,10 @@ export async function requestEmailCode(request: Request, rawEmail: unknown) {
   const codeDigest = await hmac(secret, `otp\0${challengeId}\0${code}`);
   const admitted = await db.prepare(`INSERT INTO email_otp_challenges (id,email_digest,code_digest,ip_digest,expires_at,created_at)
     SELECT ?,?,?,?,?,?
-    WHERE (SELECT COUNT(*) FROM email_otp_challenges WHERE email_digest = ? AND created_at >= ?) < 5
+    WHERE (SELECT COUNT(*) FROM email_otp_challenges WHERE email_digest = ? AND created_at >= ?) < ${EMAIL_SEND_LIMIT}
       AND (SELECT COUNT(*) FROM email_otp_challenges WHERE ip_digest = ? AND created_at >= ?) < 10
       AND NOT EXISTS (SELECT 1 FROM email_otp_challenges WHERE email_digest = ? AND created_at > ?)`)
-    .bind(challengeId, emailDigest, codeDigest, ipDigest, now + OTP_TTL_SECONDS, now, emailDigest, now - 900, ipDigest, now - 900, emailDigest, now - 60).run();
+    .bind(challengeId, emailDigest, codeDigest, ipDigest, now + OTP_TTL_SECONDS, now, emailDigest, now - EMAIL_SEND_WINDOW_SECONDS, ipDigest, now - 900, emailDigest, now - 60).run();
   if (admitted.meta.changes !== 1) throw new AuthError("请求过于频繁，请稍后再试", 429);
   try {
     const devCode = await deliverCode(request, email, code);
@@ -130,7 +132,13 @@ async function deliverCode(request: Request, email: string, code: string) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ from: env.OTP_FROM_EMAIL, to: [email], subject: "CROUS法庭验证码", text: `你的验证码是 ${code}。10 分钟内有效，请勿转发。` }),
+    body: JSON.stringify({
+      from: env.OTP_FROM_EMAIL,
+      to: [email],
+      subject: "CROUS法庭登录确认",
+      text: `你正在登录 CROUS法庭。此邮件只用于确认邮箱控制权；如果并非本人操作，请直接忽略，不需要采取任何措施。\n\n验证码：${code}\n10 分钟内有效，请勿转发。`,
+      html: `<div style="display:none;max-height:0;overflow:hidden;opacity:0">登录确认邮件；验证码位于正文，有效期十分钟。</div><p>你正在登录 <strong>CROUS法庭</strong>。</p><p>验证码：</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>10 分钟内有效，请勿转发。如果并非本人操作，请忽略此邮件。</p>`,
+    }),
   });
   if (!response.ok) throw new AuthError("验证码暂时无法发送，请稍后再试", 503);
   return null;

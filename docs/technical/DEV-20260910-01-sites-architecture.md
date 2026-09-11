@@ -83,7 +83,7 @@ Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/G
 
 ### 5.1 邮箱验证码认证
 
-- `email_otp_challenges` 只保存邮箱、客户端地址和六位码的 HMAC 摘要；验证码 10 分钟过期、最多尝试 5 次，同邮箱 15 分钟最多 5 封、同地址最多 10 封；
+- `email_otp_challenges` 只保存邮箱、客户端地址和六位码的 HMAC 摘要；验证码 10 分钟过期、最多尝试 5 次，同邮箱至少间隔 60 秒且每小时最多 3 封、同地址 15 分钟最多 10 封；
 - `auth_sessions` 只保存 256-bit 随机会话令牌的 SHA-256 摘要；浏览器 Cookie 使用 HttpOnly、SameSite=Lax，生产使用 Secure 与 `__Host-` 前缀，30 天过期；
 - 登录成功原子消费验证码并复用同一邮箱对应的随机 User ID；验证码不可重放；退出时服务端撤销会话；
 - 生产发信使用 Resend HTTP API，`AUTH_HMAC_SECRET`、`RESEND_API_KEY`、`OTP_FROM_EMAIL` 只放 Sites 服务端配置；HMAC secret 必须长期保存，轮换会使既有邮箱映射无法复用；
