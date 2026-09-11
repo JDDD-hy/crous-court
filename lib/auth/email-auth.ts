@@ -74,7 +74,9 @@ export async function verifyEmailCode(request: Request, rawEmail: unknown, chall
 
 export async function getEmailUser(): Promise<{ userId: string } | null> {
   const jar = await cookies();
-  const token = env.AUTH_MODE === "local" ? jar.get(LOCAL_COOKIE)?.value : jar.get(SECURE_COOKIE)?.value;
+  const token = env.AUTH_MODE === "local" || env.AUTH_MODE === "local-resend"
+    ? jar.get(LOCAL_COOKIE)?.value
+    : jar.get(SECURE_COOKIE)?.value;
   if (!token) return null;
   const db = getRawDb();
   const row = await db.prepare("SELECT user_id FROM auth_sessions WHERE token_digest = ? AND revoked_at IS NULL AND expires_at > ?").bind(await sha256(token), epoch()).first<{ user_id: string }>();
@@ -138,7 +140,7 @@ function clientIp(request: Request) {
   return request.headers.get("cf-connecting-ip") ?? (isLoopback(new URL(request.url)) ? "loopback" : "unknown");
 }
 
-function isLoopback(url: URL) { return url.hostname === "127.0.0.1" || url.hostname === "localhost" || url.hostname === "::1"; }
+function isLoopback(url: URL) { return url.hostname === "127.0.0.1" || url.hostname === "localhost" || url.hostname === "[::1]"; }
 function epoch() { return Math.floor(Date.now() / 1000); }
 function invalidCode() { return new AuthError("验证码无效或已过期"); }
 function randomDigits() { const bytes = crypto.getRandomValues(new Uint32Array(1)); return String(bytes[0] % 1_000_000).padStart(6, "0"); }

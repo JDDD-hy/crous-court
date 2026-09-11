@@ -1,6 +1,9 @@
-# Reference only: `npm start` injects a random loopback-only local secret.
-# Do not create or commit `.dev.vars` with production values.
+# Copy to `.dev.vars`, replace every placeholder, and never commit it.
+# `local-resend` sends real email while keeping localhost-only cookies.
+AUTH_MODE=local-resend
+AUTH_HMAC_SECRET=change-me
+RESEND_API_KEY=replace-with-your-resend-api-key
+OTP_FROM_EMAIL=CROUS法庭 <onboarding@resend.dev>
 
-# Production only:
-# RESEND_API_KEY=configure-in-sites-secrets
-# OTP_FROM_EMAIL=CROUS法庭 <login@auth.example.com>
+# Without a verified domain, Resend only delivers to its account owner's email.
+# After domain verification, replace the sender with login@your-domain.

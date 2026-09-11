@@ -87,7 +87,7 @@ Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/G
 - `auth_sessions` 只保存 256-bit 随机会话令牌的 SHA-256 摘要；浏览器 Cookie 使用 HttpOnly、SameSite=Lax，生产使用 Secure 与 `__Host-` 前缀，30 天过期；
 - 登录成功原子消费验证码并复用同一邮箱对应的随机 User ID；验证码不可重放；退出时服务端撤销会话；
 - 生产发信使用 Resend HTTP API，`AUTH_HMAC_SECRET`、`RESEND_API_KEY`、`OTP_FROM_EMAIL` 只放 Sites 服务端配置；HMAC secret 必须长期保存，轮换会使既有邮箱映射无法复用；
-- 本地模式只在显式 `AUTH_MODE=local` 且请求来自 `localhost/127.0.0.1` 时回显随机验证码，非回环地址失败关闭；
+- 本地模式只在显式 `AUTH_MODE=local` 且请求来自 `localhost/127.0.0.1` 时回显随机验证码；私有 `.dev.vars` 设置 `AUTH_MODE=local-resend` 时，本地请求改走 Resend 且不回显验证码；生产仅使用 `AUTH_MODE=resend` 与 `__Host-` Cookie，非回环地址失败关闭；
 - 所有认证和上传写请求校验同源，响应和日志不得包含邮箱、验证码、API key 或会话令牌。
 
 ## 6. AI 延后方案

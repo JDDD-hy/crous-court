@@ -10,7 +10,7 @@ Phase 3 已完成并按最新决定修订：公共浏览、邮箱六位验证码
 
 本地 D1 首次运行顺序：`npm run build` → `npm run db:migrate:local` → `npm run db:fixtures:local` → `npm start`。fixture 只用于本地开发，不含真实用户或生产种子内容。
 
-本地邮箱登录会在页面显示一次性验收验证码；该模式只允许回环地址。生产需在 Sites 服务端配置 `AUTH_HMAC_SECRET`、`RESEND_API_KEY`、`OTP_FROM_EMAIL`，且不得提交到 Git。
+本地邮箱登录默认在页面显示一次性验收验证码；该模式只允许回环地址。要在本地真实收信，复制 `.dev.vars.example` 为被 Git 忽略的 `.dev.vars`，替换全部占位值后重新运行 `npm start`。未验证域名时，Resend 只允许投递到该账号自己的邮箱。所有密钥不得提交到 Git 或发到聊天中。
 
 ## 开发前必读
 
