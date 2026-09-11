@@ -13,11 +13,11 @@ ON CONFLICT(id) DO UPDATE SET
   category = excluded.category,
   naming_status = excluded.naming_status;
 
-INSERT INTO meals (id, venue_id, creator_id, eaten_on, overall_note) VALUES
-  ('fixture-meal-01', 'venue-escoffier', 'fixture-user-01', '2026-09-10', 'Phase 2 local fixture'),
-  ('fixture-meal-02', 'venue-experimental', 'fixture-user-02', '2026-09-09', 'Phase 2 local fixture'),
-  ('fixture-meal-03', 'venue-escoffier', 'fixture-user-03', '2026-09-08', 'Phase 2 local fixture'),
-  ('fixture-meal-04', 'venue-escoffier', 'fixture-user-04', '2026-09-03', 'Phase 2 older Serving fixture')
+INSERT INTO meals (id, venue_id, creator_id, eaten_on, case_number, display_order, overall_note) VALUES
+  ('fixture-meal-01', 'venue-escoffier', 'fixture-user-01', '2026-09-10', '20260910-0-001', 1, 'Phase 2 local fixture'),
+  ('fixture-meal-02', 'venue-experimental', 'fixture-user-02', '2026-09-09', '20260909-1-001', 1, 'Phase 2 local fixture'),
+  ('fixture-meal-03', 'venue-escoffier', 'fixture-user-03', '2026-09-08', '20260908-0-001', 1, 'Phase 2 local fixture'),
+  ('fixture-meal-04', 'venue-escoffier', 'fixture-user-04', '2026-09-03', '20260903-0-001', 1, 'Phase 2 older Serving fixture')
 ON CONFLICT(id) DO UPDATE SET venue_id = excluded.venue_id, creator_id = excluded.creator_id, eaten_on = excluded.eaten_on;
 
 INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, initial_tier) VALUES

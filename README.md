@@ -6,7 +6,7 @@ Télécom Paris / Palaiseau 学生的 CROUS 菜品社区审判网站。
 
 ## 当前状态
 
-Phase 2 已完成：D1 schema、迁移、两家餐厅种子、Dish 排名计算和只读列表/详情接口已接入；真实上传、认证和社区投票写入仍按阶段延期。
+Phase 3 已完成：ChatGPT 登录写入边界、浏览器端 EXIF/GPS 清理、服务端图片复验、R2 图片与 D1 投稿记录已接通；同日多次投稿按稳定案号排序。社区投票写入、补名治理和 AI 辅助审核仍按后续阶段延期。
 
 本地 D1 首次运行顺序：`npm run build` → `npm run db:migrate:local` → `npm run db:fixtures:local` → `npm start`。fixture 只用于本地开发，不含真实用户或生产种子内容。
 

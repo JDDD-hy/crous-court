@@ -29,11 +29,11 @@ run(["d1", "migrations", "apply", ...base]);
 run(["d1", "execute", ...base, "--file", path.join(projectRoot, "db", "fixtures.sql"), "--yes"]);
 
 const tables = execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' AND name NOT LIKE 'sqlite_%' ORDER BY name").map((row) => row.name);
-for (const table of ["dishes", "meal_items", "meals", "servings", "users", "venues", "votes"]) assert.ok(tables.includes(table));
+for (const table of ["daily_case_counters", "dishes", "meal_items", "meals", "photos", "servings", "users", "venues", "votes"]) assert.ok(tables.includes(table));
 
-assert.deepEqual(execute("SELECT id, canonical_name, nickname, active FROM venues ORDER BY id"), [
-  { id: "venue-escoffier", canonical_name: "Escoffier", nickname: "学校 CROUS / Télécom 附近", active: 1 },
-  { id: "venue-experimental", canonical_name: "L’Expérimental", nickname: "宿舍 CROUS / All Suites 附近", active: 1 },
+assert.deepEqual(execute("SELECT id, canonical_name, nickname, display_number, active FROM venues ORDER BY id"), [
+  { id: "venue-escoffier", canonical_name: "Escoffier", nickname: "学校 CROUS / Télécom 附近", display_number: 0, active: 1 },
+  { id: "venue-experimental", canonical_name: "L’Expérimental", nickname: "宿舍 CROUS / All Suites 附近", display_number: 1, active: 1 },
 ]);
 assert.deepEqual(execute("PRAGMA foreign_key_check"), []);
 assert.deepEqual(execute("SELECT category, count(*) AS count FROM dishes GROUP BY category ORDER BY category"), [
@@ -45,7 +45,7 @@ execute("INSERT INTO votes (id,dish_id,user_id,target_tier) VALUES ('replacement
 assert.deepEqual(execute("SELECT count(*) AS count, target_tier FROM votes WHERE dish_id='couscous-boulettes' AND user_id='fixture-user-01'"), [{ count: 1, target_tier: 5 }]);
 const updatedVerdict = calculateVerdict(execute("SELECT target_tier FROM votes WHERE dish_id='couscous-boulettes'").map((row) => row.target_tier));
 assert.deepEqual(updatedVerdict, { tier: 2, voteCount: 5, status: "provisional", distribution: [0, 3, 1, 0, 1] });
-execute("INSERT INTO meals (id,venue_id,creator_id,eaten_on) VALUES ('test-meal-side','venue-escoffier','fixture-user-01','2026-09-08'),('test-meal-main','venue-escoffier','fixture-user-01','2026-09-10'),('test-meal-cross','venue-experimental','fixture-user-01','2026-09-10'),('test-meal-date','venue-escoffier','fixture-user-01','2026-09-11')");
+execute("INSERT INTO meals (id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES ('test-meal-side','venue-escoffier','fixture-user-01','2026-09-08','test-side',99),('test-meal-main','venue-escoffier','fixture-user-01','2026-09-10','test-main',99),('test-meal-cross','venue-experimental','fixture-user-01','2026-09-10','test-cross',99),('test-meal-date','venue-escoffier','fixture-user-01','2026-09-11','test-date',99)");
 
 for (const invalidSql of [
   "INSERT INTO dishes (id,category) VALUES ('invalid-category','dessert')",

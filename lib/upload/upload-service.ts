@@ -1,0 +1,99 @@
+import { getBindings } from "@/db";
+import { checkSanitizedImage } from "./image-validation";
+
+type ItemInput = { slot: "main" | "side_1" | "side_2"; name: string; tier: number | null };
+
+export class UploadInputError extends Error {}
+
+export async function publishMeal(form: FormData, userId: string) {
+  const venueId = requiredText(form, "venueId");
+  const eatenOn = requiredText(form, "eatenOn");
+  const mainTier = tier(form.get("mainTier"), true);
+  const items: ItemInput[] = [
+    { slot: "main", name: text(form, "mainName"), tier: mainTier },
+    { slot: "side_1", name: text(form, "sideOneName"), tier: tier(form.get("sideOneTier"), false) },
+    { slot: "side_2", name: text(form, "sideTwoName"), tier: tier(form.get("sideTwoTier"), false) },
+  ].filter((item) => item.slot === "main" || item.tier !== null);
+  if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
+  if (form.get("rightsConfirmed") !== "true") throw new UploadInputError("请确认照片发布权与无人脸信息");
+
+  const canonicalFile = form.get("canonical");
+  const thumbnailFile = form.get("thumbnail");
+  if (!(canonicalFile instanceof File) || !(thumbnailFile instanceof File)) throw new UploadInputError("请选择并处理一张餐盘照片");
+  let canonical;
+  let thumbnail;
+  try {
+    [canonical, thumbnail] = await Promise.all([checkSanitizedImage(canonicalFile), checkSanitizedImage(thumbnailFile)]);
+  } catch (error) {
+    throw new UploadInputError(error instanceof Error ? error.message : "图片校验失败");
+  }
+  if (thumbnail.width > canonical.width || thumbnail.height > canonical.height) throw new UploadInputError("缩略图尺寸无效");
+
+  const { db, bucket } = getBindings();
+  const recent = await db.prepare("SELECT COUNT(*) AS count FROM meals WHERE creator_id = ? AND created_at >= datetime('now', '-10 minutes')").bind(userId).first<{ count: number }>();
+  if ((recent?.count ?? 0) >= 5) throw new UploadInputError("投稿太频繁，请十分钟后再试");
+  const venue = await db.prepare("SELECT display_number FROM venues WHERE id = ? AND active = 1").bind(venueId).first<{ display_number: number }>();
+  if (!venue) throw new UploadInputError("餐厅不可用");
+
+  const mealId = crypto.randomUUID();
+  const photoId = crypto.randomUUID();
+  const canonicalKey = `photos/${photoId}/canonical.jpg`;
+  const thumbnailKey = `photos/${photoId}/thumbnail.jpg`;
+  await Promise.all([
+    bucket.put(canonicalKey, canonical.bytes, { httpMetadata: { contentType: canonical.mediaType } }),
+    bucket.put(thumbnailKey, thumbnail.bytes, { httpMetadata: { contentType: thumbnail.mediaType } }),
+  ]);
+
+  try {
+    const statements = [
+      db.prepare("INSERT INTO users (id) VALUES (?) ON CONFLICT(id) DO NOTHING").bind(userId),
+      db.prepare("INSERT INTO daily_case_counters (eaten_on, venue_id, next_sequence) VALUES (?, ?, 1) ON CONFLICT(eaten_on, venue_id) DO UPDATE SET next_sequence = next_sequence + 1").bind(eatenOn, venueId),
+      db.prepare("INSERT INTO meals (id, venue_id, creator_id, eaten_on, case_number, display_order) SELECT ?, ?, ?, ?, replace(?, '-', '') || '-' || display_number || '-' || printf('%03d', (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?)), (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?) FROM venues WHERE id = ?").bind(mealId, venueId, userId, eatenOn, eatenOn, eatenOn, venueId, eatenOn, venueId, venueId),
+      db.prepare("INSERT INTO photos (id, meal_id, creator_id, canonical_key, thumbnail_key, media_type, width, height, byte_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(photoId, mealId, userId, canonicalKey, thumbnailKey, canonical.mediaType, canonical.width, canonical.height, canonical.bytes.byteLength),
+    ];
+    for (const item of items) {
+      const dishId = crypto.randomUUID();
+      const servingId = crypto.randomUUID();
+      statements.push(
+        db.prepare("INSERT INTO dishes (id, original_description, category, naming_status) VALUES (?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side"),
+        db.prepare("INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, initial_tier) VALUES (?, ?, ?, ?, ?, ?)").bind(servingId, dishId, venueId, eatenOn, userId, item.tier),
+        db.prepare("INSERT INTO meal_items (meal_id, serving_id, slot) VALUES (?, ?, ?)").bind(mealId, servingId, item.slot),
+        db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), dishId, userId, item.tier),
+      );
+    }
+    await db.batch(statements);
+    const meal = await db.prepare("SELECT case_number FROM meals WHERE id = ?").bind(mealId).first<{ case_number: string }>();
+    if (!meal) throw new Error("投稿记录创建失败");
+    return { mealId, photoId, caseNumber: meal.case_number };
+  } catch (error) {
+    await Promise.allSettled([bucket.delete(canonicalKey), bucket.delete(thumbnailKey)]);
+    throw error;
+  }
+}
+
+function text(form: FormData, key: string) {
+  const value = form.get(key);
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (trimmed.length > 80) throw new UploadInputError("菜名或临时名称不能超过 80 个字符");
+  return trimmed;
+}
+
+function requiredText(form: FormData, key: string) {
+  const value = text(form, key);
+  if (!value) throw new UploadInputError("投稿信息不完整");
+  return value;
+}
+
+function tier(value: FormDataEntryValue | null, required: boolean) {
+  if (!value && !required) return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 5) throw new UploadInputError("请选择有效等级");
+  return parsed;
+}
+
+function isIsoDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value;
+}

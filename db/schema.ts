@@ -16,9 +16,11 @@ export const venues = sqliteTable("venues", {
   latitude: integer("latitude"),
   longitude: integer("longitude"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  displayNumber: integer("display_number").notNull(),
   createdAt: createdAt(),
 }, (table) => [
   uniqueIndex("venues_canonical_name_unique").on(table.canonicalName),
+  uniqueIndex("venues_display_number_unique").on(table.displayNumber),
   check("venues_active_check", sql`${table.active} in (0, 1)`),
 ]);
 
@@ -27,12 +29,25 @@ export const meals = sqliteTable("meals", {
   venueId: text("venue_id").notNull().references(() => venues.id, { onDelete: "restrict" }),
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "restrict" }),
   eatenOn: text("eaten_on").notNull(),
+  caseNumber: text("case_number").notNull(),
+  displayOrder: integer("display_order").notNull(),
   overallNote: text("overall_note"),
   status: text("status", { enum: ["active", "hidden"] }).notNull().default("active"),
   createdAt: createdAt(),
 }, (table) => [
   index("meals_venue_date_idx").on(table.venueId, table.eatenOn),
+  uniqueIndex("meals_case_number_unique").on(table.caseNumber),
+  uniqueIndex("meals_venue_date_order_unique").on(table.venueId, table.eatenOn, table.displayOrder),
   check("meals_status_check", sql`${table.status} in ('active', 'hidden')`),
+]);
+
+export const dailyCaseCounters = sqliteTable("daily_case_counters", {
+  eatenOn: text("eaten_on").notNull(),
+  venueId: text("venue_id").notNull().references(() => venues.id, { onDelete: "restrict" }),
+  nextSequence: integer("next_sequence").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.eatenOn, table.venueId] }),
+  check("daily_case_counters_sequence_check", sql`${table.nextSequence} > 0`),
 ]);
 
 export const dishes = sqliteTable("dishes", {
@@ -73,6 +88,25 @@ export const mealItems = sqliteTable("meal_items", {
   primaryKey({ columns: [table.mealId, table.slot] }),
   uniqueIndex("meal_items_meal_serving_unique").on(table.mealId, table.servingId),
   check("meal_items_slot_check", sql`${table.slot} in ('main', 'side_1', 'side_2')`),
+]);
+
+export const photos = sqliteTable("photos", {
+  id: text("id").primaryKey(),
+  mealId: text("meal_id").notNull().references(() => meals.id, { onDelete: "cascade" }),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  canonicalKey: text("canonical_key").notNull(),
+  thumbnailKey: text("thumbnail_key").notNull(),
+  mediaType: text("media_type", { enum: ["image/jpeg", "image/png"] }).notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  byteSize: integer("byte_size").notNull(),
+  createdAt: createdAt(),
+}, (table) => [
+  uniqueIndex("photos_canonical_key_unique").on(table.canonicalKey),
+  uniqueIndex("photos_thumbnail_key_unique").on(table.thumbnailKey),
+  check("photos_media_type_check", sql`${table.mediaType} in ('image/jpeg', 'image/png')`),
+  check("photos_dimensions_check", sql`${table.width} > 0 and ${table.height} > 0`),
+  check("photos_byte_size_check", sql`${table.byteSize} > 0`),
 ]);
 
 export const votes = sqliteTable("votes", {

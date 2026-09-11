@@ -11,3 +11,8 @@ export function getDb() {
 
   return drizzle(env.DB, { schema });
 }
+
+export function getBindings() {
+  if (!env.DB || !env.BUCKET) throw new Error("D1 or R2 binding is unavailable");
+  return { db: env.DB, bucket: env.BUCKET };
+}

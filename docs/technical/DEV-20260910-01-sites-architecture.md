@@ -27,17 +27,24 @@
 
 ## 4. 数据表
 
-Phase 2 已落地 `users`、`venues`、`meals`、`dishes`、`servings`、`meal_items`、`votes`。图片表留到 Phase 3，补名、去重和举报表留到 Phase 5；只建立当前阶段实际使用的约束。
+Phase 2 已落地 `users`、`venues`、`meals`、`dishes`、`servings`、`meal_items`、`votes`。Phase 3 新增 `photos`、`daily_case_counters`、食堂序号及 Meal 案号；补名、去重和举报表留到 Phase 5。
 
 ```text
 venues
-  id, canonical_name, nickname, address, latitude, longitude, active
+  id, canonical_name, nickname, display_number, address, latitude, longitude, active
 
 users
   id, created_at
 
 meals
-  id, venue_id, creator_id, eaten_on, overall_note, created_at, status
+  id, venue_id, creator_id, eaten_on, case_number, display_order, overall_note, created_at, status
+
+photos
+  id, meal_id, creator_id, canonical_key, thumbnail_key,
+  media_type, width, height, byte_size, created_at
+
+daily_case_counters
+  eaten_on, venue_id, next_sequence
 
 dishes
   id, canonical_name_fr, canonical_name_zh, original_description,
@@ -69,6 +76,10 @@ votes
 - `NamingService`：别名标准化、候选与确认；
 - `ModerationService`：举报和可见性；
 - `VenueService`：正式名、昵称和搜索别名。
+
+Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/GPS 的规范 JPEG 与缩略图；原始文件不离开浏览器。服务端再次按文件签名、结构、大小、像素数和元数据段校验，经 R2 写入成功后用 D1 `batch` 原子分配案号并写入 Meal、Photo、Dish、Serving、MealItem 和投稿者第一票；D1 失败时删除已写 R2 对象。
+
+写接口 `POST /api/uploads` 只信任 Sites 转发的 ChatGPT 用户头；匿名请求返回 401，跨站请求返回 403，同一用户十分钟最多发布五次。`GET /api/photos/:id` 只返回 active Meal 的规范图并设置 `nosniff`。
 
 ## 6. AI 延后方案
 
