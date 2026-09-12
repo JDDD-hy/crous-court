@@ -83,7 +83,7 @@ reports / moderation_actions / ai_identifications
 - `ModerationService`：举报和可见性；
 - `VenueService`：正式名、昵称和搜索别名。
 
-Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/GPS 的规范 JPEG 与缩略图；原始文件不离开浏览器。服务端再次按文件签名、结构、大小、像素数和元数据段校验，经 R2 写入成功后用 D1 `batch` 原子分配案号并写入 Meal、Photo、Dish、Serving、MealItem 和投稿者第一票；D1 失败时删除已写 R2 对象。用餐日期按 `Europe/Paris` 当天在前端设置上限，并由服务端再次拒绝未来日期。
+Phase 3 上传链路：浏览器先将 HEIF/HEIC 本地解码为 JPEG，再用 Canvas 把 JPG、PNG 或转换结果重编码为无 EXIF/GPS 的规范 JPEG 与缩略图；原始文件不离开浏览器。服务端再次按文件签名、结构、大小、像素数和元数据段校验，经 R2 写入成功后用 D1 `batch` 原子分配案号并写入 Meal、Photo、Dish、Serving、MealItem 和投稿者第一票；D1 失败时删除已写 R2 对象。用餐日期按 `Europe/Paris` 当天在前端设置上限，并由服务端再次拒绝未来日期。
 
 写接口 `POST /api/uploads` 只信任服务端邮箱会话；匿名请求返回 401，跨站请求返回 403，同一用户十分钟最多发布五次。`GET /api/photos/:id` 只返回 active Meal 的规范图并设置 `nosniff`。
 

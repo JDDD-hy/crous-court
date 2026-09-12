@@ -133,6 +133,9 @@
 
 ## 6. Open Decisions
 
+- Our Story 的发起人署名、项目缘起和开源共创文案待产品负责人提供；当前只建立 `/story` 入口和真实占位页。
+- iPhone HEIF/HEIC 上传由浏览器本地解码为 JPEG，再进入既有 Canvas 缩放、去元数据与服务端 JPG/PNG 复验；原始 HEIC/HEIF 不上传 R2。
+
 Phase 0 处置：
 
 - Phase 0 产品决策已于 2026-09-10 确认；

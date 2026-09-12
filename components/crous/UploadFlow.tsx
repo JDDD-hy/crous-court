@@ -77,7 +77,7 @@ export function UploadFlow() {
   return <form ref={formRef} onSubmit={submit} className="space-y-7">
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">1. 照片</p><h2 className="mt-2 text-2xl font-black">上传整张餐盘</h2>
-      <label className="mt-5 grid min-h-72 cursor-pointer place-items-center overflow-hidden rounded-lg border-4 border-dashed border-ink/45 bg-[#ded8c9] text-center focus-within:outline-3">{preview ? <img src={preview} alt="已清理元数据的餐盘预览" className="h-72 w-full object-contain" /> : <span><ImagePlus className="mx-auto size-12" /><strong className="mt-3 block text-lg">选择 JPG 或 PNG</strong><small>原图不离开浏览器；上传前会重编码并移除 EXIF/GPS</small></span>}<input className="sr-only" type="file" accept="image/jpeg,image/png" onChange={(event) => choosePhoto(event.target.files?.[0])} /></label>
+      <label className="mt-5 grid min-h-72 cursor-pointer place-items-center overflow-hidden rounded-lg border-4 border-dashed border-ink/45 bg-[#ded8c9] text-center focus-within:outline-3">{preview ? <img src={preview} alt="已清理元数据的餐盘预览" className="h-72 w-full object-contain" /> : <span><ImagePlus className="mx-auto size-12" /><strong className="mt-3 block text-lg">选择 JPG、PNG 或 HEIC</strong><small>原图不离开浏览器；上传前会转为 JPEG 并移除 EXIF/GPS</small></span>}<input className="sr-only" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" onChange={(event) => choosePhoto(event.target.files?.[0])} /></label>
       <AiDishRecognition image={files?.thumbnail ?? null} onApply={(main, sides) => { setMainName(main); setSideOneName(sides[0] ?? ""); setSideTwoName(sides[1] ?? ""); }} />
     </section>
 
