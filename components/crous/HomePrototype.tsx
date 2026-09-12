@@ -9,6 +9,7 @@ import { SiteHeader } from "./SiteHeader";
 
 export function HomePrototype({ meals, authenticated, myVotes }: { meals: DishSummary[]; authenticated: boolean; myVotes: Record<string, Tier> }) {
   const [currentMeals, setCurrentMeals] = useState(meals);
+  const [currentVotes, setCurrentVotes] = useState(myVotes);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [rotationPaused, setRotationPaused] = useState(false);
   const featured = currentMeals[featuredIndex];
@@ -25,10 +26,11 @@ export function HomePrototype({ meals, authenticated, myVotes }: { meals: DishSu
   const rankedMeals = [...currentMeals].sort((a, b) => (a.tier ?? 6) - (b.tier ?? 6) || b.votes - a.votes || a.id.localeCompare(b.id));
   const updateDish = (dish: DishSummary) => setCurrentMeals((items) => items.map((item) => item.id === dish.id ? dish : item));
   return <div className="min-h-screen overflow-x-hidden bg-background text-foreground"><SiteHeader authenticated={authenticated} /><main>
-    <HomeCourt dish={featured} authenticated={authenticated} myVote={myVotes[featured.id] ?? null} onChange={updateDish} onVotingChange={setRotationPaused}
+    <HomeCourt dish={featured} authenticated={authenticated} myVote={currentVotes[featured.id] ?? null} onChange={updateDish} onVotingChange={setRotationPaused}
+      reviewed={currentVotes[featured.id] !== undefined} onVoteConfirmed={(dishId, tier) => setCurrentVotes((votes) => ({ ...votes, [dishId]: tier }))}
       position={featuredIndex + 1} total={currentMeals.length}
       onPrevious={() => setFeaturedIndex((index) => nextDefendantIndex(index, currentMeals.length, -1))}
       onNext={() => setFeaturedIndex((index) => nextDefendantIndex(index, currentMeals.length))} />
-    <HomeRankings meals={rankedMeals} />
+    <HomeRankings meals={rankedMeals} authenticated={authenticated} reviewedDishIds={currentVotes} />
   </main></div>;
 }

@@ -86,7 +86,7 @@ DoD：
 
 完成日期：2026-09-12。
 
-## Phase 6：视觉与动画完成
+## Phase 6：视觉与动画完成（完成）
 
 工作：接入已确认的 Buy Me a Coffee 普通外链；完成 MotionPath、Flip、盖章微交互、Canvas 2D pixel shatter、详情拍立得布局。
 

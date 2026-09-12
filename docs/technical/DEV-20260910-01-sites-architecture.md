@@ -89,6 +89,8 @@ Phase 3 上传链路：浏览器用 Canvas 把用户原图重编码为无 EXIF/G
 
 写接口 `POST /api/dishes/:id/vote` 接受 `{ targetTier: 1..5 }`，只允许登录用户对存在 active Meal/Serving 的 Dish 投票。数据库以 `UNIQUE(dish_id,user_id)` 和 `INSERT ... ON CONFLICT DO NOTHING` 原子保证只能投一次，重复提交返回 409；每用户固定窗口一分钟最多 30 次请求。成功返回权威 Dish 与 `myVote`，匿名、跨站、非法等级、不可见 Dish 和超限分别返回 401/403/400/404/409/429。
 
+首页通过 `getUserVotes(dishIds, currentUserId)` 获取当前账号 Vote 映射：缺少记录的卡片显示 `NEW`，服务端确认投票后客户端仅把该 Dish 写入当前页面的 Vote 映射。状态不持久化到公共 Dish，也不新增可被其他账号读取的审阅字段。
+
 ### 5.1 邮箱验证码认证
 
 - `email_otp_challenges` 只保存邮箱、客户端地址和六位码的 HMAC 摘要；验证码 10 分钟过期、最多尝试 5 次，同邮箱至少间隔 60 秒且每小时最多 3 封、同地址 15 分钟最多 10 封；
