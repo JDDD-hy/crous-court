@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { TierPicker } from "./TierPicker";
-import { DishNameField, OptionalTier, TemporaryNameOptions } from "./DishFields";
+import { OptionalTier } from "./DishFields";
+import { DishIdentityField } from "./DishIdentityField";
+import { AiDishRecognition } from "./AiDishRecognition";
 import { sanitizePhoto } from "@/lib/upload/client-image";
 import type { TierId } from "./data";
+import { todayInParis } from "@/lib/calendar";
 
 type UploadResult = { mealId: string; photoId: string; caseNumber: string };
 
@@ -23,6 +26,9 @@ export function UploadFlow() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<UploadResult | null>(null);
+  const [mainName, setMainName] = useState("");
+  const [sideOneName, setSideOneName] = useState("");
+  const [sideTwoName, setSideTwoName] = useState("");
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
@@ -72,13 +78,14 @@ export function UploadFlow() {
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">1. 照片</p><h2 className="mt-2 text-2xl font-black">上传整张餐盘</h2>
       <label className="mt-5 grid min-h-72 cursor-pointer place-items-center overflow-hidden rounded-lg border-4 border-dashed border-ink/45 bg-[#ded8c9] text-center focus-within:outline-3">{preview ? <img src={preview} alt="已清理元数据的餐盘预览" className="h-72 w-full object-contain" /> : <span><ImagePlus className="mx-auto size-12" /><strong className="mt-3 block text-lg">选择 JPG 或 PNG</strong><small>原图不离开浏览器；上传前会重编码并移除 EXIF/GPS</small></span>}<input className="sr-only" type="file" accept="image/jpeg,image/png" onChange={(event) => choosePhoto(event.target.files?.[0])} /></label>
+      <AiDishRecognition image={files?.thumbnail ?? null} onApply={(main, sides) => { setMainName(main); setSideOneName(sides[0] ?? ""); setSideTwoName(sides[1] ?? ""); }} />
     </section>
 
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">2. 菜品信息</p><h2 className="mt-2 text-2xl font-black">同一天可以继续立案</h2>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="font-bold">餐厅<NativeSelect name="venueId" required className="mt-2 min-h-12 border-2 border-ink bg-paper text-base"><NativeSelectOption value="venue-escoffier">🏫 Télécom 附近 — Escoffier</NativeSelectOption><NativeSelectOption value="venue-experimental">🏠 All Suites 附近 — L’Expérimental</NativeSelectOption></NativeSelect></label><label className="font-bold">用餐日期<input name="eatenOn" type="date" required defaultValue={localDate()} className="mt-2 min-h-12 w-full rounded-md border-2 border-ink bg-paper px-3" /></label></div>
-      <div className="mt-6 grid gap-5 sm:grid-cols-3"><DishNameField label="主食（可未知）" name="mainName" /><div><DishNameField label="小菜 1（可选）" name="sideOneName" /><OptionalTier name="sideOneTier" /></div><div><DishNameField label="小菜 2（可选）" name="sideTwoName" /><OptionalTier name="sideTwoTier" /></div></div>
-      <TemporaryNameOptions /><p className="mt-4 border-l-4 border-accent pl-3 text-sm">可以直接写“神秘黄色主食”之类的临时名称。原始文字会保留，后续群众补名不会覆盖它。</p>
+      <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="font-bold">餐厅<NativeSelect name="venueId" required className="mt-2 min-h-12 border-2 border-ink bg-paper text-base"><NativeSelectOption value="venue-escoffier">🏫 Télécom 附近 — Escoffier</NativeSelectOption><NativeSelectOption value="venue-experimental">🏠 All Suites 附近 — L’Expérimental</NativeSelectOption></NativeSelect></label><label className="font-bold">用餐日期<input name="eatenOn" type="date" required defaultValue={todayInParis()} max={todayInParis()} className="mt-2 min-h-12 w-full rounded-md border-2 border-ink bg-paper px-3" /></label></div>
+      <div className="mt-6 grid gap-5 sm:grid-cols-3"><DishIdentityField label="主食（可未知）" name="mainName" category="main" value={mainName} onChange={setMainName} /><div><DishIdentityField label="小菜 1（可选）" name="sideOneName" category="side" value={sideOneName} onChange={setSideOneName} /><OptionalTier name="sideOneTier" /></div><div><DishIdentityField label="小菜 2（可选）" name="sideTwoName" category="side" value={sideTwoName} onChange={setSideTwoName} /><OptionalTier name="sideTwoTier" /></div></div>
+      <p className="mt-4 border-l-4 border-accent pl-3 text-sm">菜名可以先留空。原始文字会保留，后续识别或群众补名不会覆盖它。</p>
     </section>
 
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
@@ -92,10 +99,4 @@ export function UploadFlow() {
 
 function Success({ result, onReset }: { result: UploadResult; onReset: () => void }) {
   return <section className="grid min-h-[28rem] place-items-center border-4 border-ink bg-paper p-8 text-center shadow-[7px_7px_0_#202624]"><div><CheckCircle2 className="mx-auto size-16 text-praise" /><h2 className="mt-4 text-3xl font-black">证物已入库</h2><p className="mt-2 text-lg">案号 <strong className="font-mono">{result.caseNumber}</strong></p><img src={`/api/photos/${result.photoId}`} alt="刚刚发布的餐盘" className="mx-auto mt-5 max-h-64 rounded border-2 border-ink object-contain" /><Button className="mt-6 min-h-12 bg-ink" onClick={onReset}>继续上传另一盘</Button></div></section>;
-}
-
-function localDate() {
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60_000;
-  return new Date(now.valueOf() - offset).toISOString().slice(0, 10);
 }

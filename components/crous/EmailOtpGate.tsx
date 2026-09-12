@@ -9,7 +9,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 
 type Challenge = { challengeId: string; devCode: string | null };
 
-export function EmailOtpGate({ heading = "投稿前先验明身份", description = "验证码会发送到你的邮箱；邮箱不会公开。" }: { heading?: string; description?: string } = {}) {
+export function EmailOtpGate({ heading = "投稿前先验明身份", description = "验证码会发送到你的邮箱；邮箱不会公开。", redirectTo }: { heading?: string; description?: string; redirectTo?: string } = {}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
@@ -39,7 +39,8 @@ export function EmailOtpGate({ heading = "投稿前先验明身份", description
     setBusy(true); setError("");
     try {
       await post("/api/auth/email/verify", { email, challengeId: challenge.challengeId, code });
-      router.refresh();
+      if (redirectTo) window.location.assign(redirectTo);
+      else router.refresh();
     } catch (cause) { setError(message(cause)); }
     finally { setBusy(false); }
   }

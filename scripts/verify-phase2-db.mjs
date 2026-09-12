@@ -41,10 +41,8 @@ assert.deepEqual(execute("SELECT category, count(*) AS count FROM dishes GROUP B
   { category: "side", count: 1 },
 ]);
 
-execute("INSERT INTO votes (id,dish_id,user_id,target_tier) VALUES ('replacement','couscous-boulettes','fixture-user-01',5) ON CONFLICT(dish_id,user_id) DO UPDATE SET target_tier=excluded.target_tier, updated_at=CURRENT_TIMESTAMP");
-assert.deepEqual(execute("SELECT count(*) AS count, target_tier FROM votes WHERE dish_id='couscous-boulettes' AND user_id='fixture-user-01'"), [{ count: 1, target_tier: 5 }]);
-const updatedVerdict = calculateVerdict(execute("SELECT target_tier FROM votes WHERE dish_id='couscous-boulettes'").map((row) => row.target_tier));
-assert.deepEqual(updatedVerdict, { tier: 2, voteCount: 5, status: "provisional", distribution: [0, 3, 1, 0, 1] });
+const fixtureVerdict = calculateVerdict(execute("SELECT target_tier FROM votes WHERE dish_id='couscous-boulettes'").map((row) => row.target_tier));
+assert.deepEqual(fixtureVerdict, { tier: 2, voteCount: 5, status: "provisional", distribution: [1, 3, 1, 0, 0] });
 execute("INSERT INTO meals (id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES ('test-meal-side','venue-escoffier','fixture-user-01','2026-09-08','test-side',99),('test-meal-main','venue-escoffier','fixture-user-01','2026-09-10','test-main',99),('test-meal-cross','venue-experimental','fixture-user-01','2026-09-10','test-cross',99),('test-meal-date','venue-escoffier','fixture-user-01','2026-09-11','test-date',99)");
 
 for (const invalidSql of [
@@ -60,4 +58,4 @@ for (const invalidSql of [
   assert.notEqual(result.status, 0, `constraint unexpectedly accepted: ${invalidSql}`);
 }
 
-console.log("Phase 2 D1 verification passed: fresh migration, repeat apply, seeds, FKs, category isolation, vote upsert/recalculation, and constraints.");
+console.log("Phase 2 D1 verification passed: fresh migration, repeat apply, seeds, FKs, category isolation, ranking calculation, and unique vote constraints.");

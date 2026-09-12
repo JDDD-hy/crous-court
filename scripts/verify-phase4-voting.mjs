@@ -61,19 +61,17 @@ try {
   assert.equal(firstData.myVote, 1);
 
   const changed = await post("/api/dishes/mystery-dessert/vote", { targetTier: 5 }, cookie);
-  const changedData = (await changed.json()).data;
-  assert.equal(changed.status, 200, JSON.stringify(changedData));
-  assert.equal(changedData.dish.votes, 2);
-  assert.equal(changedData.dish.tier, 5);
-  assert.equal(changedData.myVote, 5);
+  assert.equal(changed.status, 409);
 
   const parallelCookie = await login("vote-parallel@example.invalid");
-  const parallel = await Promise.all(Array.from({ length: 10 }, (_, index) => post("/api/dishes/lentilles-saucisse/vote", { targetTier: index % 5 + 1 }, parallelCookie)));
-  assert.ok(parallel.every((response) => response.status === 200));
+  const parallel = await Promise.all(Array.from({ length: 10 }, () => post("/api/dishes/lentilles-saucisse/vote", { targetTier: 2 }, parallelCookie)));
+  assert.equal(parallel.filter((response) => response.status === 200).length, 1);
+  assert.equal(parallel.filter((response) => response.status === 409).length, 9);
 
   const rateCookie = await login("vote-rate@example.invalid");
   const allowed = await Promise.all(Array.from({ length: 30 }, () => post("/api/dishes/couscous-boulettes/vote", { targetTier: 4 }, rateCookie)));
-  assert.ok(allowed.every((response) => response.status === 200));
+  assert.equal(allowed.filter((response) => response.status === 200).length, 1);
+  assert.equal(allowed.filter((response) => response.status === 409).length, 29);
   assert.equal((await post("/api/dishes/couscous-boulettes/vote", { targetTier: 5 }, rateCookie)).status, 429);
 
   const rankings = await fetch(`${origin}/api/rankings?category=main`).then((response) => response.json());
@@ -84,7 +82,7 @@ try {
 }
 
 const rows = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT COUNT(*) AS count,target_tier FROM votes WHERE dish_id='mystery-dessert' AND user_id IN (SELECT id FROM users WHERE id NOT LIKE 'fixture-%'); SELECT dish_id,user_id,COUNT(*) AS count FROM votes GROUP BY dish_id,user_id HAVING count > 1; SELECT attempts FROM vote_rate_limits ORDER BY attempts DESC LIMIT 1", "--json"]));
-assert.deepEqual(rows[0].results, [{ count: 1, target_tier: 5 }]);
+assert.deepEqual(rows[0].results, [{ count: 1, target_tier: 1 }]);
 assert.deepEqual(rows[1].results, []);
 assert.equal(rows[2].results[0].attempts, 30);
-console.log("Phase 4 voting verification passed: auth/CSRF/validation, vote create/change, concurrency uniqueness, 30/min rate limit, median result, and ranking order.");
+console.log("Phase 4 voting verification passed: auth/CSRF/validation, immutable one-vote enforcement, concurrency uniqueness, 30/min rate limit, median result, and ranking order.");

@@ -1,0 +1,1 @@
+ALTER TABLE `dishes` ADD `merged_into_dish_id` text;

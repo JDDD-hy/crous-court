@@ -1,7 +1,8 @@
 import { getBindings } from "@/db";
+import { todayInParis } from "@/lib/calendar";
 import { checkSanitizedImage } from "./image-validation";
 
-type ItemInput = { slot: "main" | "side_1" | "side_2"; name: string; tier: number | null };
+type ItemInput = { slot: "main" | "side_1" | "side_2"; name: string; tier: number | null; dishId: string | null };
 
 export class UploadInputError extends Error {}
 
@@ -9,12 +10,13 @@ export async function publishMeal(form: FormData, userId: string) {
   const venueId = requiredText(form, "venueId");
   const eatenOn = requiredText(form, "eatenOn");
   const mainTier = tier(form.get("mainTier"), true);
-  const items: ItemInput[] = [
-    { slot: "main", name: text(form, "mainName"), tier: mainTier },
-    { slot: "side_1", name: text(form, "sideOneName"), tier: tier(form.get("sideOneTier"), false) },
-    { slot: "side_2", name: text(form, "sideTwoName"), tier: tier(form.get("sideTwoTier"), false) },
-  ].filter((item) => item.slot === "main" || item.tier !== null);
+  const items = ([
+    { slot: "main", name: text(form, "mainName"), tier: mainTier, dishId: optionalId(form, "mainDishId") },
+    { slot: "side_1", name: text(form, "sideOneName"), tier: tier(form.get("sideOneTier"), false), dishId: optionalId(form, "sideOneDishId") },
+    { slot: "side_2", name: text(form, "sideTwoName"), tier: tier(form.get("sideTwoTier"), false), dishId: optionalId(form, "sideTwoDishId") },
+  ] satisfies ItemInput[]).filter((item) => item.slot === "main" || item.tier !== null);
   if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
+  if (eatenOn > todayInParis()) throw new UploadInputError("用餐日期不能穿越到未来");
   if (form.get("rightsConfirmed") !== "true") throw new UploadInputError("请确认照片发布权与无人脸信息");
 
   const canonicalFile = form.get("canonical");
@@ -30,6 +32,9 @@ export async function publishMeal(form: FormData, userId: string) {
   if (thumbnail.width > canonical.width || thumbnail.height > canonical.height) throw new UploadInputError("缩略图尺寸无效");
 
   const { db, bucket } = getBindings();
+  const contentSha256 = await sha256(canonical.bytes);
+  const duplicate = await db.prepare("SELECT meal_id FROM photos WHERE creator_id = ? AND content_sha256 = ?").bind(userId, contentSha256).first();
+  if (duplicate) throw new UploadInputError("这张餐盘已经立过案了，请不要重复提交同一文件");
   const recent = await db.prepare("SELECT COUNT(*) AS count FROM meals WHERE creator_id = ? AND created_at >= datetime('now', '-10 minutes')").bind(userId).first<{ count: number }>();
   if ((recent?.count ?? 0) >= 5) throw new UploadInputError("投稿太频繁，请十分钟后再试");
   const venue = await db.prepare("SELECT display_number FROM venues WHERE id = ? AND active = 1").bind(venueId).first<{ display_number: number }>();
@@ -49,16 +54,21 @@ export async function publishMeal(form: FormData, userId: string) {
       db.prepare("INSERT INTO users (id) VALUES (?) ON CONFLICT(id) DO NOTHING").bind(userId),
       db.prepare("INSERT INTO daily_case_counters (eaten_on, venue_id, next_sequence) VALUES (?, ?, 1) ON CONFLICT(eaten_on, venue_id) DO UPDATE SET next_sequence = next_sequence + 1").bind(eatenOn, venueId),
       db.prepare("INSERT INTO meals (id, venue_id, creator_id, eaten_on, case_number, display_order) SELECT ?, ?, ?, ?, replace(?, '-', '') || '-' || display_number || '-' || printf('%03d', (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?)), (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?) FROM venues WHERE id = ?").bind(mealId, venueId, userId, eatenOn, eatenOn, eatenOn, venueId, eatenOn, venueId, venueId),
-      db.prepare("INSERT INTO photos (id, meal_id, creator_id, canonical_key, thumbnail_key, media_type, width, height, byte_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(photoId, mealId, userId, canonicalKey, thumbnailKey, canonical.mediaType, canonical.width, canonical.height, canonical.bytes.byteLength),
+      db.prepare("INSERT INTO photos (id, meal_id, creator_id, canonical_key, thumbnail_key, media_type, width, height, byte_size, content_sha256) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(photoId, mealId, userId, canonicalKey, thumbnailKey, canonical.mediaType, canonical.width, canonical.height, canonical.bytes.byteLength, contentSha256),
     ];
     for (const item of items) {
-      const dishId = crypto.randomUUID();
+      const dishId = item.dishId ?? crypto.randomUUID();
       const servingId = crypto.randomUUID();
+      if (item.dishId) {
+        const expectedCategory = item.slot === "main" ? "main" : "side";
+        const existing = await db.prepare("SELECT id FROM dishes WHERE id = ? AND category = ? AND merged_into_dish_id IS NULL").bind(item.dishId, expectedCategory).first();
+        if (!existing) throw new UploadInputError("选择的已有菜品已失效，请重新确认");
+      }
       statements.push(
-        db.prepare("INSERT INTO dishes (id, original_description, category, naming_status) VALUES (?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side"),
-        db.prepare("INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, initial_tier) VALUES (?, ?, ?, ?, ?, ?)").bind(servingId, dishId, venueId, eatenOn, userId, item.tier),
+        ...(item.dishId ? [] : [db.prepare("INSERT INTO dishes (id, original_description, category, naming_status) VALUES (?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side")]),
+        db.prepare("INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, original_description, initial_tier) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(servingId, dishId, venueId, eatenOn, userId, item.name, item.tier),
         db.prepare("INSERT INTO meal_items (meal_id, serving_id, slot) VALUES (?, ?, ?)").bind(mealId, servingId, item.slot),
-        db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier) VALUES (?, ?, ?, ?)").bind(crypto.randomUUID(), dishId, userId, item.tier),
+        db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier) VALUES (?, ?, ?, ?) ON CONFLICT(dish_id,user_id) DO NOTHING").bind(crypto.randomUUID(), dishId, userId, item.tier),
       );
     }
     await db.batch(statements);
@@ -83,6 +93,18 @@ function requiredText(form: FormData, key: string) {
   const value = text(form, key);
   if (!value) throw new UploadInputError("投稿信息不完整");
   return value;
+}
+
+function optionalId(form: FormData, key: string) {
+  const value = form.get(key);
+  if (typeof value !== "string" || !value) return null;
+  if (!/^[A-Za-z0-9_-]{1,80}$/.test(value)) throw new UploadInputError("已有菜品选择无效");
+  return value;
+}
+
+async function sha256(bytes: ArrayBuffer) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+  return Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function tier(value: FormDataEntryValue | null, required: boolean) {

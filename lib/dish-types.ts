@@ -1,6 +1,7 @@
 import type { Tier, VerdictStatus } from "./ranking";
 
 export type DishCategory = "main" | "side";
+export type DishNamingStatus = "unknown" | "suggested" | "community" | "verified";
 
 export type DishSummary = {
   id: string;
@@ -14,9 +15,10 @@ export type DishSummary = {
   votes: number;
   distribution: [number, number, number, number, number];
   category: DishCategory;
+  namingStatus?: DishNamingStatus;
   status: VerdictStatus;
 };
 
 export type DishDetail = DishSummary & {
-  servings: Array<{ id: string; date: string; venue: string; initialTier: Tier }>;
+  servings: Array<{ id: string; mealId: string; date: string; venue: string; originalDescription: string; initialTier: Tier; image: string | null }>;
 };

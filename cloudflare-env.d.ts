@@ -6,5 +6,9 @@ declare namespace Cloudflare {
     AUTH_MODE?: "local" | "local-resend" | "resend";
     RESEND_API_KEY?: string;
     OTP_FROM_EMAIL?: string;
+    ADMIN_EMAILS?: string;
+    AI_BASE_URL?: string;
+    AI_API_KEY?: string;
+    AI_MODEL?: string;
   }
 }

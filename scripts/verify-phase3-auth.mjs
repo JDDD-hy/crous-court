@@ -81,6 +81,12 @@ try {
   assert.equal(parallelBlockedCorrect.status, 400);
   const rawCookie = sessionCookie.split(";")[0];
   const image = await readFile(path.join(root, "public", "meals", "couscous.jpg"));
+  const futureForm = new FormData();
+  for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2999-01-01", mainName: "", mainTier: "3", rightsConfirmed: "true" })) futureForm.set(key, value);
+  futureForm.set("canonical", new Blob([image], { type: "image/jpeg" }), "future.jpg");
+  futureForm.set("thumbnail", new Blob([image], { type: "image/jpeg" }), "future-thumb.jpg");
+  const futureUpload = await fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie: rawCookie }, body: futureForm });
+  assert.equal(futureUpload.status, 400);
   const form = new FormData();
   for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2026-09-11", mainName: "神秘黄色主食", mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);
   form.set("canonical", new Blob([image], { type: "image/jpeg" }), "meal.jpg");

@@ -34,9 +34,10 @@ export async function submitVote(dishId: string, userId: string, targetTier: unk
     RETURNING attempts`).bind(userId, now, cutoff, cutoff, cutoff).first();
   if (!admitted) throw new VoteError("提交太频繁，请稍后再试", 429);
 
-  await db.prepare(`INSERT INTO votes (id,dish_id,user_id,target_tier) VALUES (?,?,?,?)
-    ON CONFLICT(dish_id,user_id) DO UPDATE SET target_tier = excluded.target_tier, updated_at = CURRENT_TIMESTAMP`)
-    .bind(crypto.randomUUID(), dishId, userId, tier).run();
+  const created = await db.prepare(`INSERT INTO votes (id,dish_id,user_id,target_tier) VALUES (?,?,?,?)
+    ON CONFLICT(dish_id,user_id) DO NOTHING RETURNING id`)
+    .bind(crypto.randomUUID(), dishId, userId, tier).first();
+  if (!created) throw new VoteError("这道菜你已经判过了，法槌没有撤回键", 409);
   const dish = await getDishDetail(dishId);
   if (!dish) throw new VoteError("菜品不存在或不可见", 404);
   return { dish, myVote: tier };

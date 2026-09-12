@@ -3,20 +3,13 @@ import test from "node:test";
 import { calculateVerdict, compareVerdicts, previewVote } from "../lib/ranking.ts";
 import { reduceVoteState } from "../lib/vote-state.ts";
 import type { DishSummary } from "../lib/dish-types.ts";
+import { nextDefendantIndex } from "../lib/defendant-rotation.ts";
 
 test("uses the worse middle tier for an even vote count", () => {
   assert.equal(calculateVerdict([1, 2, 5]).tier, 2);
   assert.equal(calculateVerdict([1, 2, 3, 4]).tier, 3);
   assert.equal(calculateVerdict([1, 2, 4, 5]).tier, 4);
   assert.equal(calculateVerdict([1, 1, 5, 5]).tier, 5);
-});
-
-test("recalculates after a user changes their target tier", () => {
-  const votes = new Map([["a", 1], ["b", 2], ["c", 5]]);
-  assert.equal(calculateVerdict([...votes.values()]).tier, 2);
-  votes.set("b", 5);
-  assert.equal(calculateVerdict([...votes.values()]).tier, 5);
-  assert.equal(votes.size, 3);
 });
 
 test("assigns thresholds and a complete distribution", () => {
@@ -41,21 +34,31 @@ test("rejects invalid target tiers", () => {
   assert.throws(() => calculateVerdict([2.5]), RangeError);
 });
 
-test("previews a first vote and a changed vote without double counting", () => {
+test("previews a first vote", () => {
   assert.deepEqual(previewVote([0, 1, 0, 0, 0], null, 5), {
     tier: 5, voteCount: 2, status: "pending", distribution: [0, 1, 0, 0, 1],
-  });
-  assert.deepEqual(previewVote([0, 1, 0, 0, 1], 5, 1), {
-    tier: 2, voteCount: 2, status: "pending", distribution: [1, 1, 0, 0, 0],
   });
 });
 
 test("rolls optimistic vote state back after a failed request", () => {
   const dish = { id: "dish", name: "Dish", zh: "菜", venue: "Venue", date: "2026-09-11", image: "/dish.jpg", tier: 3, initialTier: 3, votes: 1, distribution: [0, 0, 1, 0, 0], category: "main", status: "pending" } satisfies DishSummary;
-  const snapshot = { dish, myVote: 3 as const, error: "" };
+  const snapshot = { dish, myVote: null, error: "" };
   const optimistic = reduceVoteState(snapshot, { type: "optimistic", target: 1 });
   const rolledBack = reduceVoteState(optimistic, { type: "rollback", snapshot, error: "网络错误" });
   assert.deepEqual(rolledBack.dish, dish);
-  assert.equal(rolledBack.myVote, 3);
+  assert.equal(rolledBack.myVote, null);
   assert.equal(rolledBack.error, "网络错误");
+});
+
+test("does not optimistically replace an existing vote", () => {
+  const dish = { id: "dish", name: "Dish", zh: "菜", venue: "Venue", date: "2026-09-11", image: "/dish.jpg", tier: 3, initialTier: 3, votes: 1, distribution: [0, 0, 1, 0, 0], category: "main", status: "pending" } satisfies DishSummary;
+  const state = { dish, myVote: 3 as const, error: "" };
+  assert.equal(reduceVoteState(state, { type: "optimistic", target: 1 }), state);
+});
+
+test("cycles defendants in both directions", () => {
+  assert.equal(nextDefendantIndex(0, 3), 1);
+  assert.equal(nextDefendantIndex(2, 3), 0);
+  assert.equal(nextDefendantIndex(0, 3, -1), 2);
+  assert.equal(nextDefendantIndex(0, 0), 0);
 });

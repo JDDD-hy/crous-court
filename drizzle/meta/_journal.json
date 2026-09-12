@@ -29,6 +29,41 @@
       "when": 1789129010880,
       "tag": "0003_reflective_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789158895779,
+      "tag": "0004_strange_mister_sinister",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789159272562,
+      "tag": "0005_kind_caretaker",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1789163595536,
+      "tag": "0006_cool_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1789163758217,
+      "tag": "0007_medical_natasha_romanoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1789164099171,
+      "tag": "0008_brainy_vapor",
+      "breakpoints": true
     }
   ]
 }

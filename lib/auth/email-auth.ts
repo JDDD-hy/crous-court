@@ -85,6 +85,23 @@ export async function getEmailUser(): Promise<{ userId: string } | null> {
   return row ? { userId: row.user_id } : null;
 }
 
+export async function isAdminUser(userId: string) {
+  const configured = env.ADMIN_EMAILS?.split(",").map((email) => email.trim()).filter(Boolean) ?? [];
+  if (!configured.length) return false;
+  const row = await getRawDb().prepare("SELECT email_digest FROM users WHERE id = ?").bind(userId).first<{ email_digest: string | null }>();
+  if (!row?.email_digest) return false;
+  const secret = authSecret();
+  const digests = await Promise.all(configured.map((email) => hmac(secret, `email\0${normalizeEmail(email)}`)));
+  return digests.some((digest) => constantTimeEqual(digest, row.email_digest!));
+}
+
+export async function requireAdminUser() {
+  const user = await getEmailUser();
+  if (!user) throw new AuthError("请先使用邮箱验证码登录", 401);
+  if (!await isAdminUser(user.userId)) throw new AuthError("没有管理权限", 403);
+  return user;
+}
+
 export async function logoutEmailUser(request: Request) {
   assertSameOrigin(request);
   const cookie = request.headers.get("cookie") ?? "";

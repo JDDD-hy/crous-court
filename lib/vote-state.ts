@@ -10,6 +10,7 @@ export type VoteAction =
 export function reduceVoteState(state: VoteViewState, action: VoteAction): VoteViewState {
   if (action.type === "confirmed") return { dish: action.dish, myVote: action.myVote, error: "" };
   if (action.type === "rollback") return { ...action.snapshot, error: action.error };
+  if (state.myVote !== null) return state;
   const verdict = previewVote(state.dish.distribution, state.myVote, action.target);
   return { dish: { ...state.dish, tier: verdict.tier, votes: verdict.voteCount, distribution: verdict.distribution, status: verdict.status }, myVote: action.target, error: "" };
 }
