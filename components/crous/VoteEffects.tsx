@@ -29,12 +29,12 @@ async function playEffects(host: HTMLDivElement, event: VoteMotionEvent, signal:
   try {
     if (signal.aborted) return;
     await new Promise<void>((resolve) => {
-      const tween = gsap.fromTo(stamp, { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.16, ease: "back.out(2)", motionPath: { path: [{ x: 0, y: 0 }, { x: verdict.direction === "up" ? 36 : -36, y: verdict.direction === "up" ? -44 : 44 }, { x: 0, y: 0 }], curviness: 1.4 }, onComplete: resolve });
+      const tween = gsap.fromTo(stamp, { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.38, ease: "back.out(2)", motionPath: { path: [{ x: 0, y: 0 }, { x: verdict.direction === "up" ? 36 : -36, y: verdict.direction === "up" ? -44 : 44 }, { x: 0, y: 0 }], curviness: 1.4 }, onComplete: resolve });
       signal.addEventListener("abort", () => { tween.kill(); resolve(); }, { once: true });
     });
     if (signal.aborted) return;
     await new Promise<void>((resolve) => {
-      const tween = gsap.to(stamp, { opacity: 0, delay: 0.28, duration: 0.18, onComplete: resolve });
+      const tween = gsap.to(stamp, { opacity: 0, delay: 0.65, duration: 0.32, onComplete: resolve });
       signal.addEventListener("abort", () => { tween.kill(); resolve(); }, { once: true });
     });
     if (verdict.shatter && markMajorEffect(event)) await playPixelShatter(host, event.toTier ?? 5, signal);
@@ -69,7 +69,7 @@ async function playPixelShatter(host: HTMLDivElement, tier: number, signal: Abor
     await new Promise<void>((resolve) => {
       let frame = 0;
       const draw = (now: number) => {
-        if (signal.aborted || now - started >= 780) return resolve();
+        if (signal.aborted || now - started >= 1200) return resolve();
         const elapsed = (now - started) / 1000;
         context.clearRect(0, 0, width, height); context.fillStyle = color;
         for (const particle of particles) context.fillRect(particle.x + particle.vx * elapsed, particle.y + particle.vy * elapsed + 150 * elapsed * elapsed, particle.size, particle.size);

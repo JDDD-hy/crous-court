@@ -101,7 +101,7 @@
 
 ### Pixel 效果
 
-v1 使用 Canvas 2D pixel shatter：仅当菜品一次跨越至少 2 档向下移动，或首次进入“拉爆了”时播放。像素从卡片底部少量碎裂坠落，600–900ms，结束后销毁 Canvas。
+v1 使用 Canvas 2D pixel shatter：仅当菜品一次跨越至少 2 档向下移动，或首次进入“拉爆了”时播放。像素从卡片底部少量碎裂坠落，约 1200ms，结束后销毁 Canvas。
 
 不改变真实图片文件，不遮挡结果，不自动循环，不播放闪烁。
 
@@ -114,8 +114,8 @@ v1 使用 Canvas 2D pixel shatter：仅当菜品一次跨越至少 2 档向下�
 | 级别 | 场景 | 时长 |
 |---|---|---:|
 | 微反馈 | 按钮按压、盖章、hover | 120–220ms |
-| 状态变化 | MotionPath、Flip | 500–800ms |
-| 重大判决 | pixel shatter、升级庆祝 | 600–900ms |
+| 状态变化 | MotionPath、Flip | 550–1400ms |
+| 重大判决 | pixel shatter、升级庆祝 | 约 1200ms |
 
 启用 `prefers-reduced-motion: reduce` 时：移除路径、粒子、像素和视差，只保留 0–100ms 淡入或即时更新。
 
