@@ -4,6 +4,7 @@ import { calculateVerdict, compareVerdicts, previewVote } from "../lib/ranking.t
 import { reduceVoteState } from "../lib/vote-state.ts";
 import type { DishSummary } from "../lib/dish-types.ts";
 import { nextDefendantIndex } from "../lib/defendant-rotation.ts";
+import { getVerdictMotion } from "../lib/verdict-motion.ts";
 
 test("uses the worse middle tier for an even vote count", () => {
   assert.equal(calculateVerdict([1, 2, 5]).tier, 2);
@@ -61,4 +62,13 @@ test("cycles defendants in both directions", () => {
   assert.equal(nextDefendantIndex(2, 3), 0);
   assert.equal(nextDefendantIndex(0, 3, -1), 2);
   assert.equal(nextDefendantIndex(0, 0), 0);
+});
+
+test("only shatters on a major downgrade or first entry into the worst tier", () => {
+  assert.equal(getVerdictMotion(1, 3).shatter, true);
+  assert.equal(getVerdictMotion(3, 5).shatter, true);
+  assert.equal(getVerdictMotion(4, 5).shatter, true);
+  assert.equal(getVerdictMotion(2, 3).shatter, false);
+  assert.equal(getVerdictMotion(2, 2).shatter, false);
+  assert.equal(getVerdictMotion(null, 5).shatter, false);
 });

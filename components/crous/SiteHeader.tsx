@@ -3,6 +3,7 @@
 import { Gavel } from "lucide-react";
 import { UploadNav } from "./UploadNav";
 import { EmailLogoutButton } from "./EmailLogoutButton";
+import { MotionPreferenceButton } from "./MotionPreferenceButton";
 
 export function SiteHeader({ authenticated = false }: { authenticated?: boolean }) {
   return (
@@ -14,6 +15,7 @@ export function SiteHeader({ authenticated = false }: { authenticated?: boolean 
         </a>
         <nav aria-label="主导航" className="flex items-center gap-2 text-sm font-bold">
           <a href="/" className="hidden rounded-full px-3 py-2 hover:bg-ink/5 sm:block">今日开庭</a>
+          <MotionPreferenceButton />
           <UploadNav authenticated={authenticated} />
           {authenticated && <EmailLogoutButton />}
         </nav>

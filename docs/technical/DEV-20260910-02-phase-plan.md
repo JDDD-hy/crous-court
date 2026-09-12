@@ -88,7 +88,7 @@ DoD：
 
 ## Phase 6：视觉与动画完成
 
-工作：MotionPath、Flip、盖章微交互、Canvas 2D pixel shatter、详情拍立得布局。
+工作：接入已确认的 Buy Me a Coffee 普通外链；完成 MotionPath、Flip、盖章微交互、Canvas 2D pixel shatter、详情拍立得布局。
 
 DoD：
 
@@ -101,7 +101,7 @@ DoD：
 
 ## Phase 7：上线准备与发布
 
-工作：导入有授权种子数据、完整状态与权限验收、Buy Me a Coffee 外链、隐私和图片规则、构建、Sites 预览与正式发布。
+工作：导入有授权种子数据、完整状态与权限验收、隐私和图片规则、构建、Sites 预览与正式发布。
 
 DoD：
 
