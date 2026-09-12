@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { DishSummary } from "@/lib/dish-types";
 import type { Tier } from "@/lib/ranking";
 import { tierById, type TierId } from "./data";
@@ -23,21 +23,21 @@ export function HomeCourt({ dish, authenticated, myVote, onChange, onVotingChang
   </section>;
 }
 
-export function HomeRankings({ meals, authenticated, reviewedDishIds }: { meals: DishSummary[]; authenticated: boolean; reviewedDishIds: Readonly<Record<string, Tier>> }) {
+export function HomeExtras({ meals }: { meals: DishSummary[] }) {
   const mystery = meals.find((dish) => dish.namingStatus === "unknown" || dish.namingStatus === "suggested");
-  return <section className="mx-auto max-w-6xl space-y-12 px-4 py-14 sm:px-6"><Ranking title="主食夯拉榜" icon={<Flame className="size-6" />} items={meals.filter((meal) => meal.category === "main")} authenticated={authenticated} reviewedDishIds={reviewedDishIds} /><Ranking title="小菜捡漏榜" icon={<span aria-hidden="true">🥄</span>} items={meals.filter((meal) => meal.category === "side")} authenticated={authenticated} reviewedDishIds={reviewedDishIds} />
+  return <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
     <div className="grid gap-5 md:grid-cols-[1.3fr_.7fr]">{mystery ? <a href={`/dish/${mystery.id}`} className="group grid overflow-hidden border-4 border-dashed border-ink bg-[#ded8c9] transition-transform hover:-rotate-1 sm:grid-cols-[12rem_1fr]"><Image src={mystery.image} alt={`${mystery.zh}的待认菜品照片`} width={384} height={288} className="h-48 w-full object-cover sm:h-full" /><div className="p-6"><p className="font-mono text-sm font-bold">悬案通缉令 · {mystery.category === "main" ? "主食" : "小菜"}</p><h2 className="mt-2 text-3xl font-black">{mystery.zh}</h2><p className="mt-2 text-sm text-ink/65">{mystery.date} · {mystery.venue}</p><span className="mt-5 inline-flex items-center font-black">这盘到底是什么？<ChevronRight /></span></div></a> : <div className="border-4 border-dashed border-ink/40 bg-[#ded8c9] p-6"><p className="font-mono text-sm font-bold">悬案通缉令</p><h2 className="mt-2 text-3xl font-black">今日暂无悬案，伙房全员有名有姓。</h2></div>}<SponsorCard /></div>
   </section>;
 }
 
 function SponsorCard() {
-  return <a href="https://buymeacoffee.com/donghanyanx" target="_blank" rel="noopener noreferrer" className="group flex min-h-52 flex-col justify-between border-3 border-ink bg-[#f4ecb8] p-6 shadow-[5px_5px_0_#202624] transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-verdict"><div><p className="text-3xl" aria-hidden="true">🤖🍽️</p><h2 className="mt-2 text-xl font-black">给 AI 加个菜</h2><p className="mt-2 text-base text-ink/70">你的一票决定菜品从夯到拉，你的赞助决定服务器从活着到寄。</p></div><span className="mt-6 inline-flex items-center font-black">去投喂服务器<ChevronRight className="transition-transform group-hover:translate-x-1" /></span></a>;
+  return <a href="https://buymeacoffee.com/donghanyanx" target="_blank" rel="noopener noreferrer" className="group flex min-h-52 flex-col justify-between border-3 border-ink bg-[#f4ecb8] p-6 shadow-[5px_5px_0_#202624] transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-verdict"><div><p className="text-3xl" aria-hidden="true">🤖🍽️</p><h2 className="mt-2 text-xl font-black">给 AI 加个菜</h2><p className="mt-2 text-base text-ink/70">你的一票决定菜品从夯到拉，你的赞助决定它从活着到寄。</p></div><span className="mt-6 inline-flex items-center font-black">去投喂<ChevronRight className="transition-transform group-hover:translate-x-1" /></span></a>;
 }
 
 function Fact({ label, value }: { label: string; value: string }) { return <div><span className="block text-ink/55">{label}</span><strong>{value}</strong></div>; }
-function Ranking({ title, icon, items, authenticated, reviewedDishIds }: { title: string; icon: ReactNode; items: DishSummary[]; authenticated: boolean; reviewedDishIds: Readonly<Record<string, Tier>> }) {
+export function Ranking({ title, icon, items, authenticated, reviewedDishIds }: { title: string; icon: ReactNode; items: DishSummary[]; authenticated: boolean; reviewedDishIds: Readonly<Record<string, Tier>> }) {
   const listRef = useRankingFlip(items.map((dish) => `${dish.id}:${dish.tier}:${dish.votes}`).join("|"));
-  return <section><div className="mb-4 flex items-center gap-2"><span aria-hidden="true">{icon}</span><h2 className="text-3xl font-black">{title}</h2></div><div ref={listRef} className="grid gap-4 md:grid-cols-2">{items.map((dish, index) => { const tier = tierById((dish.tier ?? dish.initialTier ?? 3) as TierId); return <a key={dish.id} data-ranking-card data-flip-id={dish.id} href={`/dish/${dish.id}`} className="group relative grid grid-cols-[7rem_1fr] overflow-hidden border-3 border-ink bg-paper shadow-[5px_5px_0_#202624] transition-transform hover:-translate-y-1"><Image src={dish.image} alt={`${dish.zh} CROUS 餐盘`} width={240} height={180} className="h-full w-full object-cover" />{authenticated && reviewedDishIds[dish.id] === undefined && <NewBadge className="right-3 top-3" />}<div className="p-4"><p className="font-mono text-xs">#{index + 1} · {dish.venue}</p><h3 className="mt-1 text-xl font-black">{dish.zh}</h3><p className="mt-3 inline-block border-2 border-ink px-2 py-1 font-bold" style={{ backgroundColor: tier.color }}>{tier.emoji} {tier.label} · {dish.votes}票</p></div></a>; })}</div></section>;
+  return <section><div className="mb-4 flex items-center gap-2"><span aria-hidden="true">{icon}</span><h2 className="text-3xl font-black">{title}</h2></div><div ref={listRef} className="grid gap-4 md:grid-cols-2">{items.length === 0 ? <p className="border-3 border-dashed border-ink/35 bg-paper p-6 text-ink/65">这里还没有被观测到的菜品。</p> : items.map((dish, index) => { const tier = tierById((dish.tier ?? dish.initialTier ?? 3) as TierId); return <a key={dish.id} data-ranking-card data-flip-id={dish.id} href={`/dish/${dish.id}`} className="group relative grid grid-cols-[7rem_1fr] overflow-hidden border-3 border-ink bg-paper shadow-[5px_5px_0_#202624] transition-transform hover:-translate-y-1"><Image src={dish.image} alt={`${dish.zh} CROUS 餐盘`} width={240} height={180} className="h-full w-full object-cover" />{authenticated && reviewedDishIds[dish.id] === undefined && <NewBadge className="right-3 top-3" />}<div className="p-4"><p className="font-mono text-xs">#{index + 1} · {dish.venue}</p><h3 className="mt-1 text-xl font-black">{dish.zh}</h3><p className="mt-3 inline-block border-2 border-ink px-2 py-1 font-bold" style={{ backgroundColor: tier.color }}>{tier.emoji} {tier.label} · {dish.votes}票</p></div></a>; })}</div></section>;
 }
 
 function NewBadge({ className }: { className: string }) { return <span className={`absolute z-10 rotate-3 border-2 border-ink bg-[#f4ecb8] px-2 py-1 font-mono text-xs font-black shadow-[2px_2px_0_#202624] ${className}`} aria-label="尚未审阅">NEW</span>; }

@@ -91,6 +91,8 @@ Phase 3 上传链路：浏览器先将 HEIF/HEIC 本地解码为 JPEG，再用 C
 
 首页通过 `getUserVotes(dishIds, currentUserId)` 获取当前账号 Vote 映射：缺少记录的卡片显示 `NEW`，服务端确认投票后客户端仅把该 Dish 写入当前页面的 Vote 映射。状态不持久化到公共 Dish，也不新增可被其他账号读取的审阅字段。
 
+长期榜单继续直接使用公共 `listRankings()` 结果；首页首位被告仅在展示层依据当前账号 Vote 映射选择第一个未审阅 Dish，不改变公共排序和 Dish 数据。
+
 ### 5.1 邮箱验证码认证
 
 - `email_otp_challenges` 只保存邮箱、客户端地址和六位码的 HMAC 摘要；验证码 10 分钟过期、最多尝试 5 次，同邮箱至少间隔 60 秒且每小时最多 3 封、同地址 15 分钟最多 10 封；

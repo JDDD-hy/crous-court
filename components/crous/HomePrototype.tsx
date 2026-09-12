@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import type { DishSummary } from "@/lib/dish-types";
 import type { Tier } from "@/lib/ranking";
-import { nextDefendantIndex } from "@/lib/defendant-rotation";
-import { HomeCourt, HomeRankings } from "./HomeSections";
+import { firstUnreviewedIndex, nextDefendantIndex } from "@/lib/defendant-rotation";
+import { HomeCourt, HomeExtras } from "./HomeSections";
 import { SiteHeader } from "./SiteHeader";
 
 export function HomePrototype({ meals, authenticated, myVotes }: { meals: DishSummary[]; authenticated: boolean; myVotes: Record<string, Tier> }) {
   const [currentMeals, setCurrentMeals] = useState(meals);
   const [currentVotes, setCurrentVotes] = useState(myVotes);
-  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [featuredIndex, setFeaturedIndex] = useState(() => firstUnreviewedIndex(meals.map((dish) => dish.id), myVotes));
   const [rotationPaused, setRotationPaused] = useState(false);
   const featured = currentMeals[featuredIndex];
   useEffect(() => {
@@ -31,6 +31,6 @@ export function HomePrototype({ meals, authenticated, myVotes }: { meals: DishSu
       position={featuredIndex + 1} total={currentMeals.length}
       onPrevious={() => setFeaturedIndex((index) => nextDefendantIndex(index, currentMeals.length, -1))}
       onNext={() => setFeaturedIndex((index) => nextDefendantIndex(index, currentMeals.length))} />
-    <HomeRankings meals={rankedMeals} authenticated={authenticated} reviewedDishIds={currentVotes} />
+    <HomeExtras meals={rankedMeals} />
   </main></div>;
 }

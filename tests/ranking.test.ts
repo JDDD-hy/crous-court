@@ -3,7 +3,7 @@ import test from "node:test";
 import { calculateVerdict, compareVerdicts, previewVote } from "../lib/ranking.ts";
 import { reduceVoteState } from "../lib/vote-state.ts";
 import type { DishSummary } from "../lib/dish-types.ts";
-import { nextDefendantIndex } from "../lib/defendant-rotation.ts";
+import { firstUnreviewedIndex, nextDefendantIndex } from "../lib/defendant-rotation.ts";
 import { getVerdictMotion } from "../lib/verdict-motion.ts";
 
 test("uses the worse middle tier for an even vote count", () => {
@@ -62,6 +62,13 @@ test("cycles defendants in both directions", () => {
   assert.equal(nextDefendantIndex(2, 3), 0);
   assert.equal(nextDefendantIndex(0, 3, -1), 2);
   assert.equal(nextDefendantIndex(0, 0), 0);
+});
+
+test("starts each account on its first unreviewed defendant", () => {
+  const dishes = ["dish-a", "dish-b", "dish-c"];
+  assert.equal(firstUnreviewedIndex(dishes, { "dish-a": 2 }), 1);
+  assert.equal(firstUnreviewedIndex(dishes, { "dish-a": 2, "dish-b": 4 }), 2);
+  assert.equal(firstUnreviewedIndex(dishes, { "dish-a": 2, "dish-b": 4, "dish-c": 1 }), 0);
 });
 
 test("only shatters on a major downgrade or first entry into the worst tier", () => {

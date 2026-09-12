@@ -13,6 +13,7 @@ export function SiteHeader({ authenticated = false }: { authenticated?: boolean 
           <span className="text-xl">CROUS法庭</span>
         </a>
         <nav aria-label="主导航" className="flex items-center gap-2 text-sm font-bold">
+          <a href="/rankings" className="hidden rounded-full px-3 py-2 hover:bg-ink/5 sm:block">长期榜单</a>
           <a href="/" className="hidden rounded-full px-3 py-2 hover:bg-ink/5 sm:block">今日开庭</a>
           <UploadNav authenticated={authenticated} />
           {authenticated && <EmailLogoutButton />}
