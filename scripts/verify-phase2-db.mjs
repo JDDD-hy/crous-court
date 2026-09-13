@@ -44,6 +44,7 @@ assert.deepEqual(execute("SELECT category, count(*) AS count FROM dishes GROUP B
 const fixtureVerdict = calculateVerdict(execute("SELECT target_tier FROM votes WHERE dish_id='couscous-boulettes'").map((row) => row.target_tier));
 assert.deepEqual(fixtureVerdict, { tier: 2, voteCount: 5, status: "provisional", distribution: [1, 3, 1, 0, 0] });
 execute("INSERT INTO meals (id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES ('test-meal-side','venue-escoffier','fixture-user-01','2026-09-08','test-side',99),('test-meal-main','venue-escoffier','fixture-user-01','2026-09-10','test-main',99),('test-meal-cross','venue-experimental','fixture-user-01','2026-09-10','test-cross',99),('test-meal-date','venue-escoffier','fixture-user-01','2026-09-11','test-date',99)");
+execute("INSERT INTO name_suggestions (id,dish_id,proposer_id,name,normalized_name,evidence_type) VALUES ('test-name','mystery-dessert','fixture-user-01','Test','test','visual_guess')");
 
 for (const invalidSql of [
   "INSERT INTO dishes (id,category) VALUES ('invalid-category','dessert')",
@@ -53,6 +54,7 @@ for (const invalidSql of [
   "INSERT INTO meal_items (meal_id,serving_id,slot) VALUES ('test-meal-main','fixture-serving-01','side_1')",
   "INSERT INTO meal_items (meal_id,serving_id,slot) VALUES ('test-meal-cross','fixture-serving-01','main')",
   "INSERT INTO meal_items (meal_id,serving_id,slot) VALUES ('test-meal-date','fixture-serving-01','main')",
+  "INSERT INTO name_endorsements (suggestion_id,user_id) VALUES ('test-name','fixture-user-01')",
 ]) {
   const result = spawnSync(process.execPath, [wrangler, "d1", "execute", ...base, "--command", invalidSql], { cwd: projectRoot, encoding: "utf8" });
   assert.notEqual(result.status, 0, `constraint unexpectedly accepted: ${invalidSql}`);

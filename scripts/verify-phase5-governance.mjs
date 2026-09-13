@@ -50,8 +50,11 @@ try {
   assert.equal(initialCandidates.data[0].id, "lentilles-saucisse");
   const proposed = await request("/api/dishes/mystery-dessert/names", "POST", { name: "Crème dessert", evidenceType: "ate_today" }, one);
   const proposal = await proposed.json(); assert.equal(proposed.status, 201, JSON.stringify(proposal));
+  assert.equal(proposal.data.supporters, 0);
+  const selfEndorsement = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, one); assert.equal(selfEndorsement.status, 409); await selfEndorsement.text();
   const endorsedTwo = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, two); assert.equal(endorsedTwo.status, 200); await endorsedTwo.text();
   const endorsedThree = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, three); assert.equal(endorsedThree.status, 200); await endorsedThree.text();
+  const endorsedAdmin = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, admin); assert.equal(endorsedAdmin.status, 200); await endorsedAdmin.text();
   await new Promise((resolve) => setTimeout(resolve, 500));
   const reported = await request("/api/reports", "POST", { dishId: "mystery-dessert", reason: "wrong_dish", details: "名称可能不对" }, one);
   const report = await reported.json(); assert.equal(reported.status, 201, JSON.stringify(report));

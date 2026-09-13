@@ -2,15 +2,17 @@
 
 /* eslint-disable @next/next/no-img-element -- local blob preview with AI overlay */
 
+import { useState } from "react";
 import type { Region } from "./AiDishRecognition";
 
 export function DishRegionPreview({ imageUrl, region, label }: { imageUrl: string | null; region: Region; label: string }) {
+  const [imageRatio, setImageRatio] = useState(1);
   if (!imageUrl || !region) return null;
+  const cropRatio = imageRatio * region.width / region.height;
   return <figure className="mt-3">
-    <figcaption className="mb-1 text-xs font-bold text-verdict">AI 标出的{label}</figcaption>
-    <div className="relative inline-block max-w-full overflow-hidden border-2 border-ink bg-[#ded8c9]">
-      <img src={imageUrl} alt={`${label}评分主体`} className="block max-h-40 max-w-full" />
-      <span aria-hidden="true" className="absolute border-3 border-verdict bg-verdict/15" style={{ left: `${region.x * 100}%`, top: `${region.y * 100}%`, width: `${region.width * 100}%`, height: `${region.height * 100}%` }} />
+    <figcaption className="mb-1 text-xs font-bold text-verdict">AI 裁出的{label}</figcaption>
+    <div className="relative w-full max-w-72 overflow-hidden border-3 border-verdict bg-[#ded8c9]" style={{ aspectRatio: cropRatio }}>
+      <img src={imageUrl} alt={`${label}评分主体局部`} onLoad={(event) => setImageRatio(event.currentTarget.naturalWidth / event.currentTarget.naturalHeight)} className="absolute max-w-none" style={{ width: `${100 / region.width}%`, height: `${100 / region.height}%`, left: `${-100 * region.x / region.width}%`, top: `${-100 * region.y / region.height}%` }} />
     </div>
   </figure>;
 }

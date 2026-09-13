@@ -31,18 +31,18 @@ export async function suggestName(dishId: string, userId: string, input: Record<
   try {
     await db.batch([
       db.prepare("INSERT INTO name_suggestions (id,dish_id,proposer_id,name,normalized_name,evidence_type,evidence_note) VALUES (?,?,?,?,?,?,?)").bind(id, dishId, userId, name, normalizeDishName(name), input.evidenceType, note || null),
-      db.prepare("INSERT INTO name_endorsements (suggestion_id,user_id) VALUES (?,?)").bind(id, userId),
       db.prepare("UPDATE dishes SET naming_status = 'suggested' WHERE id = ? AND naming_status = 'unknown'").bind(dishId),
     ]);
   } catch { throw new GovernanceError("你已经提交过这个名称", 409); }
-  return { id, name, evidenceType: input.evidenceType, evidenceNote: note || null, status: "pending", supporters: 1 };
+  return { id, name, evidenceType: input.evidenceType, evidenceNote: note || null, status: "pending", supporters: 0 };
 }
 
 export async function endorseName(dishId: string, suggestionId: string, userId: string) {
   await enforceGovernanceLimit(userId, "endorse_name", 30);
   const db = getRawDb();
-  const suggestion = await db.prepare("SELECT name,normalized_name FROM name_suggestions WHERE id = ? AND dish_id = ? AND status IN ('pending','community')").bind(suggestionId, dishId).first<{ name: string; normalized_name: string }>();
+  const suggestion = await db.prepare("SELECT name,normalized_name,proposer_id FROM name_suggestions WHERE id = ? AND dish_id = ? AND status IN ('pending','community')").bind(suggestionId, dishId).first<{ name: string; normalized_name: string; proposer_id: string }>();
   if (!suggestion) throw new GovernanceError("名称候选不存在", 404);
+  if (suggestion.proposer_id === userId) throw new GovernanceError("提议者不能支持自己的名称", 409);
   const inserted = await db.prepare("INSERT INTO name_endorsements (suggestion_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING").bind(suggestionId, userId).run();
   if (inserted.meta.changes !== 1) throw new GovernanceError("你已经支持过这个名称", 409);
   const count = await db.prepare("SELECT COUNT(*) AS count FROM name_endorsements WHERE suggestion_id = ?").bind(suggestionId).first<{ count: number }>();
