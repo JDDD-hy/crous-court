@@ -10,6 +10,7 @@
 | 页面、视觉和动效规范 | `docs/ui/UI-20260910-01-visual-and-motion.md` |
 | 分阶段实施计划 | `docs/technical/DEV-20260910-02-phase-plan.md` |
 | 当前进度 | `docs/progress/PROG-20260910.md` |
+| 当前上线阻塞：multipart 预解析资源耗尽 | `docs/bugs/BUG-20260913-01-multipart-preparse-resource-exhaustion.md` |
 
 ## 更新矩阵
 

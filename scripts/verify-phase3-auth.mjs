@@ -81,6 +81,12 @@ try {
   assert.equal(parallelBlockedCorrect.status, 400);
   const rawCookie = sessionCookie.split(";")[0];
   const image = await readFile(path.join(root, "public", "meals", "couscous.jpg"));
+  const invalidMultipart = await fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie: rawCookie, "content-type": "application/json" }, body: "{}" });
+  assert.equal(invalidMultipart.status, 415);
+  const aiForm = new FormData();
+  aiForm.set("image", new Blob([image], { type: "image/jpeg" }), "ai.jpg");
+  const unconfiguredAi = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: rawCookie }, body: aiForm });
+  assert.equal(unconfiguredAi.status, 503);
   const futureForm = new FormData();
   for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2999-01-01", mainName: "", mainTier: "3", rightsConfirmed: "true" })) futureForm.set(key, value);
   futureForm.set("canonical", new Blob([image], { type: "image/jpeg" }), "future.jpg");
@@ -97,8 +103,9 @@ try {
     return fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie: rawCookie }, body: form });
   };
   const parallelUploads = await Promise.all(Array.from({ length: 6 }, (_, index) => upload(index)));
-  assert.equal(parallelUploads.filter((response) => response.status === 201).length, 5);
-  assert.equal(parallelUploads.filter((response) => response.status === 400).length, 1);
+  const uploadStatuses = parallelUploads.map((response) => response.status);
+  assert.equal(parallelUploads.filter((response) => response.status === 201).length, 5, `${JSON.stringify(uploadStatuses)}\n${output.slice(-4000)}`);
+  assert.equal(parallelUploads.filter((response) => response.status === 400).length, 1, `${JSON.stringify(uploadStatuses)}\n${output.slice(-4000)}`);
   const crossSite = await fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin: "https://evil.example", cookie: rawCookie } });
   assert.equal(crossSite.status, 403);
   const logout = await post("/api/auth/logout", {}, rawCookie);
@@ -110,11 +117,12 @@ try {
   await new Promise((resolve) => child.once("exit", resolve));
 }
 
-const rows = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT email_digest,code_digest FROM email_otp_challenges; SELECT token_digest,revoked_at FROM auth_sessions", "--json"]));
+const rows = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT email_digest,code_digest FROM email_otp_challenges; SELECT token_digest,revoked_at FROM auth_sessions; SELECT attempts FROM upload_rate_limits", "--json"]));
 const challenge = rows[0].results[0];
 const session = rows[1].results[0];
 assert.notEqual(challenge.email_digest, "auth-test@example.invalid");
 assert.notEqual(challenge.code_digest, code);
 assert.ok(session.revoked_at);
 assert.ok(!sessionCookie.includes(session.token_digest));
-console.log("Phase 3 email auth verification passed: bounded JSON, atomic OTP/upload limits, hardened session, replay/CSRF/logout, and no plaintext credentials in D1.");
+assert.equal(rows[2].results[0].attempts, 5);
+console.log("Phase 3 email auth verification passed: bounded JSON/multipart, atomic business limits, hardened session, replay/CSRF/logout, and no plaintext credentials in D1.");

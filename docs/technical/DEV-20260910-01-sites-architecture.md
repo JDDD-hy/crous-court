@@ -119,6 +119,7 @@ Phase 5 管理员由 `ADMIN_EMAILS` 服务端白名单判定：当前会话 User
 
 ## 7. 性能与安全预算
 
+- `/api/uploads` 与 `/api/ai/identify` 仅接受 multipart；应用层总预算分别为 17 MB 与 9 MB，最多 32 段，并继续执行单文件 8 MB、像素及元数据校验。Sites/Cloudflare 正式环境必须在 Worker 前按路由配置 `http.request.body.size` 上限并验证 413；Cloudflare 账号默认 100 MB 上限不视为满足本预算。
 - 首屏不加载 Three.js/Rapier；
 - 图片使用固定宽高和响应式缩略图；
 - 动画模块按需加载；
