@@ -29,12 +29,14 @@ export function UploadFlow() {
   const [mainName, setMainName] = useState("");
   const [sideOneName, setSideOneName] = useState("");
   const [sideTwoName, setSideTwoName] = useState("");
+  const [candidateSearchEnabled, setCandidateSearchEnabled] = useState(false);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
   async function choosePhoto(file?: File) {
     if (!file) return;
     setBusy(true);
+    setCandidateSearchEnabled(false);
     setError("");
     try {
       const cleaned = await sanitizePhoto(file);
@@ -78,13 +80,13 @@ export function UploadFlow() {
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">1. 照片</p><h2 className="mt-2 text-2xl font-black">上传整张餐盘</h2>
       <label className="mt-5 grid min-h-72 cursor-pointer place-items-center overflow-hidden rounded-lg border-4 border-dashed border-ink/45 bg-[#ded8c9] text-center focus-within:outline-3">{preview ? <img src={preview} alt="已清理元数据的餐盘预览" className="h-72 w-full object-contain" /> : <span><ImagePlus className="mx-auto size-12" /><strong className="mt-3 block text-lg">选择 JPG、PNG 或 HEIC</strong><small>原图不离开浏览器；上传前会转为 JPEG 并移除 EXIF/GPS</small></span>}<input className="sr-only" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" onChange={(event) => choosePhoto(event.target.files?.[0])} /></label>
-      <AiDishRecognition image={files?.thumbnail ?? null} onApply={(main, sides) => { setMainName(main); setSideOneName(sides[0] ?? ""); setSideTwoName(sides[1] ?? ""); }} />
+      <AiDishRecognition image={files?.thumbnail ?? null} onApply={(main, sides) => { setMainName(main); setSideOneName(sides[0] ?? ""); setSideTwoName(sides[1] ?? ""); setCandidateSearchEnabled(true); }} />
     </section>
 
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">2. 菜品信息</p><h2 className="mt-2 text-2xl font-black">同一天可以继续立案</h2>
       <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="font-bold">餐厅<NativeSelect name="venueId" required className="mt-2 min-h-12 border-2 border-ink bg-paper text-base"><NativeSelectOption value="venue-escoffier">🏫 Télécom 附近 — Escoffier</NativeSelectOption><NativeSelectOption value="venue-experimental">🏠 All Suites 附近 — L’Expérimental</NativeSelectOption></NativeSelect></label><label className="font-bold">用餐日期<input name="eatenOn" type="date" required defaultValue={todayInParis()} max={todayInParis()} className="mt-2 min-h-12 w-full rounded-md border-2 border-ink bg-paper px-3" /></label></div>
-      <div className="mt-6 grid gap-5 sm:grid-cols-3"><DishIdentityField label="主食（可未知）" name="mainName" category="main" value={mainName} onChange={setMainName} /><div><DishIdentityField label="小菜 1（可选）" name="sideOneName" category="side" value={sideOneName} onChange={setSideOneName} /><OptionalTier name="sideOneTier" /></div><div><DishIdentityField label="小菜 2（可选）" name="sideTwoName" category="side" value={sideTwoName} onChange={setSideTwoName} /><OptionalTier name="sideTwoTier" /></div></div>
+      <div className="mt-6 grid gap-5 sm:grid-cols-3"><DishIdentityField label="主食（可未知）" name="mainName" category="main" value={mainName} onChange={setMainName} candidateSearchEnabled={candidateSearchEnabled} /><div><DishIdentityField label="小菜 1（可选）" name="sideOneName" category="side" value={sideOneName} onChange={setSideOneName} candidateSearchEnabled={candidateSearchEnabled} /><OptionalTier name="sideOneTier" /></div><div><DishIdentityField label="小菜 2（可选）" name="sideTwoName" category="side" value={sideTwoName} onChange={setSideTwoName} candidateSearchEnabled={candidateSearchEnabled} /><OptionalTier name="sideTwoTier" /></div></div>
       <p className="mt-4 border-l-4 border-accent pl-3 text-sm">菜名可以先留空。原始文字会保留，后续识别或群众补名不会覆盖它。</p>
     </section>
 

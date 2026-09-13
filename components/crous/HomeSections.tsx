@@ -8,6 +8,7 @@ import type { Tier } from "@/lib/ranking";
 import { tierById, type TierId } from "./data";
 import { VoteControls } from "./VoteControls";
 import { useRankingFlip } from "./useRankingFlip";
+import { MysteryCarousel } from "./MysteryCarousel";
 
 export function HomeCourt({ dish, authenticated, myVote, onChange, onVotingChange, onVoteConfirmed, reviewed, position, total, onPrevious, onNext }: { dish: DishSummary; authenticated: boolean; myVote: Tier | null; onChange: (dish: DishSummary) => void; onVotingChange: (active: boolean) => void; onVoteConfirmed: (dishId: string, tier: Tier) => void; reviewed: boolean; position: number; total: number; onPrevious: () => void; onNext: () => void }) {
   const current = tierById((dish.tier ?? dish.initialTier ?? 3) as TierId);
@@ -24,9 +25,9 @@ export function HomeCourt({ dish, authenticated, myVote, onChange, onVotingChang
 }
 
 export function HomeExtras({ meals }: { meals: DishSummary[] }) {
-  const mystery = meals.find((dish) => dish.namingStatus === "unknown" || dish.namingStatus === "suggested");
+  const mysteries = meals.filter((dish) => dish.namingStatus === "unknown" || dish.namingStatus === "suggested");
   return <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-    <div className="grid gap-5 md:grid-cols-[1.3fr_.7fr]">{mystery ? <a href={`/dish/${mystery.id}`} className="group grid overflow-hidden border-4 border-dashed border-ink bg-[#ded8c9] transition-transform hover:-rotate-1 sm:grid-cols-[12rem_1fr]"><Image src={mystery.image} alt={`${mystery.zh}的待认菜品照片`} width={384} height={288} className="h-48 w-full object-cover sm:h-full" /><div className="p-6"><p className="font-mono text-sm font-bold">悬案通缉令 · {mystery.category === "main" ? "主食" : "小菜"}</p><h2 className="mt-2 text-3xl font-black">{mystery.zh}</h2><p className="mt-2 text-sm text-ink/65">{mystery.date} · {mystery.venue}</p><span className="mt-5 inline-flex items-center font-black">这盘到底是什么？<ChevronRight /></span></div></a> : <div className="border-4 border-dashed border-ink/40 bg-[#ded8c9] p-6"><p className="font-mono text-sm font-bold">悬案通缉令</p><h2 className="mt-2 text-3xl font-black">今日暂无悬案，伙房全员有名有姓。</h2></div>}<SponsorCard /></div>
+    <div className="grid gap-5 md:grid-cols-[1.3fr_.7fr]">{mysteries.length ? <MysteryCarousel dishes={mysteries} /> : <div className="border-4 border-dashed border-ink/40 bg-[#ded8c9] p-6"><p className="font-mono text-sm font-bold">悬案通缉令</p><h2 className="mt-2 text-3xl font-black">今日暂无悬案，伙房全员有名有姓。</h2></div>}<SponsorCard /></div>
   </section>;
 }
 

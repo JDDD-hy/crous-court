@@ -6,6 +6,9 @@
   scrollbar-width: thin;
 }
 
+@keyframes mystery-enter { from { opacity: 0; transform: translateY(0.75rem); } }
+.mystery-enter { animation: mystery-enter 350ms ease-out; }
+
 @utility scrollbar-none {
   scrollbar-width: none;
 
