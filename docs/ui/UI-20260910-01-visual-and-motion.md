@@ -115,7 +115,7 @@ v1 使用 Canvas 2D pixel shatter：仅当菜品一次跨越至少 2 档向下�
 
 ### Three.js / Rapier Pixel Voxel Drop
 
-已确认为 post-v1 计划彩蛋。仅桌面、空闲时延迟加载；移动端和 reduced-motion 完全禁用。未通过性能预算不得合入。
+已纳入合并后的 Phase 7。仅桌面、空闲时延迟加载；移动端和 reduced-motion 完全禁用。未通过性能预算不得合入。
 
 ### AI 评分主体标示
 

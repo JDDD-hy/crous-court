@@ -17,7 +17,7 @@
 - GSAP MotionPath：菜品卡片跨等级移动；
 - Canvas 2D：重大降级时的轻量 pixel shatter；
 - 所有动画默认开启，并在操作系统声明 `prefers-reduced-motion` 时降级；动画仅消费服务端确认后的状态，失败不会改变业务结果。
-- 重大像素效果以会话存储去重，Canvas 限制设备像素比并在约 1200ms 内销毁；不引入 Three.js/Rapier。
+- Phase 6 重大像素效果以会话存储去重，Canvas 限制设备像素比并在约 1200ms 内销毁；合并后的 Phase 7 可增加延迟加载的 Three.js/Rapier Pixel Voxel Drop，但不得替换业务状态更新或阻塞首屏。
 
 ## 3. 后端与存储
 
