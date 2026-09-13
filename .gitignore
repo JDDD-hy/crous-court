@@ -47,5 +47,7 @@ next-env.d.ts
 /.codex/
 /outputs/
 /work/
+# Local project notes; never publish them with source or deployments.
+/docs/
 # User-owned source photos; only sanitized derivatives belong in public/.
 /pic/
