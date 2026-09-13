@@ -97,28 +97,42 @@ ON CONFLICT(`id`) DO UPDATE SET
 --> statement-breakpoint
 CREATE TRIGGER `meal_items_validate_insert`
 BEFORE INSERT ON `meal_items`
+WHEN EXISTS (
+  SELECT 1 FROM `servings` s JOIN `dishes` d ON d.id = s.dish_id
+  WHERE s.id = NEW.serving_id
+    AND ((NEW.slot = 'main' AND d.category <> 'main') OR (NEW.slot <> 'main' AND d.category <> 'side'))
+)
 BEGIN
-  SELECT CASE WHEN EXISTS (
-    SELECT 1 FROM `servings` s JOIN `dishes` d ON d.id = s.dish_id
-    WHERE s.id = NEW.serving_id
-      AND ((NEW.slot = 'main' AND d.category <> 'main') OR (NEW.slot <> 'main' AND d.category <> 'side'))
-  ) THEN RAISE(ABORT, 'meal item slot does not match dish category') END;
-  SELECT CASE WHEN EXISTS (
-    SELECT 1 FROM `meals` m JOIN `servings` s ON s.id = NEW.serving_id
-    WHERE m.id = NEW.meal_id AND (m.venue_id <> s.venue_id OR m.eaten_on <> s.served_on)
-  ) THEN RAISE(ABORT, 'meal and serving venue/date do not match') END;
+  SELECT RAISE(ABORT, 'meal item slot does not match dish category');
 END;
 --> statement-breakpoint
 CREATE TRIGGER `meal_items_validate_update`
 BEFORE UPDATE ON `meal_items`
+WHEN EXISTS (
+  SELECT 1 FROM `servings` s JOIN `dishes` d ON d.id = s.dish_id
+  WHERE s.id = NEW.serving_id
+    AND ((NEW.slot = 'main' AND d.category <> 'main') OR (NEW.slot <> 'main' AND d.category <> 'side'))
+)
 BEGIN
-  SELECT CASE WHEN EXISTS (
-    SELECT 1 FROM `servings` s JOIN `dishes` d ON d.id = s.dish_id
-    WHERE s.id = NEW.serving_id
-      AND ((NEW.slot = 'main' AND d.category <> 'main') OR (NEW.slot <> 'main' AND d.category <> 'side'))
-  ) THEN RAISE(ABORT, 'meal item slot does not match dish category') END;
-  SELECT CASE WHEN EXISTS (
-    SELECT 1 FROM `meals` m JOIN `servings` s ON s.id = NEW.serving_id
-    WHERE m.id = NEW.meal_id AND (m.venue_id <> s.venue_id OR m.eaten_on <> s.served_on)
-  ) THEN RAISE(ABORT, 'meal and serving venue/date do not match') END;
+  SELECT RAISE(ABORT, 'meal item slot does not match dish category');
+END;
+--> statement-breakpoint
+CREATE TRIGGER `meal_items_validate_insert_meal_match`
+BEFORE INSERT ON `meal_items`
+WHEN EXISTS (
+  SELECT 1 FROM `meals` m JOIN `servings` s ON s.id = NEW.serving_id
+  WHERE m.id = NEW.meal_id AND (m.venue_id <> s.venue_id OR m.eaten_on <> s.served_on)
+)
+BEGIN
+  SELECT RAISE(ABORT, 'meal and serving venue/date do not match');
+END;
+--> statement-breakpoint
+CREATE TRIGGER `meal_items_validate_update_meal_match`
+BEFORE UPDATE ON `meal_items`
+WHEN EXISTS (
+  SELECT 1 FROM `meals` m JOIN `servings` s ON s.id = NEW.serving_id
+  WHERE m.id = NEW.meal_id AND (m.venue_id <> s.venue_id OR m.eaten_on <> s.served_on)
+)
+BEGIN
+  SELECT RAISE(ABORT, 'meal and serving venue/date do not match');
 END;
