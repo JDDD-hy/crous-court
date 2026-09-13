@@ -8,6 +8,8 @@ export type Verdict = {
   distribution: [number, number, number, number, number];
 };
 
+export type TierHistoryEntry = { tier: Tier; at: string; voteCount: number };
+
 export function calculateVerdict(targets: readonly number[]): Verdict {
   const sorted = [...targets].sort((a, b) => a - b);
   if (sorted.some((tier) => !Number.isInteger(tier) || tier < 1 || tier > 5)) {
@@ -30,6 +32,17 @@ export function compareVerdicts(a: Verdict, b: Verdict) {
   if (a.tier === null) return b.tier === null ? 0 : 1;
   if (b.tier === null) return -1;
   return a.tier - b.tier || b.voteCount - a.voteCount;
+}
+
+export function buildTierHistory(votes: readonly { tier: Tier; at: string }[]): TierHistoryEntry[] {
+  const targets: Tier[] = [];
+  const history: TierHistoryEntry[] = [];
+  for (const vote of votes) {
+    targets.push(vote.tier);
+    const tier = calculateVerdict(targets).tier!;
+    if (history.at(-1)?.tier !== tier) history.push({ tier, at: vote.at, voteCount: targets.length });
+  }
+  return history;
 }
 
 export function previewVote(distribution: Verdict["distribution"], previous: Tier | null, next: Tier): Verdict {

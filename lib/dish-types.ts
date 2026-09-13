@@ -1,4 +1,4 @@
-import type { Tier, VerdictStatus } from "./ranking";
+import type { Tier, TierHistoryEntry, VerdictStatus } from "./ranking";
 
 export type DishCategory = "main" | "side";
 export type DishNamingStatus = "unknown" | "suggested" | "community" | "verified";
@@ -21,4 +21,5 @@ export type DishSummary = {
 
 export type DishDetail = DishSummary & {
   servings: Array<{ id: string; mealId: string; date: string; venue: string; originalDescription: string; initialTier: Tier; image: string | null }>;
+  tierHistory: TierHistoryEntry[];
 };

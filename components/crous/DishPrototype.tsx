@@ -9,6 +9,7 @@ import { SiteHeader } from "./SiteHeader";
 import { DishEvidence } from "./DishEvidence";
 import { VoteControls } from "./VoteControls";
 import { DishNamingPanel } from "./DishNamingPanel";
+import { TierHistory } from "./TierHistory";
 import type { NameSuggestion } from "./DishNamingPanel";
 import { ReportDialog } from "./ReportDialog";
 import { tierById, tiers, type TierId } from "./data";
@@ -34,7 +35,7 @@ export function DishPrototype({ dish, authenticated, myVote, nameSuggestions }: 
 function DishTabs({ dish, authenticated, nameSuggestions }: { dish: DishDetail; authenticated: boolean; nameSuggestions: NameSuggestion[] }) {
   return <Tabs defaultValue="votes"><TabsList variant="line" className="h-11 w-full justify-stretch rounded-none border-b-2 border-ink/30 bg-transparent p-0"><TabsTrigger value="votes" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">票数分布</TabsTrigger><TabsTrigger value="history" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">移动历史</TabsTrigger><TabsTrigger value="name" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">群众认菜</TabsTrigger></TabsList>
     <TabsContent value="votes" className="mt-4 space-y-3">{tiers.map((tier, index) => <div key={tier.id} className="grid grid-cols-[6rem_1fr_2rem] items-center gap-3"><strong>{tier.emoji} {tier.label}</strong><div className="h-8 overflow-hidden rounded-sm border-2 border-ink bg-paper"><div className="h-full" style={{ width: `${dish.votes ? dish.distribution[index] / dish.votes * 100 : 0}%`, backgroundColor: tier.color }} /></div><span className="font-mono font-bold">{dish.distribution[index]}</span></div>)}</TabsContent>
-    <TabsContent value="history" className="mt-4 border-2 border-ink bg-paper p-4 text-sm text-ink/65">暂无可展示的判决移动记录。</TabsContent>
+    <TabsContent value="history" className="mt-4"><TierHistory entries={dish.tierHistory} /></TabsContent>
     <TabsContent value="name"><DishNamingPanel dishId={dish.id} authenticated={authenticated} initialItems={nameSuggestions} /></TabsContent>
   </Tabs>;
 }

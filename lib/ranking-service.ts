@@ -1,8 +1,8 @@
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { dishAliases, dishes, mealItems, meals, photos, servings, venues, votes } from "../db/schema";
 import type { DishCategory, DishDetail, DishSummary } from "./dish-types";
-import { calculateVerdict, compareVerdicts, type Tier } from "./ranking";
+import { buildTierHistory, calculateVerdict, compareVerdicts, type Tier } from "./ranking";
 
 const imageByDish: Record<string, string> = {
   "couscous-boulettes": "/meals/couscous.jpg",
@@ -83,7 +83,7 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
   if (!summary) return null;
 
   const db = getDb();
-  const servingRows = await db.select({
+  const [servingRows, voteRows] = await Promise.all([db.select({
       id: servings.id,
       mealId: meals.id,
       date: servings.servedOn,
@@ -98,7 +98,10 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
       .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
       .leftJoin(photos, eq(photos.mealId, meals.id))
       .where(and(eq(servings.dishId, id), eq(servings.status, "active")))
-      .orderBy(desc(servings.servedOn));
+      .orderBy(desc(servings.servedOn)),
+    db.select({ tier: votes.targetTier, at: votes.createdAt }).from(votes)
+      .where(eq(votes.dishId, id)).orderBy(asc(votes.createdAt), asc(votes.id)),
+  ]);
   const uniqueServings = [...new Map(servingRows.map((serving) => [`${serving.id}:${serving.photoId ?? ""}`, serving])).values()];
   return {
     ...summary,
@@ -111,6 +114,7 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
       originalDescription: serving.originalDescription,
       image: serving.photoId ? `/api/photos/${serving.photoId}` : null,
     })),
+    tierHistory: buildTierHistory(voteRows.map((vote) => ({ tier: vote.tier as Tier, at: vote.at }))),
   };
 }
 

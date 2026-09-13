@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateVerdict, compareVerdicts, previewVote } from "../lib/ranking.ts";
+import { buildTierHistory, calculateVerdict, compareVerdicts, previewVote } from "../lib/ranking.ts";
 import { reduceVoteState } from "../lib/vote-state.ts";
 import type { DishSummary } from "../lib/dish-types.ts";
 import { firstUnreviewedIndex, nextDefendantIndex } from "../lib/defendant-rotation.ts";
@@ -20,6 +20,19 @@ test("assigns thresholds and a complete distribution", () => {
   assert.equal(calculateVerdict(Array(14).fill(2)).status, "provisional");
   assert.equal(calculateVerdict(Array(15).fill(2)).status, "official");
   assert.deepEqual(calculateVerdict([1, 3, 3, 5]).distribution, [1, 0, 2, 0, 1]);
+});
+
+test("records only real median-tier movements in vote order", () => {
+  assert.deepEqual(buildTierHistory([
+    { tier: 3, at: "2026-09-10 12:00:00" },
+    { tier: 5, at: "2026-09-10 12:01:00" },
+    { tier: 1, at: "2026-09-10 12:02:00" },
+    { tier: 1, at: "2026-09-10 12:03:00" },
+  ]), [
+    { tier: 3, at: "2026-09-10 12:00:00", voteCount: 1 },
+    { tier: 5, at: "2026-09-10 12:01:00", voteCount: 2 },
+    { tier: 3, at: "2026-09-10 12:02:00", voteCount: 3 },
+  ]);
 });
 
 test("sorts by tier first and vote count second", () => {
