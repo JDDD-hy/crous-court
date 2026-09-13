@@ -35,10 +35,16 @@ export async function publishMeal(form: FormData, userId: string) {
   const contentSha256 = await sha256(canonical.bytes);
   const duplicate = await db.prepare("SELECT meal_id FROM photos WHERE creator_id = ? AND content_sha256 = ?").bind(userId, contentSha256).first();
   if (duplicate) throw new UploadInputError("这张餐盘已经立过案了，请不要重复提交同一文件");
-  const recent = await db.prepare("SELECT COUNT(*) AS count FROM meals WHERE creator_id = ? AND created_at >= datetime('now', '-10 minutes')").bind(userId).first<{ count: number }>();
-  if ((recent?.count ?? 0) >= 5) throw new UploadInputError("投稿太频繁，请十分钟后再试");
   const venue = await db.prepare("SELECT display_number FROM venues WHERE id = ? AND active = 1").bind(venueId).first<{ display_number: number }>();
   if (!venue) throw new UploadInputError("餐厅不可用");
+  const now = Math.floor(Date.now() / 1000);
+  const admitted = await db.prepare(`INSERT INTO upload_rate_limits (user_id,window_started_at,attempts) VALUES (?,?,1)
+    ON CONFLICT(user_id) DO UPDATE SET
+      window_started_at = CASE WHEN upload_rate_limits.window_started_at <= ? THEN excluded.window_started_at ELSE upload_rate_limits.window_started_at END,
+      attempts = CASE WHEN upload_rate_limits.window_started_at <= ? THEN 1 ELSE upload_rate_limits.attempts + 1 END
+    WHERE upload_rate_limits.window_started_at <= ? OR upload_rate_limits.attempts < 5
+    RETURNING attempts`).bind(userId, now, now - 600, now - 600, now - 600).first();
+  if (!admitted) throw new UploadInputError("投稿太频繁，请十分钟后再试");
 
   const mealId = crypto.randomUUID();
   const photoId = crypto.randomUUID();

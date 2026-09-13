@@ -156,6 +156,12 @@ export const voteRateLimits = sqliteTable("vote_rate_limits", {
   attempts: integer("attempts").notNull(),
 }, (table) => [check("vote_rate_limits_attempts_check", sql`${table.attempts} between 1 and 30`)]);
 
+export const uploadRateLimits = sqliteTable("upload_rate_limits", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  windowStartedAt: integer("window_started_at").notNull(),
+  attempts: integer("attempts").notNull(),
+}, (table) => [check("upload_rate_limits_attempts_check", sql`${table.attempts} between 1 and 5`)]);
+
 export const dishAliases = sqliteTable("dish_aliases", {
   id: text("id").primaryKey(),
   dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),

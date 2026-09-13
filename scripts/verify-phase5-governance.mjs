@@ -14,7 +14,7 @@ const secret = "phase5-governance-verification-secret-at-least-32-chars";
 let modelCalls = 0;
 const fakeAi = createServer((_request, response) => {
   modelCalls += 1;
-  const content = modelCalls === 1 ? JSON.stringify({ is_food_image: true }) : JSON.stringify({ analysis_status: "identified", is_food_image: true, is_standard_meal: false, staple: { name: "粗麦粉配肉丸", confidence: 0.82 }, side_dishes: [{ name: "原味酸奶", type: "酸奶", ingredients: [], confidence: 0.78 }], other_visible_items: [], warnings: [], scene_description: "餐盘中有粗麦粉配肉丸和一杯酸奶。" });
+  const content = modelCalls === 1 ? JSON.stringify({ is_food_image: true }) : JSON.stringify({ analysis_status: "identified", is_food_image: true, is_standard_meal: false, staple: { name: "粗麦粉配肉丸", confidence: 0.82, region: { x: 0.12, y: 0.2, width: 0.58, height: 0.64 } }, side_dishes: [{ name: "原味酸奶", type: "酸奶", ingredients: [], confidence: 0.78, region: { x: 0.74, y: 0.16, width: 0.18, height: 0.22 } }], other_visible_items: [], warnings: [], scene_description: "餐盘中有粗麦粉配肉丸和一杯酸奶。" });
   response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify({ choices: [{ message: { content } }] }));
 });
 await new Promise((resolve) => fakeAi.listen(8794, "127.0.0.1", resolve));
@@ -72,7 +72,7 @@ try {
 
   const aiForm = new FormData(); aiForm.set("image", new Blob([image], { type: "image/jpeg" }), "meal.jpg");
   const ai = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: one }, body: aiForm });
-  const aiResult = await ai.json(); assert.equal(ai.status, 200, JSON.stringify(aiResult)); assert.equal(aiResult.data.staple.name, "粗麦粉配肉丸"); assert.equal(modelCalls, 2);
+  const aiResult = await ai.json(); assert.equal(ai.status, 200, JSON.stringify(aiResult)); assert.equal(aiResult.data.staple.name, "粗麦粉配肉丸"); assert.deepEqual(aiResult.data.staple.region, { x: 0.12, y: 0.2, width: 0.58, height: 0.64 }); assert.equal(modelCalls, 2);
 } finally {
   child.kill();
   await Promise.race([new Promise((resolve) => child.once("exit", resolve)), new Promise((resolve) => setTimeout(resolve, 3_000))]);

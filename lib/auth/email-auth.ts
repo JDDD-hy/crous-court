@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { env } from "cloudflare:workers";
 import { getRawDb } from "@/db";
+import { BodyTooLargeError, readLimitedText } from "@/lib/http/read-limited-body";
 
 const OTP_TTL_SECONDS = 10 * 60;
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -122,8 +123,10 @@ export function assertSameOrigin(request: Request) {
 
 export async function parseJsonRequest(request: Request) {
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new AuthError("请求格式无效", 415);
-  const body = await request.text();
-  if (!body || new TextEncoder().encode(body).byteLength > 2048) throw new AuthError("请求格式无效", 413);
+  let body: string;
+  try { body = await readLimitedText(request, 2048); }
+  catch (error) { if (error instanceof BodyTooLargeError) throw new AuthError("请求格式无效", 413); throw error; }
+  if (!body) throw new AuthError("请求格式无效", 400);
   try { return JSON.parse(body) as Record<string, unknown>; }
   catch { throw new AuthError("请求格式无效", 400); }
 }
