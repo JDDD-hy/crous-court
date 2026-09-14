@@ -8,7 +8,7 @@ export class IdentificationError extends Error { constructor(message: string, pu
 
 export async function identifyDish(file: File, userId: string) {
   if (!env.AI_BASE_URL || !env.AI_API_KEY || !env.AI_MODEL) throw new IdentificationError("AI 识菜尚未配置，仍可自己填写或留给群众", 503);
-  const image = await checkSanitizedImage(file).catch(() => { throw new IdentificationError("识别图片无效"); });
+  const image = await checkSanitizedImage(file);
   const imageSha256 = await sha256(image.bytes);
   const db = getRawDb();
   const cached = await db.prepare("SELECT result_json FROM ai_identifications WHERE user_id=? AND image_sha256=? AND model=? AND prompt_version=?").bind(userId, imageSha256, env.AI_MODEL, PROMPT_VERSION).first<{ result_json: string }>();

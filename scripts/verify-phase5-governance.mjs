@@ -73,6 +73,15 @@ try {
   const split = await request("/api/admin/actions", "POST", { action: "split_serving", servingId: "fixture-serving-01", name: "重新立案的主食" }, admin);
   assert.equal(split.status, 200, await split.text());
 
+  for (const [bytes, code] of [[new Uint8Array(), "IMAGE_EMPTY"], [Uint8Array.from([255,216,255,225,0,2,255,217]), "JPEG_APP1_METADATA"]]) {
+    const invalidForm = new FormData(); invalidForm.set("image", new Blob([bytes], { type: "image/jpeg" }), "photo.jpg");
+    const invalid = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: one }, body: invalidForm });
+    const diagnostic = await invalid.json();
+    assert.equal(invalid.status, 400); assert.equal(diagnostic.code, code);
+    assert.match(diagnostic.requestId, /^[0-9a-f-]{36}$/);
+    assert.notEqual(diagnostic.error, "识别图片无效");
+    assert.equal(modelCalls, 0, "invalid images must not reach the AI provider");
+  }
   const aiForm = new FormData(); aiForm.set("image", new Blob([image], { type: "image/jpeg" }), "meal.jpg");
   const ai = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: one }, body: aiForm });
   const aiResult = await ai.json(); assert.equal(ai.status, 200, JSON.stringify(aiResult)); assert.equal(aiResult.data.staple.name, "粗麦粉配肉丸"); assert.deepEqual(aiResult.data.staple.region, { x: 0.12, y: 0.2, width: 0.58, height: 0.64 }); assert.equal(modelCalls, 2);
