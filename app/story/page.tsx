@@ -62,7 +62,7 @@ export default async function StoryPage() {
           <section aria-labelledby="story-contact" className="border-t-2 border-dashed border-ink/20 py-10 sm:py-12">
             <p className="mb-3 font-mono text-sm font-bold tracking-widest text-verdict">04 / 还有高手？</p>
             <h2 id="story-contact" className="text-2xl font-black sm:text-3xl">来，一起把法庭整大点。</h2>
-            <p className="mt-6 text-lg leading-loose text-ink/80">会写代码、会认菜，或者有更离谱的点子？欢迎来信。</p>
+            <p className="mt-6 text-lg leading-loose text-ink/80">我们只是抛砖引玉！有更离谱的点子？欢迎来信</p>
             <a href="mailto:xedocjade@agent.qq.com" className="mt-6 inline-flex min-h-11 max-w-full items-center border-2 border-ink bg-paper px-4 py-3 text-base font-bold shadow-[4px_4px_0_#202624] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:px-6"><span className="break-all">xedocjade@agent.qq.com</span></a>
           </section>
           <footer className="border-t-2 border-dashed border-ink/20 pt-8 text-center text-base leading-relaxed text-ink/65">故事仍在装盘，判决交给你们。<p className="mt-2 text-sm">CROUS法庭 · 学生社区，非 CROUS 官方网站</p></footer>
