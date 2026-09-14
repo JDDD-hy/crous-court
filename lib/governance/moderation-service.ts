@@ -1,7 +1,8 @@
+import { mergeDish } from "./merge-dish";
 import { getRawDb } from "@/db";
 import { GovernanceError } from "./errors";
-import { normalizeDishName } from "./name-utils";
 import { enforceGovernanceLimit } from "./rate-limit";
+import { getMergeSuggestions, rejectMergeSuggestion, scanMergeSuggestions } from "@/lib/ai/merge-review";
 
 const reasons = new Set(["privacy", "not_food", "abuse", "wrong_dish", "other"]);
 
@@ -32,7 +33,7 @@ export async function getAdminQueue() {
       WHERE ns.status IN ('pending','community') GROUP BY ns.id ORDER BY ns.created_at ASC`).all(),
     db.prepare("SELECT id,merged_into_dish_id FROM dishes WHERE merged_into_dish_id IS NOT NULL ORDER BY created_at DESC LIMIT 30").all(),
   ]);
-  return { reports: reportRows.results, names: nameRows.results, merges: mergedRows.results };
+  return { reports: reportRows.results, names: nameRows.results, merges: mergedRows.results, suggestions: await getMergeSuggestions() };
 }
 
 export async function moderate(adminId: string, input: Record<string, unknown>) {
@@ -44,6 +45,13 @@ export async function moderate(adminId: string, input: Record<string, unknown>) 
     verify_name: () => verifyName(adminId, String(input.suggestionId ?? ""), String(input.language ?? "other")),
     merge_dish: () => mergeDish(adminId, String(input.sourceDishId ?? ""), String(input.targetDishId ?? "")),
     split_serving: () => splitServing(adminId, String(input.servingId ?? ""), typeof input.name === "string" ? input.name : ""),
+    scan_merges: () => scanMergeSuggestions(adminId),
+    reject_merge: () => rejectMergeSuggestion(adminId, String(input.suggestionId ?? "")),
+    accept_merge: async () => {
+      const suggestion = await getRawDb().prepare("SELECT source_id,target_id FROM ai_merge_suggestions WHERE id=? AND status='pending'").bind(String(input.suggestionId ?? "")).first<{ source_id: string; target_id: string }>();
+      if (!suggestion) throw new GovernanceError("建议已处理，请刷新", 409);
+      return mergeDish(adminId, suggestion.source_id, suggestion.target_id, String(input.suggestionId));
+    },
   };
   const handler = handlers[input.action];
   if (!handler) throw new GovernanceError("管理操作无效");
@@ -81,35 +89,6 @@ async function verifyName(adminId: string, suggestionId: string, language: strin
   ]);
   await audit(adminId, "verify_name", "suggestion", suggestionId, { dishId: row.dish_id, language });
   return { suggestionId, status: "verified" };
-}
-
-async function mergeDish(adminId: string, sourceId: string, targetId: string) {
-  if (!sourceId || !targetId || sourceId === targetId) throw new GovernanceError("合并对象无效");
-  const db = getRawDb();
-  const rows = await db.prepare("SELECT id,category,canonical_name_fr,canonical_name_zh,original_description,merged_into_dish_id FROM dishes WHERE id IN (?,?)").bind(sourceId, targetId).all<{
-    id: string; category: string; canonical_name_fr: string | null; canonical_name_zh: string | null; original_description: string; merged_into_dish_id: string | null;
-  }>();
-  const source = rows.results.find((row) => row.id === sourceId);
-  const target = rows.results.find((row) => row.id === targetId);
-  if (!source || !target || source.category !== target.category || source.merged_into_dish_id || target.merged_into_dish_id) throw new GovernanceError("只能合并两个有效且同类别的菜品");
-  const conflicts = await db.prepare("SELECT sv.id,sv.user_id,sv.target_tier,sv.created_at,sv.updated_at,tv.id target_id,tv.created_at target_created_at FROM votes sv INNER JOIN votes tv ON tv.user_id=sv.user_id AND tv.dish_id=? WHERE sv.dish_id=?").bind(targetId, sourceId).all<{
-    id: string; user_id: string; target_tier: number; created_at: string; updated_at: string; target_id: string; target_created_at: string;
-  }>();
-  const statements = [
-    db.prepare("INSERT OR IGNORE INTO votes (id,dish_id,user_id,target_tier,created_at,updated_at) SELECT id,?,user_id,target_tier,created_at,updated_at FROM votes WHERE dish_id=? ORDER BY created_at ASC").bind(targetId, sourceId),
-    db.prepare("DELETE FROM votes WHERE dish_id=?").bind(sourceId),
-    db.prepare("UPDATE servings SET dish_id=? WHERE dish_id=?").bind(targetId, sourceId),
-    db.prepare("UPDATE dishes SET merged_into_dish_id=? WHERE id=?").bind(targetId, sourceId),
-  ];
-  for (const conflict of conflicts.results) if (conflict.created_at < conflict.target_created_at) statements.unshift(
-    db.prepare("UPDATE votes SET target_tier=?,created_at=?,updated_at=? WHERE id=?").bind(conflict.target_tier, conflict.created_at, conflict.updated_at, conflict.target_id),
-  );
-  for (const name of [source.canonical_name_fr, source.canonical_name_zh, source.original_description].filter(Boolean) as string[]) statements.push(
-    db.prepare("INSERT INTO dish_aliases (id,dish_id,name,normalized_name,source,created_by) VALUES (?,?,?,?,'admin',?) ON CONFLICT(dish_id,normalized_name) DO NOTHING").bind(crypto.randomUUID(), targetId, name, normalizeDishName(name), adminId),
-  );
-  await db.batch(statements);
-  await audit(adminId, "merge_dish", "dish", sourceId, { targetId, conflictingSourceVoteIds: conflicts.results.map((row) => row.id), rule: "earlier_vote_kept" });
-  return { sourceId, targetId };
 }
 
 async function splitServing(adminId: string, servingId: string, rawName: string) {

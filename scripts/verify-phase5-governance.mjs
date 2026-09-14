@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { cleanCanvasJpeg } from "../lib/upload/canvas-jpeg.ts";
+import { verifyAiMergeReview } from "./verify-ai-merge-review.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const persist = path.join(root, ".sites-runtime", "phase5-governance-verification");
@@ -13,7 +14,18 @@ const config = path.join(root, "dist", "server", "wrangler.json");
 const origin = "http://127.0.0.1:8793";
 const secret = "phase5-governance-verification-secret-at-least-32-chars";
 let modelCalls = 0;
-const fakeAi = createServer((_request, response) => {
+let mergeCalls = 0;
+const fakeAi = createServer(async (_request, response) => {
+  let raw = ""; for await (const chunk of _request) raw += chunk;
+  const body = JSON.parse(raw);
+  if (body.response_format?.json_schema?.name === "crous_merge_review") {
+    mergeCalls += 1;
+    const ids = new Set(JSON.parse(body.messages[1].content).dishes.map((d) => d.id));
+    const pairs = [["merge-a", "merge-b"], ["merge-c", "merge-d"]].filter(([a, b]) => ids.has(a) && ids.has(b)).map(([sourceId, targetId]) => ({ sourceId, targetId, reason: "名称语义相近", uncertainty: "需要人工核对照片" }));
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(mergeCalls === 1 ? { pairs: [{ ...pairs[0], targetId: "invented" }] } : { pairs }) } }] }));
+    return;
+  }
   modelCalls += 1;
   const content = modelCalls === 1 ? JSON.stringify({ is_food_image: true }) : JSON.stringify({ analysis_status: "identified", is_food_image: true, is_standard_meal: false, staple: { name: "粗麦粉配肉丸", confidence: 0.82, region: { x: 0.12, y: 0.2, width: 0.58, height: 0.64 } }, side_dishes: [{ name: "原味酸奶", type: "酸奶", ingredients: [], confidence: 0.78, region: { x: 0.74, y: 0.16, width: 0.18, height: 0.22 } }], other_visible_items: [], warnings: [], scene_description: "餐盘中有粗麦粉配肉丸和一杯酸奶。" });
   response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify({ choices: [{ message: { content } }] }));
@@ -90,6 +102,10 @@ try {
   const aiForm = new FormData(); aiForm.set("image", cleaned);
   const ai = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: one }, body: aiForm });
   const aiResult = await ai.json(); assert.equal(ai.status, 200, JSON.stringify(aiResult)); assert.equal(aiResult.data.staple.name, "粗麦粉配肉丸"); assert.deepEqual(aiResult.data.staple.region, { x: 0.12, y: 0.2, width: 0.58, height: 0.64 }); assert.equal(modelCalls, 2);
+  await verifyAiMergeReview({ request, admin, ordinary: one, sql: (command, json = false) => {
+    const output = run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", command, ...(json ? ["--json"] : [])]);
+    return json ? JSON.parse(output) : output;
+  } });
 } finally {
   child.kill();
   await Promise.race([new Promise((resolve) => child.once("exit", resolve)), new Promise((resolve) => setTimeout(resolve, 3_000))]);

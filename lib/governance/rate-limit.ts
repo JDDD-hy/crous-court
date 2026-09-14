@@ -1,7 +1,7 @@
 import { getRawDb } from "@/db";
 import { GovernanceError } from "./errors";
 
-export async function enforceGovernanceLimit(userId: string, action: "suggest_name" | "endorse_name" | "report", limit: number) {
+export async function enforceGovernanceLimit(userId: string, action: "suggest_name" | "endorse_name" | "report" | "merge_review", limit: number) {
   const now = Math.floor(Date.now() / 1000);
   const result = await getRawDb().prepare(`INSERT INTO governance_rate_limits (user_id,action,window_started_at,attempts) VALUES (?,?,?,1)
     ON CONFLICT(user_id,action) DO UPDATE SET

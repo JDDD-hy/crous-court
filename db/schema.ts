@@ -246,10 +246,28 @@ export const aiRateLimits = sqliteTable("ai_rate_limits", {
 
 export const governanceRateLimits = sqliteTable("governance_rate_limits", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  action: text("action", { enum: ["suggest_name", "endorse_name", "report"] }).notNull(),
+  action: text("action", { enum: ["suggest_name", "endorse_name", "report", "merge_review"] }).notNull(),
   windowStartedAt: integer("window_started_at").notNull(),
   attempts: integer("attempts").notNull(),
 }, (table) => [
   primaryKey({ columns: [table.userId, table.action] }),
   check("governance_rate_limits_attempts_check", sql`${table.attempts} between 1 and 30`),
+]);
+
+export const aiMergeSuggestions = sqliteTable("ai_merge_suggestions", {
+  id: text("id").primaryKey(),
+  pairKey: text("pair_key").notNull(),
+  sourceId: text("source_id").notNull().references(() => dishes.id),
+  targetId: text("target_id").notNull().references(() => dishes.id),
+  reason: text("reason").notNull(),
+  uncertainty: text("uncertainty").notNull(),
+  model: text("model").notNull(),
+  requestedBy: text("requested_by").notNull().references(() => users.id),
+  status: text("status", { enum: ["pending", "accepted", "rejected"] }).notNull().default("pending"),
+  reviewedBy: text("reviewed_by").references(() => users.id),
+  reviewedAt: text("reviewed_at"),
+  createdAt: createdAt(),
+}, (table) => [uniqueIndex("ai_merge_pair_unique").on(table.pairKey),
+  check("ai_merge_distinct", sql`${table.sourceId} <> ${table.targetId}`),
+  check("ai_merge_status", sql`${table.status} in ('pending','accepted','rejected')`),
 ]);

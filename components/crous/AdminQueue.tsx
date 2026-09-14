@@ -3,17 +3,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AiMergeReview } from "./AiMergeReview";
+import type { MergeSuggestion } from "@/lib/ai/merge-review-schema";
 
-export type ModerationQueue = { reports: Array<Record<string, unknown>>; names: Array<Record<string, unknown>>; merges: Array<Record<string, unknown>> };
+export type ModerationQueue = { reports: Array<Record<string, unknown>>; names: Array<Record<string, unknown>>; merges: Array<Record<string, unknown>>; suggestions: MergeSuggestion[] };
 
 export function AdminQueue({ initialQueue }: { initialQueue: ModerationQueue }) {
   const [queue, setQueue] = useState<ModerationQueue>(initialQueue); const [message, setMessage] = useState("");
   const load = async () => { const response = await fetch("/api/admin/queue"); const payload = await response.json() as { data: ModerationQueue | null }; if (payload.data) setQueue(payload.data); };
-  async function act(body: Record<string, unknown>) { const response = await fetch("/api/admin/actions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }); const payload = await response.json() as { error: string | null }; setMessage(response.ok ? "操作已记录" : payload.error ?? "操作失败"); if (response.ok) await load(); }
-  return <><Tabs defaultValue="reports"><TabsList><TabsTrigger value="reports">举报 {queue.reports.length}</TabsTrigger><TabsTrigger value="names">待认菜 {queue.names.length}</TabsTrigger><TabsTrigger value="records">合并记录</TabsTrigger></TabsList>
+  async function act(body: Record<string, unknown>) {
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/actions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const payload = await response.json() as { error: string | null; data?: { scanned?: number; added?: number } };
+      setMessage(response.ok ? body.action === "scan_merges" ? `已扫描 ${payload.data?.scanned ?? 0} 道菜，新增 ${payload.data?.added ?? 0} 条建议；已有或拒绝的配对不会重复添加。` : "操作已记录" : payload.error ?? "操作失败");
+      await load();
+    } catch { setMessage("网络或列表刷新失败，请刷新页面核对操作结果。"); }
+  }
+  return <>{message && <p role="status" className="mb-4 font-bold">{message}</p>}<Tabs defaultValue="reports"><TabsList className="h-auto flex-wrap"><TabsTrigger value="reports">举报 {queue.reports.length}</TabsTrigger><TabsTrigger value="names">待认菜 {queue.names.length}</TabsTrigger><TabsTrigger value="ai">AI 合并建议 {queue.suggestions.length}</TabsTrigger><TabsTrigger value="records">合并记录</TabsTrigger></TabsList>
+    <TabsContent value="ai"><AiMergeReview suggestions={queue.suggestions} act={act} /></TabsContent>
     <TabsContent value="reports" className="space-y-3">{queue.reports.map((item) => <article key={String(item.id)} className="border-2 border-ink bg-paper p-4"><strong>{String(item.reason)}</strong><p className="text-sm">{item.details ? String(item.details) : "无补充说明"}</p><div className="mt-3 flex flex-wrap gap-2">{typeof item.meal_id === "string" && <Button size="sm" variant="destructive" onClick={() => act({ action: "hide_meal", mealId: item.meal_id })}>隐藏该餐盘</Button>}<Button size="sm" onClick={() => act({ action: "resolve_report", reportId: item.id })}>处理完成</Button><Button size="sm" variant="outline" onClick={() => act({ action: "dismiss_report", reportId: item.id })}>驳回</Button></div></article>)}{!queue.reports.length && <p>当前没有待处理举报。</p>}</TabsContent>
     <TabsContent value="names" className="space-y-3">{queue.names.map((item) => <article key={String(item.id)} className="border-2 border-ink bg-paper p-4"><strong>{String(item.name)}</strong><p className="text-sm">{String(item.evidence_type)} · {String(item.supporters)} 人支持</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={() => act({ action: "verify_name", suggestionId: item.id, language: "fr" })}>确认为法语名</Button><Button size="sm" variant="outline" onClick={() => act({ action: "verify_name", suggestionId: item.id, language: "zh" })}>确认为中文名</Button></div></article>)}</TabsContent>
-    <TabsContent value="records" className="space-y-3"><MergeForm act={act} /><SplitForm act={act} />{queue.merges.map((item) => <p key={String(item.id)} className="font-mono text-sm">{String(item.id)} → {String(item.merged_into_dish_id)}</p>)}</TabsContent></Tabs>{message && <p role="status" className="mt-4 font-bold">{message}</p>}</>;
+    <TabsContent value="records" className="space-y-3"><MergeForm act={act} /><SplitForm act={act} />{queue.merges.map((item) => <p key={String(item.id)} className="font-mono text-sm">{String(item.id)} → {String(item.merged_into_dish_id)}</p>)}</TabsContent></Tabs></>;
 }
 
 function MergeForm({ act }: { act: (body: Record<string, unknown>) => void }) { const [source, setSource] = useState(""); const [target, setTarget] = useState(""); return <div className="border-2 border-ink bg-paper p-4"><h2 className="font-black">合并嫌疑人</h2><div className="mt-2 flex gap-2"><input value={source} onChange={(e) => setSource(e.target.value)} placeholder="来源 Dish ID" className="min-h-10 flex-1 border-2 border-ink px-2" /><input value={target} onChange={(e) => setTarget(e.target.value)} placeholder="目标 Dish ID" className="min-h-10 flex-1 border-2 border-ink px-2" /><Button onClick={() => confirm("确定合并？法槌会保留证据，但不会 Ctrl+Z。") && act({ action: "merge_dish", sourceDishId: source, targetDishId: target })}>合并</Button></div></div>; }
