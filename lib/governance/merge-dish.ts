@@ -11,20 +11,23 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
   const source = await db.prepare("SELECT canonical_name_fr,canonical_name_zh,original_description FROM dishes WHERE id=?").bind(sourceId).first<Record<string, string | null>>();
   const statements = [
     db.prepare(`INSERT INTO moderation_actions (id,admin_id,action,target_type,target_id,details_json)
-      SELECT ?,?,'merge_dish','dish',?,? WHERE EXISTS(
+      SELECT ?,?,'merge_dish','dish',?,json_set(?, '$.conflictingVotes', json((
+        SELECT json_group_array(json_object('id',v.id,'dishId',v.dish_id,'userId',v.user_id,'tier',v.target_tier,'createdAt',v.created_at,'sourceServingId',v.source_serving_id))
+        FROM votes v WHERE v.dish_id IN (?,?) AND EXISTS(SELECT 1 FROM votes other WHERE other.user_id=v.user_id AND other.dish_id IN (?,?) AND other.dish_id<>v.dish_id)
+      ))) WHERE EXISTS(
         SELECT 1 FROM dishes s JOIN dishes t ON t.id=? WHERE s.id=? AND s.category=t.category
         AND s.merged_into_dish_id IS NULL AND t.merged_into_dish_id IS NULL)
       AND (? IS NULL OR EXISTS(SELECT 1 FROM ai_merge_suggestions WHERE id=? AND source_id=? AND target_id=? AND status='pending'))`)
-      .bind(auditId, adminId, sourceId, JSON.stringify({ targetId, suggestionId, rule: "earlier_vote_kept" }), targetId, sourceId, suggestionId, suggestionId, sourceId, targetId),
+      .bind(auditId, adminId, sourceId, JSON.stringify({ targetId, suggestionId, rule: "earlier_vote_kept;equal_time_smallest_id" }), sourceId, targetId, sourceId, targetId, targetId, sourceId, suggestionId, suggestionId, sourceId, targetId),
     // Remove only conflicting later votes, then move the surviving source votes in place.
     db.prepare(`DELETE FROM votes WHERE dish_id=? AND ${gate} AND EXISTS(
-      SELECT 1 FROM votes s WHERE s.dish_id=? AND s.user_id=votes.user_id AND s.created_at<votes.created_at)`)
+      SELECT 1 FROM votes s WHERE s.dish_id=? AND s.user_id=votes.user_id AND (s.created_at<votes.created_at OR (s.created_at=votes.created_at AND s.id<votes.id)))`)
       .bind(targetId, auditId, sourceId),
     db.prepare(`DELETE FROM votes WHERE dish_id=? AND ${gate} AND EXISTS(
       SELECT 1 FROM votes t WHERE t.dish_id=? AND t.user_id=votes.user_id)`)
       .bind(sourceId, auditId, targetId),
-    db.prepare(`UPDATE votes SET dish_id=? WHERE dish_id=? AND ${gate}`).bind(targetId, sourceId, auditId),
     db.prepare(`UPDATE servings SET dish_id=? WHERE dish_id=? AND ${gate}`).bind(targetId, sourceId, auditId),
+    db.prepare(`UPDATE votes SET dish_id=? WHERE dish_id=? AND ${gate}`).bind(targetId, sourceId, auditId),
     db.prepare(`INSERT INTO dish_aliases (id,dish_id,name,normalized_name,language,source,created_by)
       SELECT lower(hex(randomblob(16))),?,name,normalized_name,language,source,created_by FROM dish_aliases
       WHERE dish_id=? AND ${gate} ON CONFLICT(dish_id,normalized_name) DO NOTHING`).bind(targetId, sourceId, auditId),

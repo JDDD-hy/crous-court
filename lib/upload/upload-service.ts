@@ -78,7 +78,7 @@ export async function publishMeal(form: FormData, userId: string) {
         ...(item.dishId ? [] : [db.prepare("INSERT INTO dishes (id, original_description, category, naming_status) VALUES (?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side")]),
         db.prepare("INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, original_description, initial_tier) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(servingId, dishId, venueId, eatenOn, userId, item.name, item.tier),
         db.prepare("INSERT INTO meal_items (meal_id, serving_id, slot) VALUES (?, ?, ?)").bind(mealId, servingId, item.slot),
-        db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier) VALUES (?, ?, ?, ?) ON CONFLICT(dish_id,user_id) DO NOTHING").bind(crypto.randomUUID(), dishId, userId, item.tier),
+        db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier, source_serving_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT(dish_id,user_id) DO NOTHING").bind(crypto.randomUUID(), dishId, userId, item.tier, servingId),
       );
     }
     await db.batch(statements);
@@ -87,6 +87,7 @@ export async function publishMeal(form: FormData, userId: string) {
     return { mealId, photoId, caseNumber: meal.case_number };
   } catch (error) {
     await Promise.allSettled([bucket.delete(canonicalKey), bucket.delete(thumbnailKey)]);
+    if (error instanceof Error && error.message.includes("dish_no_longer_active")) throw new UploadInputError("菜品刚刚被合并，请刷新后重新选择");
     throw error;
   }
 }

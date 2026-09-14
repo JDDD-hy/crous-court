@@ -1,3 +1,4 @@
+import { getSplitVoteRepairs, repairSplitVote, splitServing } from "./split-serving";
 import { mergeDish } from "./merge-dish";
 import { getRawDb } from "@/db";
 import { GovernanceError } from "./errors";
@@ -33,7 +34,7 @@ export async function getAdminQueue() {
       WHERE ns.status IN ('pending','community') GROUP BY ns.id ORDER BY ns.created_at ASC`).all(),
     db.prepare("SELECT id,merged_into_dish_id FROM dishes WHERE merged_into_dish_id IS NOT NULL ORDER BY created_at DESC LIMIT 30").all(),
   ]);
-  return { reports: reportRows.results, names: nameRows.results, merges: mergedRows.results, suggestions: await getMergeSuggestions() };
+  return { reports: reportRows.results, names: nameRows.results, merges: mergedRows.results, suggestions: await getMergeSuggestions(), splitRepairs: await getSplitVoteRepairs() };
 }
 
 export async function moderate(adminId: string, input: Record<string, unknown>) {
@@ -45,6 +46,7 @@ export async function moderate(adminId: string, input: Record<string, unknown>) 
     verify_name: () => verifyName(adminId, String(input.suggestionId ?? ""), String(input.language ?? "other")),
     merge_dish: () => mergeDish(adminId, String(input.sourceDishId ?? ""), String(input.targetDishId ?? "")),
     split_serving: () => splitServing(adminId, String(input.servingId ?? ""), typeof input.name === "string" ? input.name : ""),
+    repair_split_vote: () => repairSplitVote(adminId, String(input.servingId ?? "")),
     scan_merges: () => scanMergeSuggestions(adminId),
     reject_merge: () => rejectMergeSuggestion(adminId, String(input.suggestionId ?? "")),
     accept_merge: async () => {
@@ -89,19 +91,6 @@ async function verifyName(adminId: string, suggestionId: string, language: strin
   ]);
   await audit(adminId, "verify_name", "suggestion", suggestionId, { dishId: row.dish_id, language });
   return { suggestionId, status: "verified" };
-}
-
-async function splitServing(adminId: string, servingId: string, rawName: string) {
-  const db = getRawDb();
-  const serving = await db.prepare("SELECT s.dish_id,d.category FROM servings s JOIN dishes d ON d.id=s.dish_id WHERE s.id=?").bind(servingId).first<{ dish_id: string; category: string }>();
-  if (!serving) throw new GovernanceError("出餐记录不存在", 404);
-  const dishId = crypto.randomUUID();
-  await db.batch([
-    db.prepare("INSERT INTO dishes (id,original_description,category,naming_status) VALUES (?,?,?,'unknown')").bind(dishId, rawName.trim().slice(0, 80), serving.category),
-    db.prepare("UPDATE servings SET dish_id=? WHERE id=?").bind(dishId, servingId),
-  ]);
-  await audit(adminId, "split_serving", "serving", servingId, { fromDishId: serving.dish_id, newDishId: dishId });
-  return { servingId, dishId };
 }
 
 async function audit(adminId: string, action: string, targetType: string, targetId: string, details: object) {

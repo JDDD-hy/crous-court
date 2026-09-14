@@ -42,9 +42,9 @@ export function VoteControls({ dish, authenticated, myVote, onChange, onInteract
     try {
       const response = await fetch(`/api/dishes/${encodeURIComponent(dish.id)}/vote`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ targetTier: target }) });
       const payload = await response.json() as { data: VoteResult | null; error: string | null };
-      if (!response.ok || !payload.data) throw new Error(payload.error ?? "判决提交失败");
+      if ((!response.ok && response.status !== 409) || !payload.data) throw new Error(payload.error ?? "判决提交失败");
       const confirmed = reduceVoteState(optimistic, { type: "confirmed", ...payload.data });
-      setMotionEvent({ id: crypto.randomUUID(), dishId: dish.id, fromTier: snapshot.dish.tier, toTier: confirmed.dish.tier });
+      if (response.ok) setMotionEvent({ id: crypto.randomUUID(), dishId: dish.id, fromTier: snapshot.dish.tier, toTier: confirmed.dish.tier });
       setVoteState(confirmed); onChange(confirmed.dish); onVoteConfirmed?.(dish.id, payload.data.myVote);
     } catch (cause) {
       const rolledBack = reduceVoteState(optimistic, { type: "rollback", snapshot, error: cause instanceof Error ? cause.message : "判决提交失败" });

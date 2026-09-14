@@ -17,8 +17,9 @@ export function TierHistory({ entries }: { entries: TierHistoryEntry[] }) {
   }, [entries]);
 
   if (!entries.length) return <p className="border-2 border-ink bg-paper p-4 text-sm text-ink/65">还没有有效判决。</p>;
-  const active = entries[step];
+  const active = entries[Math.min(step, entries.length - 1)];
   return <div className="border-2 border-ink bg-paper p-4">
+    <p className="mb-3 text-sm text-ink/65">按当前有效票及原投票时间回放；合并或拆分后会重新计算，不代表当时页面的实际排名。</p>
     <div className="relative mx-5 pt-10" aria-label={`第 ${active.voteCount} 票后：${tierById(active.tier).label}`}>
       <div className="h-2 bg-ink/20" />
       <span className="absolute top-0 -translate-x-1/2 border-2 border-ink bg-accent px-2 py-1 font-black shadow-[3px_3px_0_#202624] transition-[left] duration-[1200ms] motion-reduce:transition-none" style={{ left: `${(active.tier - 1) * 25}%` }}>{tierById(active.tier).emoji} {tierById(active.tier).label}</span>

@@ -62,6 +62,9 @@ try {
 
   const changed = await post("/api/dishes/mystery-dessert/vote", { targetTier: 5 }, cookie);
   assert.equal(changed.status, 409);
+  const synchronized = await changed.json();
+  assert.equal(synchronized.data.myVote, 1);
+  assert.equal(synchronized.data.dish.votes, 2);
 
   const parallelCookie = await login("vote-parallel@example.invalid");
   const parallel = await Promise.all(Array.from({ length: 10 }, () => post("/api/dishes/lentilles-saucisse/vote", { targetTier: 2 }, parallelCookie)));

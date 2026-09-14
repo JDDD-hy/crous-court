@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SplitControls, type SplitRepair } from "./SplitControls";
 import { AiMergeReview } from "./AiMergeReview";
 import type { MergeSuggestion } from "@/lib/ai/merge-review-schema";
 
-export type ModerationQueue = { reports: Array<Record<string, unknown>>; names: Array<Record<string, unknown>>; merges: Array<Record<string, unknown>>; suggestions: MergeSuggestion[] };
+export type ModerationQueue = { reports: Array<Record<string, unknown>>; names: Array<Record<string, unknown>>; merges: Array<Record<string, unknown>>; suggestions: MergeSuggestion[]; splitRepairs: SplitRepair[] };
 
 export function AdminQueue({ initialQueue }: { initialQueue: ModerationQueue }) {
   const [queue, setQueue] = useState<ModerationQueue>(initialQueue); const [message, setMessage] = useState("");
@@ -24,8 +25,7 @@ export function AdminQueue({ initialQueue }: { initialQueue: ModerationQueue }) 
     <TabsContent value="ai"><AiMergeReview suggestions={queue.suggestions} act={act} /></TabsContent>
     <TabsContent value="reports" className="space-y-3">{queue.reports.map((item) => <article key={String(item.id)} className="border-2 border-ink bg-paper p-4"><strong>{String(item.reason)}</strong><p className="text-sm">{item.details ? String(item.details) : "无补充说明"}</p><div className="mt-3 flex flex-wrap gap-2">{typeof item.meal_id === "string" && <Button size="sm" variant="destructive" onClick={() => act({ action: "hide_meal", mealId: item.meal_id })}>隐藏该餐盘</Button>}<Button size="sm" onClick={() => act({ action: "resolve_report", reportId: item.id })}>处理完成</Button><Button size="sm" variant="outline" onClick={() => act({ action: "dismiss_report", reportId: item.id })}>驳回</Button></div></article>)}{!queue.reports.length && <p>当前没有待处理举报。</p>}</TabsContent>
     <TabsContent value="names" className="space-y-3">{queue.names.map((item) => <article key={String(item.id)} className="border-2 border-ink bg-paper p-4"><strong>{String(item.name)}</strong><p className="text-sm">{String(item.evidence_type)} · {String(item.supporters)} 人支持</p><div className="mt-3 flex gap-2"><Button size="sm" onClick={() => act({ action: "verify_name", suggestionId: item.id, language: "fr" })}>确认为法语名</Button><Button size="sm" variant="outline" onClick={() => act({ action: "verify_name", suggestionId: item.id, language: "zh" })}>确认为中文名</Button></div></article>)}</TabsContent>
-    <TabsContent value="records" className="space-y-3"><MergeForm act={act} /><SplitForm act={act} />{queue.merges.map((item) => <p key={String(item.id)} className="font-mono text-sm">{String(item.id)} → {String(item.merged_into_dish_id)}</p>)}</TabsContent></Tabs></>;
+    <TabsContent value="records" className="space-y-3"><MergeForm act={act} /><SplitControls repairs={queue.splitRepairs} act={act} />{queue.merges.map((item) => <p key={String(item.id)} className="font-mono text-sm">{String(item.id)} → {String(item.merged_into_dish_id)}</p>)}</TabsContent></Tabs></>;
 }
 
 function MergeForm({ act }: { act: (body: Record<string, unknown>) => void }) { const [source, setSource] = useState(""); const [target, setTarget] = useState(""); return <div className="border-2 border-ink bg-paper p-4"><h2 className="font-black">合并嫌疑人</h2><div className="mt-2 flex gap-2"><input value={source} onChange={(e) => setSource(e.target.value)} placeholder="来源 Dish ID" className="min-h-10 flex-1 border-2 border-ink px-2" /><input value={target} onChange={(e) => setTarget(e.target.value)} placeholder="目标 Dish ID" className="min-h-10 flex-1 border-2 border-ink px-2" /><Button onClick={() => confirm("确定合并？法槌会保留证据，但不会 Ctrl+Z。") && act({ action: "merge_dish", sourceDishId: source, targetDishId: target })}>合并</Button></div></div>; }
-function SplitForm({ act }: { act: (body: Record<string, unknown>) => void }) { const [serving, setServing] = useState(""); const [name, setName] = useState(""); return <div className="border-2 border-ink bg-paper p-4"><h2 className="font-black">拆分行踪</h2><div className="mt-2 flex gap-2"><input value={serving} onChange={(e) => setServing(e.target.value)} placeholder="Serving ID" className="min-h-10 flex-1 border-2 border-ink px-2" /><input value={name} onChange={(e) => setName(e.target.value)} placeholder="新嫌疑人临时名" className="min-h-10 flex-1 border-2 border-ink px-2" /><Button onClick={() => confirm("确定拆分？这次行踪将另立新案。") && act({ action: "split_serving", servingId: serving, name })}>拆分</Button></div></div>; }

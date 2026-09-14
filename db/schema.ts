@@ -142,6 +142,7 @@ export const votes = sqliteTable("votes", {
   dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "restrict" }),
   targetTier: integer("target_tier").notNull(),
+  sourceServingId: text("source_serving_id").references(() => servings.id, { onDelete: "restrict" }),
   createdAt: createdAt(),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
@@ -215,7 +216,7 @@ export const reports = sqliteTable("reports", {
 export const moderationActions = sqliteTable("moderation_actions", {
   id: text("id").primaryKey(),
   adminId: text("admin_id").notNull().references(() => users.id, { onDelete: "restrict" }),
-  action: text("action", { enum: ["hide_meal", "resolve_report", "dismiss_report", "verify_name", "merge_dish", "split_serving"] }).notNull(),
+  action: text("action", { enum: ["hide_meal", "resolve_report", "dismiss_report", "verify_name", "merge_dish", "split_serving", "repair_split_vote"] }).notNull(),
   targetType: text("target_type", { enum: ["meal", "report", "suggestion", "dish", "serving"] }).notNull(),
   targetId: text("target_id").notNull(),
   detailsJson: text("details_json").notNull().default("{}"),

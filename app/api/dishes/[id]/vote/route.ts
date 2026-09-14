@@ -12,7 +12,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return Response.json({ data, error: null, requestId }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     const known = error instanceof AuthError || error instanceof VoteError;
-    return Response.json({ data: null, error: known ? error.message : "判决提交失败", requestId }, {
+    return Response.json({ data: error instanceof VoteError ? error.currentVote ?? null : null, error: known ? error.message : "判决提交失败", requestId }, {
       status: known ? error.status : 500,
       headers: { "cache-control": "no-store" },
     });
