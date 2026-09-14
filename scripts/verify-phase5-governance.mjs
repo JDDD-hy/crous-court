@@ -4,6 +4,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { cleanCanvasJpeg } from "../lib/upload/canvas-jpeg.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const persist = path.join(root, ".sites-runtime", "phase5-governance-verification");
@@ -82,7 +83,11 @@ try {
     assert.notEqual(diagnostic.error, "识别图片无效");
     assert.equal(modelCalls, 0, "invalid images must not reach the AI provider");
   }
-  const aiForm = new FormData(); aiForm.set("image", new Blob([image], { type: "image/jpeg" }), "meal.jpg");
+  const app1 = Uint8Array.from([255,225,0,8,69,120,105,102,0,0]);
+  const safariEncoded = new Blob([image.subarray(0, 2), app1, image.subarray(2)], { type: "image/jpeg" });
+  const cleaned = await cleanCanvasJpeg(safariEncoded);
+  assert.deepEqual(Buffer.from(await cleaned.arrayBuffer()), image);
+  const aiForm = new FormData(); aiForm.set("image", cleaned);
   const ai = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: one }, body: aiForm });
   const aiResult = await ai.json(); assert.equal(ai.status, 200, JSON.stringify(aiResult)); assert.equal(aiResult.data.staple.name, "粗麦粉配肉丸"); assert.deepEqual(aiResult.data.staple.region, { x: 0.12, y: 0.2, width: 0.58, height: 0.64 }); assert.equal(modelCalls, 2);
 } finally {

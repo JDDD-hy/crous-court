@@ -1,3 +1,5 @@
+import { cleanCanvasJpeg } from "./canvas-jpeg.ts";
+
 export async function sanitizePhoto(file: File) {
   if (file.size > 12 * 1024 * 1024) throw new Error("原图不能超过 12 MB");
   const source = await normalizePhoto(file);
@@ -39,5 +41,5 @@ async function resize(source: ImageBitmap, maxEdge: number, quality: number) {
   context.drawImage(source, 0, 0, width, height);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
   if (!blob) throw new Error("图片清理失败");
-  return new File([blob], "photo.jpg", { type: "image/jpeg" });
+  return cleanCanvasJpeg(blob);
 }
