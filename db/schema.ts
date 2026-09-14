@@ -109,11 +109,11 @@ export const servings = sqliteTable("servings", {
 export const mealItems = sqliteTable("meal_items", {
   mealId: text("meal_id").notNull().references(() => meals.id, { onDelete: "cascade" }),
   servingId: text("serving_id").notNull().references(() => servings.id, { onDelete: "restrict" }),
-  slot: text("slot", { enum: ["main", "side_1", "side_2"] }).notNull(),
+  slot: text("slot", { enum: ["main", "side_1", "side_2", "side_3", "side_4", "side_5", "side_6", "side_7", "side_8"] }).notNull(),
 }, (table) => [
   primaryKey({ columns: [table.mealId, table.slot] }),
   uniqueIndex("meal_items_meal_serving_unique").on(table.mealId, table.servingId),
-  check("meal_items_slot_check", sql`${table.slot} in ('main', 'side_1', 'side_2')`),
+  check("meal_items_slot_check", sql`${table.slot} in ('main', 'side_1', 'side_2', 'side_3', 'side_4', 'side_5', 'side_6', 'side_7', 'side_8')`),
 ]);
 
 export const photos = sqliteTable("photos", {

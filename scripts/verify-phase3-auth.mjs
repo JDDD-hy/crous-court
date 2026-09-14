@@ -96,6 +96,11 @@ try {
   const upload = (index) => {
     const form = new FormData();
     for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2026-09-11", mainName: `并发测试 ${index}`, mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);
+    form.set("mainDishId", "");
+    for (let side = 1; side <= 8; side++) {
+      const prefix = side === 1 ? "sideOne" : side === 2 ? "sideTwo" : `side${side}`;
+      form.set(`${prefix}DishId`, ""); form.set(`${prefix}Name`, `小菜 ${side}`); form.set(`${prefix}Tier`, String((side % 5) + 1));
+    }
     const marker = Buffer.from([0xff, 0xee, 0x00, 0x04, index, 0]);
     const uniqueImage = Buffer.concat([image.subarray(0, 2), marker, image.subarray(2)]);
     form.set("canonical", new Blob([uniqueImage], { type: "image/jpeg" }), `meal-${index}.jpg`);
@@ -126,3 +131,7 @@ assert.ok(session.revoked_at);
 assert.ok(!sessionCookie.includes(session.token_digest));
 assert.equal(rows[2].results[0].attempts, 5);
 console.log("Phase 3 email auth verification passed: bounded JSON/multipart, atomic business limits, hardened session, replay/CSRF/logout, and no plaintext credentials in D1.");
+
+const extraRows = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT mi.slot, count(*) AS count FROM meal_items mi JOIN servings s ON s.id=mi.serving_id JOIN votes v ON v.dish_id=s.dish_id AND v.user_id=s.creator_id WHERE s.original_description LIKE '小菜 %' GROUP BY mi.slot ORDER BY mi.slot", "--json"]))[0].results;
+assert.deepEqual(extraRows, Array.from({ length: 8 }, (_, index) => ({ slot: `side_${index + 1}`, count: 5 })));
+console.log("All eight side dishes persisted with individual initial votes.");

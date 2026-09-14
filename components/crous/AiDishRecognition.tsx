@@ -39,8 +39,8 @@ export function AiDishRecognition({ image, imageUrl, onApply, onResult }: { imag
     <div className="flex items-center justify-between gap-3"><div><strong className="flex items-center gap-2"><Bot className="size-5" />饿晕了？让 AI 指认</strong><p className="text-sm text-ink/60">只给候选，不会替你定案。</p></div><Button type="button" onClick={identify} disabled={!image || busy}>{busy ? "AI 正在看盘…" : "开始识别"}</Button></div>
     {error && <p role="alert" className="mt-3 break-words text-sm font-bold text-verdict">{error}</p>}
     {result && <div className="mt-4 border-t border-ink/25 pt-3">{imageUrl && <AnnotatedMeal imageUrl={imageUrl} result={result} />}<p className="mt-3">{result.scene_description || "AI 没敢描述这盘。"}</p><p className="mt-2 text-sm"><strong>主食：</strong>{result.staple?.name ?? "没认出来"}　<strong>小菜：</strong>{result.side_dishes.map((dish) => dish.name).join("、") || "未发现"}</p>
-      {result.side_dishes.length > 2 && <p className="mt-2 text-sm font-bold text-verdict">看到了超过两份小菜；应用时只取前两份，你仍可手动修改。</p>}
-      <div className="mt-3 flex gap-2"><Button type="button" size="sm" onClick={() => onApply(result.staple?.name ?? "", result.side_dishes.slice(0, 2).map((dish) => dish.name))}>采用这些候选</Button><Button type="button" size="sm" variant="outline" onClick={() => { setResult(null); onResult(null); }}>认错了，我自己来</Button></div>
+      {result.side_dishes.length > 2 && <p className="mt-2 text-sm font-bold text-verdict">看到了超过两份小菜；采用后会展开额外小菜，逐份确认即可。</p>}
+      <div className="mt-3 flex gap-2"><Button type="button" size="sm" onClick={() => onApply(result.staple?.name ?? "", result.side_dishes.map((dish) => dish.name))}>采用这些候选</Button><Button type="button" size="sm" variant="outline" onClick={() => { setResult(null); onResult(null); }}>认错了，我自己来</Button></div>
     </div>}
   </div>;
 }

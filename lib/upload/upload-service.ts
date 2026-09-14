@@ -2,7 +2,7 @@ import { getBindings } from "@/db";
 import { todayInParis } from "@/lib/calendar";
 import { checkSanitizedImage } from "./image-validation";
 
-type ItemInput = { slot: "main" | "side_1" | "side_2"; name: string; tier: number | null; dishId: string | null };
+type ItemInput = { slot: "main" | `side_${number}`; name: string; tier: number | null; dishId: string | null };
 
 export class UploadInputError extends Error {}
 
@@ -14,6 +14,10 @@ export async function publishMeal(form: FormData, userId: string) {
     { slot: "main", name: text(form, "mainName"), tier: mainTier, dishId: optionalId(form, "mainDishId") },
     { slot: "side_1", name: text(form, "sideOneName"), tier: tier(form.get("sideOneTier"), false), dishId: optionalId(form, "sideOneDishId") },
     { slot: "side_2", name: text(form, "sideTwoName"), tier: tier(form.get("sideTwoTier"), false), dishId: optionalId(form, "sideTwoDishId") },
+    ...Array.from({ length: 6 }, (_, index): ItemInput => {
+      const slot = index + 3;
+      return { slot: `side_${slot}`, name: text(form, `side${slot}Name`), tier: tier(form.get(`side${slot}Tier`), false), dishId: optionalId(form, `side${slot}DishId`) };
+    }),
   ] satisfies ItemInput[]).filter((item) => item.slot === "main" || item.tier !== null);
   if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
   if (eatenOn > todayInParis()) throw new UploadInputError("用餐日期不能穿越到未来");

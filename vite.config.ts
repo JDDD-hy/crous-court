@@ -60,6 +60,7 @@ export default defineConfig(async () => {
       vinext(),
       sites({ mockAuth: false }),
       cloudflare({
+        persistState: { path: ".wrangler/crous-court" },
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         inspectorPort: false,
         config: localBindingConfig,
