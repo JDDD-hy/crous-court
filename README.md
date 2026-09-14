@@ -6,7 +6,7 @@ Télécom Paris / Palaiseau 学生的 CROUS 菜品社区审判网站。
 
 ## 当前状态
 
-Phase 6 已完成；原 Phase 7/8 已合并为当前上线与增强阶段。多模态候选识别与评分主体标框已接通；`BUG-20260913-01` 的应用层 multipart 限制和多路并发回归已通过，正式部署前仍须验证 Cloudflare 边缘请求体规则，之后进入 Three.js/Rapier 桌面彩蛋。网页不会向访客展示内部 Phase 名称。
+Phase 6 已完成；原 Phase 7/8 已合并为当前上线与增强阶段。多模态候选识别与评分主体标框已接通；Three.js/Rapier 桌面降级彩蛋已本地实现，尚待真实 GPU/视觉验收与发布。网站已有发布版本，但 `BUG-20260913-01` 的边缘保护绕过问题及完整生产验收仍未关闭。网页不会向访客展示内部 Phase 名称。
 
 本地 D1 首次运行顺序：`npm run build` → `npm run db:migrate:local` → `npm run db:fixtures:local` → `npm start`。fixture 只用于本地开发，不含真实用户或生产种子内容。
 

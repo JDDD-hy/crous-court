@@ -24,9 +24,9 @@ export default async function StoryPage() {
             <p className="mb-3 font-mono text-sm font-bold tracking-widest text-verdict">01 / 立案缘由</p>
             <h2 id="story-origin" className="text-2xl font-black sm:text-3xl">这一盘，你来判。</h2>
             <div className="mt-6 space-y-4 text-lg leading-loose text-ink/80">
-              <p>CROUS法庭是一个面向帕莱索学生的食堂菜品社区。在这里，一张真实餐盘照片，就是一份新的卷宗。</p>
-              <p>主食归主食，小菜归小菜。从“夯”到“拉爆了”，每个人都可以给出自己的判断。遇到叫不出名字的菜，也可以先留下照片，交给群众一起认。</p>
-              <p>同一道菜，不同的日期、不同的餐盘，都值得被记录。判决由大家的投票形成，照片则保留每一次相遇。</p>
+              <p>小青椒最先提出了一个点子：给 CROUS 的菜品做一个“从夯到拉”的排行榜。</p>
+              <p>JDDD 不想让这个点子只停留在两个人之间，于是把它做成了网站，让更多在法国吃 CROUS 的中国留学生一起参与。CROUS法庭就这样开始了。</p>
+              <p>一张餐盘照片、一票自己的判断，都是参与的方式。主食归主食，小菜归小菜；遇到叫不出名字的菜，也可以先留下照片，交给群众一起认。</p>
               <p>先从帕莱索开始，之后争取做大做强，在更多CROUS开庭——说不定能到全法呢（bushi，开玩笑的</p>
             </div>
             <blockquote className="mt-8 border-l-4 border-verdict bg-ink/5 px-5 py-4 text-lg font-bold leading-relaxed">调侃的是菜品，认真的是每个人的用餐体验。</blockquote>
@@ -40,13 +40,13 @@ export default async function StoryPage() {
                 <span aria-hidden="true" className="text-3xl">🕶</span>
                 <h3 className="mt-4 text-xl font-black">JDDD</h3>
                 <p className="mt-2 text-base font-bold text-verdict">法庭网管</p>
-                <p className="mt-5 border-t border-dashed border-ink/25 pt-4 font-mono text-sm text-ink/60">发起人 / JDDD</p>
+                <p className="mt-5 border-t border-dashed border-ink/25 pt-4 font-mono text-sm text-ink/60">网站开发 / JDDD</p>
               </div>
               <div className="border-2 border-ink bg-white/40 p-6 shadow-[4px_4px_0_#202624]">
                 <span aria-hidden="true" className="text-3xl">🫑</span>
                 <h3 className="mt-4 text-xl font-black">小青椒</h3>
                 <p className="mt-2 text-base font-bold text-verdict">味觉证人</p>
-                <p className="mt-5 border-t border-dashed border-ink/25 pt-4 font-mono text-sm text-ink/60">发起人 / 小青椒</p>
+                <p className="mt-5 border-t border-dashed border-ink/25 pt-4 font-mono text-sm text-ink/60">创意提出 / 小青椒</p>
               </div>
             </div>
           </section>

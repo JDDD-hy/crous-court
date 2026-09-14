@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import { isMotionReduced } from "@/lib/motion-preference";
+import { getVoxelDrop, preloadVoxelDrop } from "@/lib/voxel-preload";
 import { getVerdictMotion, type VoteMotionEvent } from "@/lib/verdict-motion";
 import { tierById, type TierId } from "./data";
 
@@ -11,11 +12,15 @@ gsap.registerPlugin(MotionPathPlugin);
 
 export function VoteEffects({ event }: { event: VoteMotionEvent | null }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  useEffect(() => preloadVoxelDrop(), []);
   useEffect(() => {
     if (!event || !hostRef.current || isMotionReduced()) return;
     const controller = new AbortController();
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const stop = () => { if (preference.matches) controller.abort(); };
+    preference.addEventListener("change", stop);
     void playEffects(hostRef.current, event, controller.signal);
-    return () => controller.abort();
+    return () => { controller.abort(); preference.removeEventListener("change", stop); };
   }, [event]);
   return <div ref={hostRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />;
 }
@@ -37,7 +42,11 @@ async function playEffects(host: HTMLDivElement, event: VoteMotionEvent, signal:
       const tween = gsap.to(stamp, { opacity: 0, delay: 0.65, duration: 0.32, onComplete: resolve });
       signal.addEventListener("abort", () => { tween.kill(); resolve(); }, { once: true });
     });
-    if (verdict.shatter && markMajorEffect(event)) await playPixelShatter(host, event.toTier ?? 5, signal);
+    if (signal.aborted || isMotionReduced()) return;
+    if (verdict.shatter && markMajorEffect(event)) {
+      const played = await getVoxelDrop()?.(host, event.toTier ?? 5, signal);
+      if (!played && !signal.aborted && !isMotionReduced()) await playPixelShatter(host, event.toTier ?? 5, signal);
+    }
   } catch {
     // Animation is best-effort; the confirmed vote is already rendered.
   } finally {
