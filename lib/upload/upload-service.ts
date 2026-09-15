@@ -51,15 +51,17 @@ export async function publishMeal(form: FormData, userId: string) {
   if (!admitted) throw new UploadInputError("投稿太频繁，请十分钟后再试");
 
   const mealId = crypto.randomUUID();
+  const translationCandidates: Array<{ id: string; text: string }> = [];
   const photoId = crypto.randomUUID();
   const canonicalKey = `photos/${photoId}/canonical.jpg`;
   const thumbnailKey = `photos/${photoId}/thumbnail.jpg`;
-  await Promise.all([
-    bucket.put(canonicalKey, canonical.bytes, { httpMetadata: { contentType: canonical.mediaType } }),
-    bucket.put(thumbnailKey, thumbnail.bytes, { httpMetadata: { contentType: thumbnail.mediaType } }),
-  ]);
-
+  let committed = false;
   try {
+    const writes = await Promise.allSettled([
+      bucket.put(canonicalKey, canonical.bytes, { httpMetadata: { contentType: canonical.mediaType } }),
+      bucket.put(thumbnailKey, thumbnail.bytes, { httpMetadata: { contentType: thumbnail.mediaType } }),
+    ]);
+    if (writes.some(result => result.status === "rejected")) throw new Error("Photo storage failed");
     const statements = [
       db.prepare("INSERT INTO users (id) VALUES (?) ON CONFLICT(id) DO NOTHING").bind(userId),
       db.prepare("INSERT INTO daily_case_counters (eaten_on, venue_id, next_sequence) VALUES (?, ?, 1) ON CONFLICT(eaten_on, venue_id) DO UPDATE SET next_sequence = next_sequence + 1").bind(eatenOn, venueId),
@@ -68,6 +70,7 @@ export async function publishMeal(form: FormData, userId: string) {
     ];
     for (const item of items) {
       const dishId = item.dishId ?? crypto.randomUUID();
+      if (!item.dishId) translationCandidates.push({ id: dishId, text: item.name });
       const servingId = crypto.randomUUID();
       if (item.dishId) {
         const expectedCategory = item.slot === "main" ? "main" : "side";
@@ -82,11 +85,12 @@ export async function publishMeal(form: FormData, userId: string) {
       );
     }
     await db.batch(statements);
+    committed = true;
     const meal = await db.prepare("SELECT case_number FROM meals WHERE id = ?").bind(mealId).first<{ case_number: string }>();
     if (!meal) throw new Error("投稿记录创建失败");
-    return { mealId, photoId, caseNumber: meal.case_number };
+    return { mealId, photoId, caseNumber: meal.case_number, translationCandidates };
   } catch (error) {
-    await Promise.allSettled([bucket.delete(canonicalKey), bucket.delete(thumbnailKey)]);
+    if (!committed) await Promise.allSettled([bucket.delete(canonicalKey), bucket.delete(thumbnailKey)]);
     if (error instanceof Error && error.message.includes("dish_no_longer_active")) throw new UploadInputError("菜品刚刚被合并，请刷新后重新选择");
     throw error;
   }

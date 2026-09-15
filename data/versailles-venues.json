@@ -1,0 +1,933 @@
+{
+  "source": "https://www.crous-versailles.fr/se-restaurer/ou-manger/",
+  "checkedOn": "2026-09-15",
+  "coordinateSource": "Official detail page navigation link; not independently surveyed",
+  "venues": [
+    {
+      "id": "brasserie-la-coulee-verte-2",
+      "name": "Brasserie La Coulée Verte",
+      "directoryName": "Brasserie La Coulée Verte",
+      "type": "brasserie",
+      "address": "54, boulevard Desgranges - 92330 Sceaux",
+      "postalCode": "92330",
+      "coordinates": {
+        "latitude": 48.7815657,
+        "longitude": 2.2850797999999
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-coulee-verte-2/",
+      "warnings": []
+    },
+    {
+      "id": "brasserie-la-palette-2",
+      "name": "Brasserie La Palette",
+      "directoryName": "Brasserie La Palette",
+      "type": "brasserie",
+      "address": "3, rue de la division Leclerc - 78280 Guyancourt",
+      "postalCode": "78280",
+      "coordinates": {
+        "latitude": 48.7859261,
+        "longitude": 2.0510750999999
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-palette-2/",
+      "warnings": []
+    },
+    {
+      "id": "brasserie-la-ruche-2",
+      "name": "Brasserie La Ruche",
+      "directoryName": "Brasserie La Ruche",
+      "type": "brasserie",
+      "address": "9 bis, rue Joliot-Curie - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.862725,
+        "longitude": 2.287592
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-ruche-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-centralesupelec-breguet-2",
+      "name": "Cafétéria CentraleSupélec Breguet",
+      "directoryName": "Cafétéria CentraleSupélec Breguet",
+      "type": "cafeteria",
+      "address": "3, rue Joliot Curie, plateau du Moulon - 91192 Gif-sur-Yvette",
+      "postalCode": "91192",
+      "coordinates": {
+        "latitude": 48.7099669,
+        "longitude": 2.1635228
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-centralesupelec-breguet-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-gennevilliers-2",
+      "name": "Cafétéria de Gennevilliers",
+      "directoryName": "Cafétéria de Gennevilliers",
+      "type": "cafeteria",
+      "address": "1, avenue Marcel Paul - 92230 Gennevilliers",
+      "postalCode": "92230",
+      "coordinates": {
+        "latitude": 48.9418724,
+        "longitude": 2.3028526000001
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-gennevilliers-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-lecole-darchitecture-2",
+      "name": "Cafétéria de l’École d’architecture",
+      "directoryName": "Cafétéria de l’École d’architecture",
+      "type": "cafeteria",
+      "address": "5, avenue de Sceaux - 78000 Versailles",
+      "postalCode": "78000",
+      "coordinates": {
+        "latitude": 48.8007928,
+        "longitude": 2.1270694
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-lecole-darchitecture-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-linstitut-de-biologie-2",
+      "name": "Cafétéria de l’Institut de Biologie",
+      "directoryName": "Cafétéria de l’Institut de Biologie",
+      "type": "cafeteria",
+      "address": "Bât. IBGBI, 23 boulevard de France, 91000 Évry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.6269736,
+        "longitude": 2.4390811
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-linstitut-de-biologie-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-liut-dorsay-2",
+      "name": "Cafétéria de l’IUT d’Orsay",
+      "directoryName": "Cafétéria de l’IUT d’Orsay",
+      "type": "cafeteria",
+      "address": "Plateau de Moulon - 91400 Orsay",
+      "postalCode": "91400",
+      "coordinates": {
+        "latitude": 48.708308431718,
+        "longitude": 2.1647980426088
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-liut-dorsay-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-liut-de-saint-cloud-2",
+      "name": "Cafétéria de l’IUT de Saint-Cloud",
+      "directoryName": "Cafétéria de l’IUT de Saint-Cloud",
+      "type": "cafeteria",
+      "address": "11, avenue Pozzo Di Borgo - 92210 Saint-Cloud",
+      "postalCode": "92210",
+      "coordinates": {
+        "latitude": 48.8435454,
+        "longitude": 2.2154696
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-liut-de-saint-cloud-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-la-bu-2",
+      "name": "Cafétéria de la BU",
+      "directoryName": "Cafétéria de la BU",
+      "type": "cafeteria",
+      "address": "Bibliothèque de l'université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.892423,
+        "longitude": 2.215331
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-la-bu-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-de-la-poste-2",
+      "name": "Cafétéria de La Poste",
+      "directoryName": "Cafétéria de La Poste",
+      "type": "cafeteria",
+      "address": "Institut de la poste Rue du Facteur Cheval - 91000 Evry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.631093,
+        "longitude": 2.4312171
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-la-poste-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-descartes-2",
+      "name": "Cafétéria Descartes",
+      "directoryName": "Cafétéria Descartes",
+      "type": "cafeteria",
+      "address": "45, avenue des États-Unis - 78000 Versailles",
+      "postalCode": "78000",
+      "coordinates": {
+        "latitude": 48.812953986779,
+        "longitude": 2.1480095386505
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-descartes-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-eiffel-2",
+      "name": "Cafétéria Eiffel",
+      "directoryName": "Cafétéria Eiffel",
+      "type": "cafeteria",
+      "address": "8, rue Joliot Curie, 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.710463478267,
+        "longitude": 2.1688048559885
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-eiffel-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-ens-2",
+      "name": "Cafétéria ENS",
+      "directoryName": "Cafétéria ENS",
+      "type": "cafeteria",
+      "address": "2, rue Yvette Cauchois - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.714213076805,
+        "longitude": 2.1649408290007
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-ens-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-escoffier-2",
+      "name": "Cafétéria Escoffier",
+      "directoryName": "Cafétéria Escoffier",
+      "type": "cafeteria",
+      "address": "22, cours Pierre Vasseur - 91120 Palaiseau",
+      "postalCode": "91120",
+      "coordinates": {
+        "latitude": 48.71374400367,
+        "longitude": 2.2038616593777
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-escoffier-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-henri-moissan-2",
+      "name": "Cafétéria Henri Moissan",
+      "directoryName": "Cafétéria Henri Moissan",
+      "type": "cafeteria",
+      "address": "15, avenue des Sciences, 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.712481834329,
+        "longitude": 2.1720946811287
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-henri-moissan-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-jean-monnet-2",
+      "name": "Cafétéria Jean Monnet",
+      "directoryName": "Cafétéria Jean Monnet",
+      "type": "cafeteria",
+      "address": "54, boulevard Desgranges - 92330 Sceaux",
+      "postalCode": "92330",
+      "coordinates": {
+        "latitude": 48.7815657,
+        "longitude": 2.2850797999999
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-jean-monnet-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-lamphi-2",
+      "name": "Cafétéria L’Amphi",
+      "directoryName": "Cafétéria L’Amphi",
+      "type": "cafeteria",
+      "address": "Bâtiment 332 - 91440 Bures-sur-Yvette",
+      "postalCode": "91440",
+      "coordinates": {
+        "latitude": 48.701902829438,
+        "longitude": 2.1678604268349
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lamphi-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-lank-2",
+      "name": "Cafétéria L’An’K",
+      "directoryName": "Cafétéria L’An’K",
+      "type": "cafeteria",
+      "address": "Bâtiment Jean Rouch 200, avenue de la République - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.90560277004,
+        "longitude": 2.2159313744645
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lank-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-lasiatique-2",
+      "name": "Cafétéria L’arrêt Café",
+      "directoryName": "Cafétéria L’arrêt Café",
+      "type": "cafeteria",
+      "address": "Bâtiment Veil - 200, avenue de la République - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.9026656,
+        "longitude": 2.213463
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lasiatique-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-lexperimental-2",
+      "name": "Cafétéria L’Expérimental",
+      "directoryName": "Cafétéria L’Expérimental",
+      "type": "cafeteria",
+      "address": "7-9, boulevard Thomas Gobert - 91120 Palaiseau",
+      "postalCode": "91120",
+      "coordinates": {
+        "latitude": 48.713826810711,
+        "longitude": 2.193638092775
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lexperimental-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-la-terrasse-2",
+      "name": "Cafétéria La Terrasse",
+      "directoryName": "Cafétéria La Terrasse",
+      "type": "cafeteria",
+      "address": "1, allée de l’Université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.905852170183,
+        "longitude": 2.2148555792811
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-la-terrasse-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-le-boomerang-2",
+      "name": "Caféteria Le Boomerang",
+      "directoryName": "Caféteria Le Boomerang",
+      "type": "cafeteria",
+      "address": "Chemin de la Tuilerie 91220 Brétigny-sur-Orge",
+      "postalCode": "91220",
+      "coordinates": {
+        "latitude": 48.620030293478,
+        "longitude": 2.3100643155069
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-boomerang-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-le-millenium-2",
+      "name": "Cafétéria Le Millénium",
+      "directoryName": "Cafétéria Le Millénium",
+      "type": "cafeteria",
+      "address": "1 allée de l'Université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.90550661877,
+        "longitude": 2.2147590197628
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-millenium-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-batiment-g-2",
+      "name": "Cafétéria Le Paradoxe",
+      "directoryName": "Cafétéria Le Paradoxe",
+      "type": "cafeteria",
+      "address": "Bâtiment Allais, avenue de la République - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.9047283,
+        "longitude": 2.2088302
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-batiment-g-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-le-parc-le-kiosque",
+      "name": "Cafétéria Le Parc – Le Kiosque",
+      "directoryName": "Cafétéria Le Parc – Le Kiosque",
+      "type": "cafeteria",
+      "address": "5, avenue du parc - 95000 Cergy Pontoise",
+      "postalCode": "95000",
+      "coordinates": {
+        "latitude": 49.033447,
+        "longitude": 2.072881
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-parc-le-kiosque/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-le-pelvoux-2",
+      "name": "Cafétéria Le Pelvoux",
+      "directoryName": "Cafétéria Le Pelvoux",
+      "type": "cafeteria",
+      "address": "36 rue de Pelvoux - 91000 Evry-Courcouronnes",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.6145484,
+        "longitude": 2.4292188
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-pelvoux-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-le-tropical-2",
+      "name": "Cafétéria Le Tropical",
+      "directoryName": "Cafétéria Le Tropical",
+      "type": "cafeteria",
+      "address": "Bâtiment 406, rue Claude Bernard - 91400 Orsay",
+      "postalCode": "91400",
+      "coordinates": {
+        "latitude": 48.704096336784,
+        "longitude": 2.1815696872322
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-tropical-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-les-aviateurs-2",
+      "name": "Cafétéria Les Aviateurs",
+      "directoryName": "Cafétéria Les Aviateurs",
+      "type": "cafeteria",
+      "address": "10-12, avenue de l'Europe - 78140 Vélizy-Villacoublay",
+      "postalCode": "78140",
+      "coordinates": {
+        "latitude": 48.781912,
+        "longitude": 2.217694
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-aviateurs-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-les-chenes-1-2",
+      "name": "Cafétéria Les Chênes 1",
+      "directoryName": "Cafétéria Les Chênes 1",
+      "type": "cafeteria",
+      "address": "33 Boulevard du Port 95011 Cergy-Pontoise",
+      "postalCode": "95011",
+      "coordinates": {
+        "latitude": 49.0340132,
+        "longitude": 2.0673829
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-chenes-1-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-les-chenes-2-2",
+      "name": "Cafétéria Les Chênes 2",
+      "directoryName": "Cafétéria Les Chênes 2",
+      "type": "cafeteria",
+      "address": "33, boulevard du Port - 95000 Cergy-Pontoise cedex",
+      "postalCode": "95000",
+      "coordinates": {
+        "latitude": 49.039085629372,
+        "longitude": 2.0764056197628
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-chenes-2-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-les-sciences-2",
+      "name": "Cafétéria Les Sciences",
+      "directoryName": "Cafétéria Les Sciences",
+      "type": "cafeteria",
+      "address": "Bâtiment Maupertuis, 3 rue du Père André Jarlan - 91000 Evry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.624283,
+        "longitude": 2.4400079
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-sciences-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-libre-service-henri-moissan-2",
+      "name": "Cafétéria libre-service Henri Moissan",
+      "directoryName": "Cafétéria libre-service Henri Moissan",
+      "type": "cafeteria",
+      "address": "15, avenue des Sciences - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.712170344451,
+        "longitude": 2.1722448848239
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-libre-service-henri-moissan-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-lieu-de-vie-2",
+      "name": "Cafétéria Lieu de Vie",
+      "directoryName": "Cafétéria Lieu de Vie",
+      "type": "cafeteria",
+      "address": "13, bis rue Joliot Curie - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.7,
+        "longitude": 2.175
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lieu-de-vie-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-monseigneur-romero-2",
+      "name": "Cafeteria Monseigneur Roméro",
+      "directoryName": "Cafeteria Monseigneur Roméro",
+      "type": "cafeteria",
+      "address": "Bât. 1ers cycles 15, rue André Lalande - 91000 Evry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.6194045,
+        "longitude": 2.4279866
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-monseigneur-romero-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-neuville-2",
+      "name": "Cafétéria Neuville",
+      "directoryName": "Cafétéria Neuville",
+      "type": "cafeteria",
+      "address": "5, mail Gay-Lussac - 95031 Cergy-Pontoise",
+      "postalCode": "95031",
+      "coordinates": {
+        "latitude": 49.017132,
+        "longitude": 2.075022
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-neuville-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-saint-martin-2",
+      "name": "Cafétéria Saint-Martin",
+      "directoryName": "Cafétéria Saint-Martin",
+      "type": "cafeteria",
+      "address": "13, avenue du Général Schmitz - 95037 Pontoise",
+      "postalCode": "95037",
+      "coordinates": {
+        "latitude": 49.041106,
+        "longitude": 2.085006
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-saint-martin-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-la-sandwicherie-2",
+      "name": "Cafétéria Science Pause",
+      "directoryName": "Cafétéria Science Pause",
+      "type": "cafeteria",
+      "address": "Bât Veil, 200 avenue de la République - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.9047283,
+        "longitude": 2.2088302
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-la-sandwicherie-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-soft-rock-vauban-2",
+      "name": "Cafétéria Soft Rock – Vauban",
+      "directoryName": "Cafétéria Soft Rock – Vauban",
+      "type": "cafeteria",
+      "address": "1, boulevard d'Alembert - 78280 Guyancourt",
+      "postalCode": "78280",
+      "coordinates": {
+        "latitude": 48.7799677,
+        "longitude": 2.0435216
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-soft-rock-vauban-2/",
+      "warnings": []
+    },
+    {
+      "id": "cafeteria-ville-davray-2",
+      "name": "Cafétéria Ville d’Avray",
+      "directoryName": "Cafétéria Ville d’Avray",
+      "type": "cafeteria",
+      "address": "1, chemin Desvallières - 92410 Ville d'Avray",
+      "postalCode": "92410",
+      "coordinates": {
+        "latitude": 48.825736927526,
+        "longitude": 2.2003591652265
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-ville-davray-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-centralesupelec-eiffel-2",
+      "name": "RU CentraleSupélec Eiffel",
+      "directoryName": "RU CentraleSupélec Eiffel",
+      "type": "ru",
+      "address": "8, rue Joliot Curie - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.710442239531,
+        "longitude": 2.1691910940619
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-centralesupelec-eiffel-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-de-liut-ville-davray-2",
+      "name": "RU de l’IUT Ville d’Avray",
+      "directoryName": "RU de l’IUT Ville d’Avray",
+      "type": "ru",
+      "address": "1, chemin Desvallières - 92410 Ville d'Avray",
+      "postalCode": "92410",
+      "coordinates": {
+        "latitude": 48.8253863,
+        "longitude": 2.1980363
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-de-liut-ville-davray-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-ens-2",
+      "name": "RU ENS",
+      "directoryName": "RU ENS",
+      "type": "ru",
+      "address": "2, rue Yvette Cauchois - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.713958230364,
+        "longitude": 2.1650910326959
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-ens-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-escoffier-2",
+      "name": "RU Escoffier",
+      "directoryName": "RU Escoffier",
+      "type": "ru",
+      "address": "22, cours Pierre Vasseur - 31120 Palaiseau",
+      "postalCode": "31120",
+      "coordinates": {
+        "latitude": 48.712795393198,
+        "longitude": 2.2051491197628
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-escoffier-2/",
+      "warnings": [
+        "postal-code-outside-idf"
+      ]
+    },
+    {
+      "id": "ru-et-snack-saint-germain",
+      "name": "RU et snack Saint-Germain",
+      "directoryName": "RU et snack Saint-Germain",
+      "type": "ru",
+      "address": "5, rue Pasteur - 78100 Saint-Germain-en-Laye",
+      "postalCode": "78100",
+      "coordinates": {
+        "latitude": 48.9007448,
+        "longitude": 2.070304
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-et-snack-saint-germain/",
+      "warnings": []
+    },
+    {
+      "id": "ru-henri-moissan-2",
+      "name": "RU Henri Moissan",
+      "directoryName": "RU Henri Moissan",
+      "type": "ru",
+      "address": "15, avenue des Sciences - 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.712418120647,
+        "longitude": 2.1721054099641
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-henri-moissan-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-lexperimental-2",
+      "name": "RU L’Expérimental",
+      "directoryName": "RU L’Expérimental",
+      "type": "ru",
+      "address": "7-9, boulevard Thomas Gobert - 91120 Palaiseau",
+      "postalCode": "91120",
+      "coordinates": {
+        "latitude": 48.7128782018,
+        "longitude": 2.1941638057082
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-lexperimental-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-la-coulee-verte-2",
+      "name": "RU La Coulée Verte",
+      "directoryName": "RU La Coulée Verte",
+      "type": "ru",
+      "address": "54, boulevard Desgranges - 92330 Sceaux",
+      "postalCode": "92330",
+      "coordinates": {
+        "latitude": 48.7815657,
+        "longitude": 2.2850797999999
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-la-coulee-verte-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-la-terrasse-2",
+      "name": "RU La Terrasse",
+      "directoryName": "RU La Terrasse",
+      "type": "ru",
+      "address": "1, allée de l’Université 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.904047555485,
+        "longitude": 2.2173836059629
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-la-terrasse-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-boomerang-2",
+      "name": "RU Le Boomerang",
+      "directoryName": "RU Le Boomerang",
+      "type": "ru",
+      "address": "Chemin de la Tuilerie - 91220 Brétigny-sur-Orge",
+      "postalCode": "91220",
+      "coordinates": {
+        "latitude": 48.62020760048,
+        "longitude": 2.3097853657872
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-boomerang-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-jardin-2",
+      "name": "RU Le Jardin",
+      "directoryName": "RU Le Jardin",
+      "type": "ru",
+      "address": "1, allée de l’Université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.905295055501,
+        "longitude": 2.2151345290007
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-jardin-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-parc-2",
+      "name": "RU Le Parc",
+      "directoryName": "RU Le Parc",
+      "type": "ru",
+      "address": "5, avenue du parc - 95000 Cergy Pontoise",
+      "postalCode": "95000",
+      "coordinates": {
+        "latitude": 49.033447,
+        "longitude": 2.072881
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-parc-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-sablier-2",
+      "name": "RU Le Sablier",
+      "directoryName": "RU Le Sablier",
+      "type": "ru",
+      "address": "Bâtiment Ile de France, 1 rue du Père André Jarlan - 91000 Evry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.6248592,
+        "longitude": 2.4265743
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-sablier-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-tex-mex-2",
+      "name": "RU Le Tex Mex",
+      "directoryName": "RU Le Tex Mex",
+      "type": "ru",
+      "address": "1, allée de l’Université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.903652625128,
+        "longitude": 2.2195830173545
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-tex-mex-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-le-vip-2",
+      "name": "RU Le VIP",
+      "directoryName": "RU Le VIP",
+      "type": "ru",
+      "address": "1, allée de l’Université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.904301437639,
+        "longitude": 2.2195079155069
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-vip-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-les-aviateurs-2",
+      "name": "RU Les Aviateurs",
+      "directoryName": "RU Les Aviateurs",
+      "type": "ru",
+      "address": "10-12, avenue de l'Europe - 78140 Velizy-Villacoublay",
+      "postalCode": "78140",
+      "coordinates": {
+        "latitude": 48.7819395,
+        "longitude": 2.2182733
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-aviateurs-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-les-cedres-2",
+      "name": "RU Les Cèdres",
+      "directoryName": "RU Les Cèdres",
+      "type": "ru",
+      "address": "Bâtiment 406, rue Claude Bernard - 91400 Orsay",
+      "postalCode": "91400",
+      "coordinates": {
+        "latitude": 48.703154625027,
+        "longitude": 2.1818593657872
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-cedres-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-les-chenes-2",
+      "name": "RU Les Chênes",
+      "directoryName": "RU Les Chênes",
+      "type": "ru",
+      "address": "33, boulevard du Port - 95011 Cergy-Pontoise",
+      "postalCode": "95011",
+      "coordinates": {
+        "latitude": 49.050966,
+        "longitude": 2.100645
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-chenes-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-les-etats-unis-2",
+      "name": "RU Les États-Unis",
+      "directoryName": "RU Les États-Unis",
+      "type": "ru",
+      "address": "45, avenue des États-Unis - 78000 Versailles",
+      "postalCode": "78000",
+      "coordinates": {
+        "latitude": 48.81226866294,
+        "longitude": 2.1498119831085
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-etats-unis-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-lieu-de-vie-2",
+      "name": "RU Lieu de Vie",
+      "directoryName": "RU Lieu de Vie",
+      "type": "ru",
+      "address": "13, bis rue Joliot Curie 91190 Gif-sur-Yvette",
+      "postalCode": "91190",
+      "coordinates": {
+        "latitude": 48.709632682747,
+        "longitude": 2.1712195845072
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-lieu-de-vie-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-monseigneur-romero-2",
+      "name": "RU Monseigneur Roméro",
+      "directoryName": "RU Monseigneur Roméro",
+      "type": "ru",
+      "address": "Bât. 1ers cycles 15, rue André Lalande - 91000 Evry",
+      "postalCode": "91000",
+      "coordinates": {
+        "latitude": 48.6194045,
+        "longitude": 2.4279865999999
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-monseigneur-romero-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-nanterre-2",
+      "name": "RU Nanterre",
+      "directoryName": "RU Nanterre",
+      "type": "ru",
+      "address": "1, allée de l'université - 92000 Nanterre",
+      "postalCode": "92000",
+      "coordinates": {
+        "latitude": 48.9045044,
+        "longitude": 2.2160564000001
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-nanterre-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-neuville-2",
+      "name": "RU Neuville",
+      "directoryName": "RU Neuville",
+      "type": "ru",
+      "address": "5, mail Gay-Lussac - 95031 Cergy-Pontoise",
+      "postalCode": "95031",
+      "coordinates": {
+        "latitude": 49.017132,
+        "longitude": 2.075022
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-neuville-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-saint-martin-2",
+      "name": "RU Saint-Martin",
+      "directoryName": "RU Saint-Martin",
+      "type": "ru",
+      "address": "13, avenue du Général Schmitz 95300 Pontoise cedex",
+      "postalCode": "95300",
+      "coordinates": {
+        "latitude": 49.041056228088,
+        "longitude": 2.0830501726226
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-saint-martin-2/",
+      "warnings": []
+    },
+    {
+      "id": "ru-vauban-2",
+      "name": "RU Vauban",
+      "directoryName": "RU Vauban",
+      "type": "ru",
+      "address": "1, boulevard d'Alembert - 78280 Guyancourt",
+      "postalCode": "78280",
+      "coordinates": {
+        "latitude": 48.7799677,
+        "longitude": 2.0435216
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-vauban-2/",
+      "warnings": []
+    },
+    {
+      "id": "snack-neuville-2",
+      "name": "Snack Neuville",
+      "directoryName": "Snack Neuville",
+      "type": "other",
+      "address": "5, mail Gay-Lussac 95031 Cergy-Pontoise cedex",
+      "postalCode": "95031",
+      "coordinates": {
+        "latitude": 49.017134054409,
+        "longitude": 2.0724769038544
+      },
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/snack-neuville-2/",
+      "warnings": []
+    }
+  ]
+}

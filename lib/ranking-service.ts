@@ -3,6 +3,8 @@ import { getDb } from "../db";
 import { dishAliases, dishes, mealItems, meals, photos, servings, venues, votes } from "../db/schema";
 import type { DishCategory, DishDetail, DishSummary } from "./dish-types";
 import { buildTierHistory, calculateVerdict, compareVerdicts, type Tier } from "./ranking";
+import { getLocale } from "./i18n/server";
+import { translator } from "./i18n/core";
 
 const imageByDish: Record<string, string> = {
   "couscous-boulettes": "/meals/couscous.jpg",
@@ -10,7 +12,10 @@ const imageByDish: Record<string, string> = {
   "mystery-dessert": "/meals/poulet-haricots.jpg",
 };
 
-export async function listRankings(category?: DishCategory): Promise<DishSummary[]> {
+export async function listRankings(category?: DishCategory, venueIds?: string[]): Promise<DishSummary[]> {
+  if (venueIds && !venueIds.length) return [];
+  const locale = await getLocale();
+  const t = translator(locale);
   const db = getDb();
   const dishRows = await db.select().from(dishes).where(category ? and(eq(dishes.category, category), isNull(dishes.mergedIntoDishId)) : isNull(dishes.mergedIntoDishId));
   if (!dishRows.length) return [];
@@ -33,7 +38,7 @@ export async function listRankings(category?: DishCategory): Promise<DishSummary
       .innerJoin(mealItems, eq(mealItems.servingId, servings.id))
       .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
       .leftJoin(photos, eq(photos.mealId, meals.id))
-      .where(and(inArray(servings.dishId, ids), eq(servings.status, "active")))
+      .where(and(inArray(servings.dishId, ids), eq(servings.status, "active"), venueIds ? inArray(servings.venueId, venueIds) : undefined))
       .orderBy(desc(servings.servedOn)),
     db.select({ dishId: dishAliases.dishId, name: dishAliases.name }).from(dishAliases).where(inArray(dishAliases.dishId, ids)),
   ]);
@@ -59,9 +64,14 @@ export async function listRankings(category?: DishCategory): Promise<DishSummary
       verdict,
       dish: {
         id: dish.id,
-        name: dish.canonicalNameFr ?? dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? `神秘菜品 #${dish.id.slice(-4)}`,
-        zh: dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? (dish.originalDescription || "等待群众认菜"),
-        venue: `${serving.venueNickname} · ${serving.venueName}`,
+        canonicalNameFr: dish.canonicalNameFr,
+        canonicalNameEn: dish.canonicalNameEn,
+        canonicalNameZh: dish.canonicalNameZh,
+        machineNameZh: dish.machineNameSource === dish.originalDescription ? dish.machineNameZh : null,
+        originalDescription: dish.originalDescription,
+        name: dish.canonicalNameFr ?? dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? t("神秘菜品 #{0}", dish.id.slice(-4)),
+        zh: dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? (dish.originalDescription || t("等待群众认菜")),
+        venue: locale === "en" || serving.venueNickname === serving.venueName ? serving.venueName : `${serving.venueNickname} · ${serving.venueName}`,
         date: serving.date,
         image: serving.photoId ? `/api/photos/${serving.photoId}` : imageByDish[dish.id] ?? "/file.svg",
         tier: verdict.tier,
@@ -78,6 +88,7 @@ export async function listRankings(category?: DishCategory): Promise<DishSummary
 }
 
 export async function getDishDetail(id: string): Promise<DishDetail | null> {
+  const locale = await getLocale();
   const rankings = await listRankings();
   const summary = rankings.find((dish) => dish.id === id);
   if (!summary) return null;
@@ -109,7 +120,7 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
       id: serving.id,
       mealId: serving.mealId,
       date: serving.date,
-      venue: `${serving.venueNickname} · ${serving.venueName}`,
+      venue: locale === "en" || serving.venueNickname === serving.venueName ? serving.venueName : `${serving.venueNickname} · ${serving.venueName}`,
       initialTier: serving.initialTier as Tier,
       originalDescription: serving.originalDescription,
       image: serving.photoId ? `/api/photos/${serving.photoId}` : null,

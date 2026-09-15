@@ -8,7 +8,7 @@ export type VoteAction =
   | { type: "rollback"; snapshot: VoteViewState; error: string };
 
 export function reduceVoteState(state: VoteViewState, action: VoteAction): VoteViewState {
-  if (action.type === "confirmed") return { dish: action.dish, myVote: action.myVote, error: "" };
+  if (action.type === "confirmed") return { dish: { ...action.dish, venue: state.dish.venue, date: state.dish.date, image: state.dish.image, initialTier: state.dish.initialTier }, myVote: action.myVote, error: "" };
   if (action.type === "rollback") return { ...action.snapshot, error: action.error };
   if (state.myVote !== null) return state;
   const verdict = previewVote(state.dish.distribution, state.myVote, action.target);

@@ -85,6 +85,20 @@
       "when": 1789422779548,
       "tag": "0013_vote_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1789491688980,
+      "tag": "0014_english_dish_names",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1789492339941,
+      "tag": "0015_dish_machine_translation",
+      "breakpoints": true
     }
   ]
 }

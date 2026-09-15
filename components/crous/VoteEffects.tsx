@@ -7,10 +7,13 @@ import { isMotionReduced } from "@/lib/motion-preference";
 import { getVoxelDrop, preloadVoxelDrop } from "@/lib/voxel-preload";
 import { getVerdictMotion, type VoteMotionEvent } from "@/lib/verdict-motion";
 import { tierById, type TierId } from "./data";
+import { useT } from "@/lib/i18n/client";
+import type { Translator } from "@/lib/i18n/core";
 
 gsap.registerPlugin(MotionPathPlugin);
 
 export function VoteEffects({ event }: { event: VoteMotionEvent | null }) {
+  const t = useT();
   const hostRef = useRef<HTMLDivElement>(null);
   useEffect(() => preloadVoxelDrop(), []);
   useEffect(() => {
@@ -19,17 +22,17 @@ export function VoteEffects({ event }: { event: VoteMotionEvent | null }) {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const stop = () => { if (preference.matches) controller.abort(); };
     preference.addEventListener("change", stop);
-    void playEffects(hostRef.current, event, controller.signal);
+    void playEffects(hostRef.current, event, controller.signal, t);
     return () => { controller.abort(); preference.removeEventListener("change", stop); };
-  }, [event]);
+  }, [event, t]);
   return <div ref={hostRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />;
 }
 
-async function playEffects(host: HTMLDivElement, event: VoteMotionEvent, signal: AbortSignal) {
+async function playEffects(host: HTMLDivElement, event: VoteMotionEvent, signal: AbortSignal, t: Translator) {
   const verdict = getVerdictMotion(event.fromTier, event.toTier);
   const stamp = document.createElement("span");
   stamp.className = "absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 rotate-[-7deg] border-4 border-verdict bg-paper px-4 py-2 text-xl font-black text-verdict shadow-[4px_4px_0_#202624]";
-  stamp.textContent = event.toTier ? `已落槌 · ${tierById(event.toTier as TierId).emoji} ${tierById(event.toTier as TierId).label}` : "已落槌";
+  stamp.textContent = event.toTier ? t("已落槌 · {0} {1}", tierById(event.toTier as TierId).emoji, t(tierById(event.toTier as TierId).label)) : t("已落槌");
   host.appendChild(stamp);
   try {
     if (signal.aborted) return;

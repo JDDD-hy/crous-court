@@ -6,8 +6,12 @@ import { GovernanceError } from "./errors";
 export { GovernanceError } from "./errors";
 
 const evidenceTypes = new Set(["menu_photo", "ate_today", "visual_guess", "ai_guess"]);
+const visibleDish = `SELECT 1 FROM dishes d WHERE d.id=? AND d.merged_into_dish_id IS NULL AND EXISTS (
+  SELECT 1 FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id
+  WHERE s.dish_id=d.id AND s.status='active' AND m.status='active')`;
 
 export async function listNameSuggestions(dishId: string) {
+  if (!await getRawDb().prepare(visibleDish).bind(dishId).first()) throw new GovernanceError("菜品不存在", 404);
   const rows = await getRawDb().prepare(`SELECT ns.id, ns.name, ns.evidence_type, ns.evidence_note, ns.status,
       count(ne.user_id) AS supporters
     FROM name_suggestions ns LEFT JOIN name_endorsements ne ON ne.suggestion_id = ns.id
@@ -25,7 +29,7 @@ export async function suggestName(dishId: string, userId: string, input: Record<
   if (typeof input.evidenceType !== "string" || !evidenceTypes.has(input.evidenceType)) throw new GovernanceError("请选择有效的名称依据");
   const note = typeof input.evidenceNote === "string" ? input.evidenceNote.trim().slice(0, 240) : "";
   const db = getRawDb();
-  const dish = await db.prepare("SELECT id FROM dishes WHERE id = ? AND merged_into_dish_id IS NULL").bind(dishId).first();
+  const dish = await db.prepare(visibleDish).bind(dishId).first();
   if (!dish) throw new GovernanceError("菜品不存在", 404);
   const id = crypto.randomUUID();
   try {
@@ -40,6 +44,7 @@ export async function suggestName(dishId: string, userId: string, input: Record<
 export async function endorseName(dishId: string, suggestionId: string, userId: string) {
   await enforceGovernanceLimit(userId, "endorse_name", 30);
   const db = getRawDb();
+  if (!await db.prepare(visibleDish).bind(dishId).first()) throw new GovernanceError("菜品不存在", 404);
   const suggestion = await db.prepare("SELECT name,normalized_name,proposer_id FROM name_suggestions WHERE id = ? AND dish_id = ? AND status IN ('pending','community')").bind(suggestionId, dishId).first<{ name: string; normalized_name: string; proposer_id: string }>();
   if (!suggestion) throw new GovernanceError("名称候选不存在", 404);
   if (suggestion.proposer_id === userId) throw new GovernanceError("提议者不能支持自己的名称", 409);

@@ -17,6 +17,17 @@ test("rejects a declared oversized multipart body before parsing", async () => {
   await assert.rejects(parseLimitedFormData(request, 100), BodyTooLargeError);
 });
 
+test("rejects and cancels a lengthless multipart stream before parsing its malformed body", async () => {
+  let cancelled = false;
+  let chunks = 0;
+  const body = new ReadableStream({ pull(controller) { chunks++; controller.enqueue(new Uint8Array(32)); }, cancel() { cancelled = true; } });
+  const request = new Request("https://example.test", { method: "POST", headers: { "content-type": "multipart/form-data; boundary=test" }, body, duplex: "half" } as RequestInit);
+  assert.equal(request.headers.has("content-length"), false);
+  await assert.rejects(parseLimitedFormData(request, 64), BodyTooLargeError);
+  assert.equal(cancelled, true);
+  assert.ok(chunks <= 4, "Stop reading immediately after the byte budget is exceeded");
+});
+
 test("rejects multipart content larger than a false small length", async () => {
   const source = new FormData();
   source.set("value", "x".repeat(101));

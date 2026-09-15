@@ -2,16 +2,20 @@ import { env } from "cloudflare:workers";
 import { getRawDb } from "@/db";
 import { checkSanitizedImage } from "@/lib/upload/image-validation";
 import { identificationSchema } from "./dish-identification-schema";
+import { getLocale } from "@/lib/i18n/server";
+import type { Locale } from "@/lib/i18n/core";
 
 const PROMPT_VERSION = "crous-meal-v3";
 export class IdentificationError extends Error { constructor(message: string, public status = 400) { super(message); } }
 
 export async function identifyDish(file: File, userId: string) {
+  const locale = await getLocale();
+  const promptVersion = locale === "en" ? `${PROMPT_VERSION}-en-v2` : PROMPT_VERSION;
   if (!env.AI_BASE_URL || !env.AI_API_KEY || !env.AI_MODEL) throw new IdentificationError("AI 识菜尚未配置，仍可自己填写或留给群众", 503);
   const image = await checkSanitizedImage(file);
   const imageSha256 = await sha256(image.bytes);
   const db = getRawDb();
-  const cached = await db.prepare("SELECT result_json FROM ai_identifications WHERE user_id=? AND image_sha256=? AND model=? AND prompt_version=?").bind(userId, imageSha256, env.AI_MODEL, PROMPT_VERSION).first<{ result_json: string }>();
+  const cached = await db.prepare("SELECT result_json FROM ai_identifications WHERE user_id=? AND image_sha256=? AND model=? AND prompt_version=?").bind(userId, imageSha256, env.AI_MODEL, promptVersion).first<{ result_json: string }>();
   if (cached) return identificationSchema.parse(JSON.parse(cached.result_json));
   const admitted = await db.prepare(`INSERT INTO ai_rate_limits (user_id,day,attempts) VALUES (?,date('now'),1)
     ON CONFLICT(user_id,day) DO UPDATE SET attempts=attempts+1 WHERE attempts<3
@@ -21,9 +25,9 @@ export async function identifyDish(file: File, userId: string) {
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const result = await callModel(image.bytes, image.mediaType, attempt > 0);
+      const result = await callModel(image.bytes, image.mediaType, attempt > 0, locale);
       await db.prepare("INSERT INTO ai_identifications (id,user_id,image_sha256,model,prompt_version,result_json) VALUES (?,?,?,?,?,?)")
-        .bind(crypto.randomUUID(), userId, imageSha256, env.AI_MODEL, PROMPT_VERSION, JSON.stringify(result)).run();
+        .bind(crypto.randomUUID(), userId, imageSha256, env.AI_MODEL, promptVersion, JSON.stringify(result)).run();
       return result;
     } catch (error) {
       lastError = error;
@@ -33,7 +37,7 @@ export async function identifyDish(file: File, userId: string) {
   throw new IdentificationError(lastError instanceof IdentificationError ? lastError.message : "AI 看饿了，但没敢乱认。请自己填写或交给群众", 502);
 }
 
-async function callModel(bytes: ArrayBuffer, mediaType: string, retry: boolean) {
+async function callModel(bytes: ArrayBuffer, mediaType: string, retry: boolean, locale: Locale) {
   const response = await fetch(`${env.AI_BASE_URL!.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
     headers: { authorization: `Bearer ${env.AI_API_KEY}`, "content-type": "application/json" },
@@ -44,7 +48,7 @@ async function callModel(bytes: ArrayBuffer, mediaType: string, retry: boolean) 
       max_tokens: 550,
       response_format: { type: "json_schema", json_schema: { name: "crous_meal_identification", strict: true, schema: jsonSchema } },
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: systemPrompt + (locale === "en" ? " Return scene_description, ingredients and other free-text descriptions in English. Use a common English dish name when reliably identifiable, otherwise a short English description. These remain unconfirmed suggestions. Preserve all schema enum values exactly as specified." : "") },
         { role: "user", content: [
           { type: "text", text: retry ? "上次输出未通过 Schema。重新观察图片，并返回字段完整的 JSON。" : "识别这张 CROUS 餐盘。" },
           { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64(bytes)}` } },

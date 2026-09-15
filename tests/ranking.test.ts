@@ -70,6 +70,17 @@ test("does not optimistically replace an existing vote", () => {
   assert.equal(reduceVoteState(state, { type: "optimistic", target: 1 }), state);
 });
 
+test("confirmed votes preserve the selected venue observation while updating global scores", () => {
+  const dish = { id: "dish", name: "Dish", zh: "菜", venue: "Escoffier", date: "2026-09-11", image: "/local.jpg", tier: 3, initialTier: 3, votes: 1, distribution: [0, 0, 1, 0, 0], category: "main", status: "pending" } satisfies DishSummary;
+  const result = reduceVoteState({ dish, myVote: null, error: "" }, { type: "confirmed", myVote: 1, dish: { ...dish, venue: "Experimental", date: "2026-09-15", image: "/other.jpg", initialTier: 5, votes: 2, distribution: [1, 0, 1, 0, 0] } });
+  assert.equal(result.dish.venue, "Escoffier");
+  assert.equal(result.dish.date, "2026-09-11");
+  assert.equal(result.dish.image, "/local.jpg");
+  assert.equal(result.dish.initialTier, 3);
+  assert.equal(result.dish.votes, 2);
+  assert.deepEqual(result.dish.distribution, [1, 0, 1, 0, 0]);
+});
+
 test("cycles defendants in both directions", () => {
   assert.equal(nextDefendantIndex(0, 3), 1);
   assert.equal(nextDefendantIndex(2, 3), 0);

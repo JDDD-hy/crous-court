@@ -7,6 +7,11 @@ export type DishSummary = {
   id: string;
   name: string;
   zh: string;
+  canonicalNameFr?: string | null;
+  canonicalNameEn?: string | null;
+  canonicalNameZh?: string | null;
+  machineNameZh?: string | null;
+  originalDescription?: string;
   venue: string;
   date: string;
   image: string;

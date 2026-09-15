@@ -36,3 +36,31 @@ test("image diagnostics distinguish empty, format, metadata and truncated inputs
       (error: unknown) => error instanceof ImageValidationError && error.code === code);
   }
 });
+
+test("JPEG checks metadata after dimensions and between progressive scans", async () => {
+  const header = [255,216,255,194,0,11,8,0,100,0,200,1,1,17,0];
+  const scan = [255,218,0,2,7,255,0,8,255,208,9];
+  for (const middle of [[], scan]) {
+    for (const marker of [225,237,254]) {
+      const bytes = Uint8Array.from([...header,...middle,255,marker,0,2,255,217]);
+      await assert.rejects(checkSanitizedImage(new File([bytes], "metadata.jpg")), /EXIF/);
+    }
+  }
+  const clean = Uint8Array.from([...header,...scan,...scan,255,217]);
+  assert.equal((await checkSanitizedImage(new File([clean], "progressive.jpg"))).width, 200);
+  for (const bytes of [clean.slice(0,-2), Uint8Array.from([...clean,1]), Uint8Array.from([...header,255])]) {
+    await assert.rejects(checkSanitizedImage(new File([bytes], "truncated.jpg")), /不完整/);
+  }
+});
+
+test("PNG requires IEND and rejects trailing or incomplete chunks", async () => {
+  const signature = [137,80,78,71,13,10,26,10];
+  const chunk = (name: string, data: number[]) => [0,0,0,data.length,...Array.from(name, c => c.charCodeAt(0)),...data,0,0,0,0];
+  const header = [...signature,...chunk("IHDR", [0,0,0,1,0,0,0,1,8,2,0,0,0])];
+  const complete = [...header,...chunk("IDAT", []),...chunk("IEND", [])];
+  assert.equal((await checkSanitizedImage(new File([Uint8Array.from(complete)], "clean.png"))).width, 1);
+  for (const bytes of [header, [...header,0], [...complete,1], complete.slice(0,-1)]) {
+    await assert.rejects(checkSanitizedImage(new File([Uint8Array.from(bytes)], "bad.png")),
+      (error: unknown) => error instanceof ImageValidationError && error.code === "PNG_TRUNCATED");
+  }
+});

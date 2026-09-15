@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { cleanCanvasJpeg } from "../lib/upload/canvas-jpeg.ts";
 import { verifyAiMergeReview } from "./verify-ai-merge-review.mjs";
 import { verifySplitVotes } from "./verify-split-votes.mjs";
+import { verifyEnglishNames } from "./verify-english-names.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const persist = path.join(root, ".sites-runtime", "phase5-governance-verification");
@@ -31,7 +32,7 @@ const fakeAi = createServer(async (_request, response) => {
   const content = modelCalls === 1 ? JSON.stringify({ is_food_image: true }) : JSON.stringify({ analysis_status: "identified", is_food_image: true, is_standard_meal: false, staple: { name: "粗麦粉配肉丸", confidence: 0.82, region: { x: 0.12, y: 0.2, width: 0.58, height: 0.64 } }, side_dishes: [{ name: "原味酸奶", type: "酸奶", ingredients: [], confidence: 0.78, region: { x: 0.74, y: 0.16, width: 0.18, height: 0.22 } }], other_visible_items: [], warnings: [], scene_description: "餐盘中有粗麦粉配肉丸和一杯酸奶。" });
   response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify({ choices: [{ message: { content } }] }));
 });
-await new Promise((resolve) => fakeAi.listen(8794, "127.0.0.1", resolve));
+await new Promise((resolve) => fakeAi.listen(8796, "127.0.0.1", resolve));
 
 function run(args) { const result = spawnSync(process.execPath, [wrangler, ...args], { cwd: root, encoding: "utf8" }); assert.equal(result.status, 0, result.stdout + result.stderr); return result.stdout; }
 async function request(url, method = "GET", body, cookie) {
@@ -44,7 +45,7 @@ async function login(email) { const requested = await request("/api/auth/email/r
 await rm(persist, { recursive: true, force: true });
 run(["d1", "migrations", "apply", "DB", "--local", "--persist-to", persist, "--config", config]);
 run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--file", path.join(root, "db", "fixtures.sql"), "--yes"]);
-const child = spawn(process.execPath, [wrangler, "dev", "--config", config, "--local", "--persist-to", persist, "--ip", "127.0.0.1", "--port", "8793", "--inspector-port", "0", "--var", "AUTH_MODE:local", "--var", `AUTH_HMAC_SECRET:${secret}`, "--var", "ADMIN_EMAILS:admin@example.invalid", "--var", "AI_BASE_URL:http://127.0.0.1:8794/v1", "--var", "AI_API_KEY:test-only", "--var", "AI_MODEL:test-vision"], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+const child = spawn(process.execPath, [wrangler, "dev", "--config", config, "--local", "--persist-to", persist, "--ip", "127.0.0.1", "--port", "8793", "--inspector-port", "0", "--var", "AUTH_MODE:local", "--var", `AUTH_HMAC_SECRET:${secret}`, "--var", "ADMIN_EMAILS:admin@example.invalid", "--var", "AI_BASE_URL:http://127.0.0.1:8796/v1", "--var", "AI_API_KEY:test-only", "--var", "AI_MODEL:test-vision"], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
 let output = ""; child.stdout.on("data", (chunk) => output += chunk); child.stderr.on("data", (chunk) => output += chunk);
 await new Promise((resolve, reject) => { const timeout = setTimeout(() => reject(new Error(`Worker did not start\n${output.slice(-4000)}`)), 20_000); const ready = (chunk) => { if (String(chunk).includes("Ready on")) { clearTimeout(timeout); resolve(); } }; child.stdout.on("data", ready); child.stderr.on("data", ready); });
 
@@ -114,6 +115,10 @@ try {
     const output = run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", command, ...(json ? ["--json"] : [])]);
     return json ? JSON.parse(output) : output;
   } });
+  await verifyEnglishNames({ request, admin, ordinary: one, sql: (command, json = false) => {
+    const result = run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", command, ...(json ? ["--json"] : [])]);
+    return json ? JSON.parse(result) : result;
+  } });
 } finally {
   child.kill();
   await Promise.race([new Promise((resolve) => child.once("exit", resolve)), new Promise((resolve) => setTimeout(resolve, 3_000))]);
@@ -121,7 +126,7 @@ try {
   await new Promise((resolve) => fakeAi.close(resolve));
 }
 
-const verified = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT naming_status,canonical_name_fr,original_description FROM dishes WHERE id='mystery-dessert'; SELECT COUNT(*) count FROM moderation_actions; SELECT COUNT(*) count FROM votes GROUP BY dish_id,user_id HAVING count > 1; SELECT merged_into_dish_id FROM dishes WHERE id='lentilles-saucisse'; SELECT status,(SELECT COUNT(*) FROM name_endorsements WHERE suggestion_id=name_suggestions.id) supporters FROM name_suggestions; SELECT dish_id FROM dish_aliases WHERE normalized_name='crème dessert'; SELECT attempts FROM ai_rate_limits; SELECT COUNT(*) count FROM ai_identifications; SELECT original_description FROM servings WHERE original_description IN ('Semoule vue par moi','Couscous cette fois') ORDER BY original_description; SELECT COUNT(*) count FROM votes v JOIN users u ON u.id=v.user_id WHERE v.dish_id='couscous-boulettes' AND u.email_digest IS NOT NULL; SELECT attempts FROM governance_rate_limits WHERE action='report'", "--json"]));
+const verified = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT naming_status,canonical_name_fr,original_description FROM dishes WHERE id='mystery-dessert'; SELECT COUNT(*) count FROM moderation_actions; SELECT COUNT(*) count FROM votes GROUP BY dish_id,user_id HAVING count > 1; SELECT merged_into_dish_id FROM dishes WHERE id='lentilles-saucisse'; SELECT status,(SELECT COUNT(*) FROM name_endorsements WHERE suggestion_id=name_suggestions.id) supporters FROM name_suggestions WHERE dish_id='mystery-dessert'; SELECT dish_id FROM dish_aliases WHERE normalized_name='crème dessert'; SELECT attempts FROM ai_rate_limits; SELECT COUNT(*) count FROM ai_identifications; SELECT original_description FROM servings WHERE original_description IN ('Semoule vue par moi','Couscous cette fois') ORDER BY original_description; SELECT COUNT(*) count FROM votes v JOIN users u ON u.id=v.user_id WHERE v.dish_id='couscous-boulettes' AND u.email_digest IS NOT NULL; SELECT attempts FROM governance_rate_limits WHERE action='report'", "--json"]));
 assert.deepEqual(verified[0].results, [{ naming_status: "verified", canonical_name_fr: "Crème dessert", original_description: "巧克力？慕斯？案情复杂" }]);
 assert.ok(verified[1].results[0].count >= 4); assert.deepEqual(verified[2].results, []); assert.equal(verified[3].results[0].merged_into_dish_id, "couscous-boulettes");
 assert.deepEqual(verified[4].results, [{ status: "verified", supporters: 3 }]); assert.deepEqual(verified[5].results, [{ dish_id: "mystery-dessert" }]);

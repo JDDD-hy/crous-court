@@ -1,4 +1,6 @@
 "use client";
+import { useT } from "@/lib/i18n/client";
+
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,6 +12,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 type Challenge = { challengeId: string; devCode: string | null };
 
 export function EmailOtpGate({ heading = "投稿前先验明身份", description = "验证码会发送到你的邮箱；邮箱不会公开。", redirectTo }: { heading?: string; description?: string; redirectTo?: string } = {}) {
+  const t = useT();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
@@ -45,10 +48,10 @@ export function EmailOtpGate({ heading = "投稿前先验明身份", description
     finally { setBusy(false); }
   }
 
-  return <section className="border-4 border-ink bg-paper p-8 shadow-[7px_7px_0_#202624]">
-    <p className="font-mono text-sm font-bold text-verdict">身份核验</p><h2 className="mt-2 text-2xl font-black">{heading}</h2>
-    {!challenge ? <form onSubmit={(event) => { event.preventDefault(); void sendCode(); }} className="mt-6 max-w-lg"><label htmlFor="login-email" className="font-bold">邮箱地址</label><Input id="login-email" type="email" autoComplete="email" required value={email} onChange={(event) => { setEmail(event.target.value); setError(""); }} aria-invalid={Boolean(error)} aria-describedby={error ? "auth-error email-help" : "email-help"} className="mt-2 min-h-12 border-2 border-ink bg-paper text-base" /><p id="email-help" className="mt-2 text-sm text-ink/65">{description}</p><Button disabled={busy} className="mt-5 min-h-12 bg-ink px-6">{busy ? "发送中…" : "发送验证码"}</Button></form> : <form onSubmit={verify} className="mt-6"><p className="text-ink/70">输入发送到 <strong>{maskEmail(email)}</strong> 的六位验证码。</p><InputOTP autoFocus maxLength={6} pattern={REGEXP_ONLY_DIGITS} value={code} onChange={(value) => { setCode(value); setError(""); }} containerClassName="mt-5" aria-label="六位邮箱验证码" aria-invalid={Boolean(error)} aria-describedby={error ? "auth-error" : undefined}><InputOTPGroup>{Array.from({ length: 6 }, (_, index) => <InputOTPSlot key={index} index={index} className="size-12 border-2 border-ink text-lg" />)}</InputOTPGroup></InputOTP>{challenge.devCode && <p className="mt-3 rounded border-2 border-accent bg-[#efe2ac] p-3 font-mono text-sm" aria-live="polite">本地验收验证码：<strong>{challenge.devCode}</strong></p>}<div className="mt-5 flex flex-wrap gap-3"><Button disabled={busy || code.length !== 6} className="min-h-12 bg-ink px-6">{busy ? "核验中…" : "验证并继续"}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => { setChallenge(null); setCode(""); setError(""); }} className="min-h-12 border-2 border-ink">更换邮箱</Button><Button type="button" variant="ghost" disabled={busy || cooldown > 0} onClick={() => void sendCode()} className="min-h-12">{cooldown ? `${cooldown} 秒后可重发` : "重新发送"}</Button></div></form>}
-    {error && <p id="auth-error" role="alert" className="mt-5 border-2 border-verdict bg-[#f4d9d4] p-3 font-bold text-verdict">{error}</p>}
+  return <section data-language-busy={busy} data-language-draft={Boolean(email || challenge || code)} className="border-4 border-ink bg-paper p-8 shadow-[7px_7px_0_#202624]">
+    <p className="font-mono text-sm font-bold text-verdict">{t("身份核验")}</p><h2 className="mt-2 text-2xl font-black">{t(heading)}</h2>
+    {!challenge ? <form onSubmit={(event) => { event.preventDefault(); void sendCode(); }} className="mt-6 max-w-lg"><label htmlFor="login-email" className="font-bold">{t("邮箱地址")}</label><Input id="login-email" type="email" autoComplete="email" required value={email} onChange={(event) => { setEmail(event.target.value); setError(""); }} aria-invalid={Boolean(error)} aria-describedby={error ? "auth-error email-help" : "email-help"} className="mt-2 min-h-12 border-2 border-ink bg-paper text-base" /><p id="email-help" className="mt-2 text-sm text-ink/65">{t(description)}</p><Button disabled={busy} className="mt-5 min-h-12 bg-ink px-6">{busy ? t("发送中…") : t("发送验证码")}</Button></form> : <form onSubmit={verify} className="mt-6"><p className="text-ink/70">{t("输入发送到")} <strong>{maskEmail(email)}</strong>  {t("的六位验证码。")}</p><InputOTP autoFocus maxLength={6} pattern={REGEXP_ONLY_DIGITS} value={code} onChange={(value) => { setCode(value); setError(""); }} containerClassName="mt-5" aria-label={t("六位邮箱验证码")} aria-invalid={Boolean(error)} aria-describedby={error ? "auth-error" : undefined}><InputOTPGroup>{Array.from({ length: 6 }, (_, index) => <InputOTPSlot key={index} index={index} className="size-12 border-2 border-ink text-lg" />)}</InputOTPGroup></InputOTP>{challenge.devCode && <p className="mt-3 rounded border-2 border-accent bg-[#efe2ac] p-3 font-mono text-sm" aria-live="polite">{t("本地验收验证码：")}<strong>{challenge.devCode}</strong></p>}<div className="mt-5 flex flex-wrap gap-3"><Button disabled={busy || code.length !== 6} className="min-h-12 bg-ink px-6">{busy ? t("核验中…") : t("验证并继续")}</Button><Button type="button" variant="outline" disabled={busy} onClick={() => { setChallenge(null); setCode(""); setError(""); }} className="min-h-12 border-2 border-ink">{t("更换邮箱")}</Button><Button type="button" variant="ghost" disabled={busy || cooldown > 0} onClick={() => void sendCode()} className="min-h-12">{cooldown ? t("{0} 秒后可重发", cooldown) : t("重新发送")}</Button></div></form>}
+    {error && <p id="auth-error" role="alert" className="mt-5 border-2 border-verdict bg-[#f4d9d4] p-3 font-bold text-verdict">{t(error)}</p>}
   </section>;
 }
 

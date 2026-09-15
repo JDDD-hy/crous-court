@@ -8,7 +8,7 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
   const auditId = crypto.randomUUID();
   // The audit insert is the transaction's eligibility gate; every mutation uses its unique ID.
   const gate = "EXISTS(SELECT 1 FROM moderation_actions WHERE id=?)";
-  const source = await db.prepare("SELECT canonical_name_fr,canonical_name_zh,original_description FROM dishes WHERE id=?").bind(sourceId).first<Record<string, string | null>>();
+  const source = await db.prepare("SELECT canonical_name_fr,canonical_name_en,canonical_name_zh,original_description FROM dishes WHERE id=?").bind(sourceId).first<Record<string, string | null>>();
   const statements = [
     db.prepare(`INSERT INTO moderation_actions (id,admin_id,action,target_type,target_id,details_json)
       SELECT ?,?,'merge_dish','dish',?,json_set(?, '$.conflictingVotes', json((
@@ -32,11 +32,13 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
       SELECT lower(hex(randomblob(16))),?,name,normalized_name,language,source,created_by FROM dish_aliases
       WHERE dish_id=? AND ${gate} ON CONFLICT(dish_id,normalized_name) DO NOTHING`).bind(targetId, sourceId, auditId),
   ];
-  for (const name of Object.values(source ?? {}).filter((value): value is string => Boolean(value))) statements.push(
-    db.prepare(`INSERT INTO dish_aliases (id,dish_id,name,normalized_name,source,created_by)
-      SELECT ?,?,?,?,'admin',? WHERE ${gate} ON CONFLICT(dish_id,normalized_name) DO NOTHING`)
-      .bind(crypto.randomUUID(), targetId, name, normalizeDishName(name), adminId, auditId),
-  );
+  for (const [field, name] of Object.entries(source ?? {})) {
+    if (!name) continue;
+    const language = field === "canonical_name_en" ? "en" : field === "canonical_name_fr" ? "fr" : field === "canonical_name_zh" ? "zh" : "other";
+    statements.push(db.prepare(`INSERT INTO dish_aliases (id,dish_id,name,normalized_name,language,source,created_by)
+      SELECT ?,?,?,?,?,'admin',? WHERE ${gate} ON CONFLICT(dish_id,normalized_name) DO NOTHING`)
+      .bind(crypto.randomUUID(), targetId, name, normalizeDishName(name), language, adminId, auditId));
+  }
   statements.push(
     db.prepare(`UPDATE dishes SET merged_into_dish_id=? WHERE id=? AND ${gate}`).bind(targetId, sourceId, auditId),
     db.prepare(`UPDATE ai_merge_suggestions SET status='accepted',reviewed_by=?,reviewed_at=CURRENT_TIMESTAMP

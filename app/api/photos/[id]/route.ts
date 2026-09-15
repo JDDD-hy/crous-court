@@ -7,5 +7,5 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!photo) return new Response("Not found", { status: 404 });
   const object = await bucket.get(photo.canonical_key);
   if (!object) return new Response("Not found", { status: 404 });
-  return new Response(object.body, { headers: { "content-type": photo.media_type, "cache-control": "public, max-age=3600", "x-content-type-options": "nosniff" } });
+  return new Response(object.body, { headers: { "content-type": photo.media_type, "cache-control": "no-store", "x-content-type-options": "nosniff" } });
 }

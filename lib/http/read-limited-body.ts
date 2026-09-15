@@ -47,7 +47,9 @@ export async function parseLimitedFormData(request: Request, maxBytes: number) {
     throw new InvalidBodyError("multipart boundary 无效");
   }
   let form: FormData;
-  try { form = await request.formData(); }
+  // Count actual bytes before invoking the multipart parser, even without Content-Length.
+  const bytes = await readLimitedBytes(request, maxBytes);
+  try { form = await new Response(bytes, { headers: { "content-type": contentType } }).formData(); }
   catch { throw new InvalidBodyError("multipart 请求格式无效"); }
   let parts = 0;
   let contentBytes = 0;

@@ -80,6 +80,13 @@ try {
   const parallelBlockedCorrect = await post("/api/auth/email/verify", { email: "parallel-attempts@example.invalid", challengeId: parallelAttemptPayload.data.challengeId, code: parallelAttemptPayload.data.devCode });
   assert.equal(parallelBlockedCorrect.status, 400);
   const rawCookie = sessionCookie.split(";")[0];
+  for (const endpoint of ["/api/uploads", "/api/ai/identify"]) {
+    async function* oversized() { for (let i = 0; i < 384; i++) yield Buffer.alloc(65536, 120); }
+    const responses = await Promise.all(Array.from({ length: 6 }, () => fetch(`${origin}${endpoint}`, { method: "POST", headers: { origin, cookie: rawCookie, "content-type": "multipart/form-data; boundary=lengthless", connection: "close" }, body: oversized(), duplex: "half" })));
+    assert.deepEqual(responses.map(response => response.status), [413, 413, 413, 413, 413, 413], endpoint);
+    await Promise.allSettled(responses.map(response => response.arrayBuffer()));
+  }
+  console.log("Six concurrent lengthless oversized streams rejected with 413 on each upload and AI route.");
   const image = await readFile(path.join(root, "public", "meals", "couscous.jpg"));
   const invalidMultipart = await fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie: rawCookie, "content-type": "application/json" }, body: "{}" });
   assert.equal(invalidMultipart.status, 415);

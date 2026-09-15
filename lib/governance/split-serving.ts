@@ -1,3 +1,4 @@
+import { getLocale, getT } from "@/lib/i18n/server";
 import { getRawDb } from "@/db";
 import { GovernanceError } from "./errors";
 
@@ -40,14 +41,16 @@ export async function splitServing(adminId: string, servingId: string, rawName: 
 }
 
 export async function getSplitVoteRepairs() {
+  const t = await getT();
+  const locale = await getLocale();
   return (await getRawDb().prepare(`SELECT DISTINCT s.id serving_id,s.dish_id,s.initial_tier,
-    coalesce(d.canonical_name_zh,d.canonical_name_fr,nullif(d.original_description,''),'未知菜品') name
+    coalesce(CASE WHEN ?='en' THEN d.canonical_name_en ELSE d.canonical_name_zh END,nullif(d.original_description,''),d.canonical_name_fr,d.canonical_name_en,d.canonical_name_zh) name
     FROM servings s JOIN dishes d ON d.id=s.dish_id JOIN moderation_actions a ON a.target_id=s.id
     JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id
     WHERE a.action='split_serving' AND json_extract(a.details_json,'$.newDishId')=s.dish_id
     AND s.status='active' AND m.status='active' AND d.merged_into_dish_id IS NULL
     AND NOT EXISTS(SELECT 1 FROM votes v WHERE v.dish_id=s.dish_id AND v.user_id=s.creator_id)
-    ORDER BY s.created_at LIMIT 30`).all<{ serving_id: string; dish_id: string; initial_tier: number; name: string }>()).results;
+    ORDER BY s.created_at LIMIT 30`).bind(locale).all<{ serving_id: string; dish_id: string; initial_tier: number; name: string | null }>()).results.map(row => ({ ...row, name: row.name ?? t("未知菜品") }));
 }
 
 export async function repairSplitVote(adminId: string, servingId: string) {

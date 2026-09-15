@@ -78,6 +78,9 @@ export const dailyCaseCounters = sqliteTable("daily_case_counters", {
 export const dishes = sqliteTable("dishes", {
   id: text("id").primaryKey(),
   canonicalNameFr: text("canonical_name_fr"),
+  canonicalNameEn: text("canonical_name_en"),
+  machineNameZh: text("machine_name_zh"),
+  machineNameSource: text("machine_name_source"),
   canonicalNameZh: text("canonical_name_zh"),
   originalDescription: text("original_description").notNull().default(""),
   category: text("category", { enum: ["main", "side"] }).notNull(),
@@ -168,7 +171,7 @@ export const dishAliases = sqliteTable("dish_aliases", {
   dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   normalizedName: text("normalized_name").notNull(),
-  language: text("language", { enum: ["fr", "zh", "other"] }).notNull().default("other"),
+  language: text("language", { enum: ["fr", "en", "zh", "other"] }).notNull().default("other"),
   source: text("source", { enum: ["user", "community", "admin"] }).notNull(),
   createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: createdAt(),

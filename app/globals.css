@@ -115,6 +115,15 @@ body {
 .court-grid { background-image: radial-gradient(#2026241c 1px, transparent 1px); background-size: 16px 16px; }
 .ticket { clip-path: polygon(0 0, 100% 0, 100% 94%, 97% 100%, 94% 94%, 91% 100%, 88% 94%, 85% 100%, 82% 94%, 79% 100%, 76% 94%, 73% 100%, 70% 94%, 67% 100%, 64% 94%, 61% 100%, 58% 94%, 55% 100%, 52% 94%, 49% 100%, 46% 94%, 43% 100%, 40% 94%, 37% 100%, 34% 94%, 31% 100%, 28% 94%, 25% 100%, 22% 94%, 19% 100%, 16% 94%, 13% 100%, 10% 94%, 7% 100%, 4% 94%, 0 100%); }
 
+/* English labels can wrap without reducing the existing touch targets. */
+html[lang="en"] [data-slot="button"]:not([data-size^="icon"]) {
+  white-space: normal;
+  height: auto;
+  min-height: 2.25rem;
+}
+html[lang="en"] [data-slot="tabs-list"] { height: auto; flex-wrap: wrap; }
+html[lang="en"] [data-slot="tabs-trigger"] { white-space: normal; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

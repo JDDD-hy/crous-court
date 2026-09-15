@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { env } from "cloudflare:workers";
 import { getRawDb } from "@/db";
 import { BodyTooLargeError, readLimitedText } from "@/lib/http/read-limited-body";
+import { getLocale } from "@/lib/i18n/server";
+import { verificationEmail } from "@/lib/i18n/email";
 
 const OTP_TTL_SECONDS = 10 * 60;
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -127,7 +129,11 @@ export async function parseJsonRequest(request: Request) {
   try { body = await readLimitedText(request, 2048); }
   catch (error) { if (error instanceof BodyTooLargeError) throw new AuthError("请求格式无效", 413); throw error; }
   if (!body) throw new AuthError("请求格式无效", 400);
-  try { return JSON.parse(body) as Record<string, unknown>; }
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Expected object");
+    return parsed as Record<string, unknown>;
+  }
   catch { throw new AuthError("请求格式无效", 400); }
 }
 
@@ -155,9 +161,7 @@ async function deliverCode(request: Request, email: string, code: string) {
     body: JSON.stringify({
       from: env.OTP_FROM_EMAIL,
       to: [email],
-      subject: "CROUS法庭登录确认",
-      text: `你正在登录 CROUS法庭。此邮件只用于确认邮箱控制权；如果并非本人操作，请直接忽略，不需要采取任何措施。\n\n验证码：${code}\n10 分钟内有效，请勿转发。`,
-      html: `<div style="display:none;max-height:0;overflow:hidden;opacity:0">登录确认邮件；验证码位于正文，有效期十分钟。</div><p>你正在登录 <strong>CROUS法庭</strong>。</p><p>验证码：</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>10 分钟内有效，请勿转发。如果并非本人操作，请忽略此邮件。</p>`,
+      ...verificationEmail(await getLocale(), code),
     }),
   });
   if (!response.ok) throw new AuthError("验证码暂时无法发送，请稍后再试", 503);
