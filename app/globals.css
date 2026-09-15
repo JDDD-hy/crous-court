@@ -124,6 +124,30 @@ html[lang="en"] [data-slot="button"]:not([data-size^="icon"]) {
 html[lang="en"] [data-slot="tabs-list"] { height: auto; flex-wrap: wrap; }
 html[lang="en"] [data-slot="tabs-trigger"] { white-space: normal; }
 
+html[lang="en"] [data-dish-title] {
+  line-height: 1.2;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+html[lang="en"] h1[data-dish-title] { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+html[lang="en"] h2[data-dish-title] { font-size: 1.5rem; }
+html[lang="en"] h3[data-dish-title] { font-size: 1.125rem; }
+[data-dish-title] .dish-translation {
+  display: block;
+  margin-top: 0.35em;
+  font-size: max(0.65em, 0.875rem);
+  font-weight: 500;
+  line-height: 1.4;
+  color: #53646a;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+[data-dish-title] .dish-translation small {
+  font-size: max(0.75em, 0.75rem);
+  text-decoration: none;
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

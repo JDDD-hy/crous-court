@@ -14,7 +14,7 @@ test("Chinese and mixed dish names translate to English without replacing confir
   });
   const [name] = await translateChineseNames(["草莓酸奶"], "test-only:fx");
   const dish = { name: "草莓酸奶", zh: "草莓酸奶", originalDescription: "草莓酸奶", machineNameEn: name };
-  assert.equal(dishPresentation(dish, "en").primary, "Strawberry yoghurt (machine translated)");
+  assert.equal(dishPresentation(dish, "en").primary, "Strawberry yoghurt");
   assert.equal(dishPresentation(dish, "zh").primary, "草莓酸奶");
   assert.equal(dishPresentation({ ...dish, canonicalNameEn: "Confirmed name" }, "en").primary, "Confirmed name");
 });
@@ -38,7 +38,7 @@ test("DeepL Free batches bounded names, retains only detected English, and never
   assert.deepEqual(await translateEnglishNames(["Roast chicken", "Poulet rôti"], "test-only:fx"), ["烤鸡", null]);
   assert.equal(mockedFetch.mock.callCount(), 1);
   const dish = { name: "Roast chicken", zh: "Roast chicken", originalDescription: "Roast chicken", machineNameZh: "烤鸡" };
-  assert.deepEqual(dishPresentation(dish, "zh"), { primary: "烤鸡（机译）", secondary: "原文：Roast chicken", card: "烤鸡（机译）" });
+  assert.deepEqual(dishPresentation(dish, "zh"), { primary: "烤鸡", secondary: "Roast chicken", card: "烤鸡" });
   assert.equal(dishPresentation(dish, "en").primary, "Roast chicken");
   assert.equal(dishPresentation({ ...dish, canonicalNameZh: "人工确认烤鸡" }, "zh").primary, "人工确认烤鸡");
   await assert.rejects(translateEnglishNames(Array(10).fill("Roast chicken"), "test-only:fx"));

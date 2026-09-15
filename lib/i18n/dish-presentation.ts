@@ -7,8 +7,7 @@ export function dishPresentation(dish: DishNames, locale: Locale) {
   const confirmedName = locale === "zh" ? dish.canonicalNameZh : dish.canonicalNameEn;
   const machine = locale === "zh" ? dish.machineNameZh : dish.machineNameEn;
   if (!confirmedName && machine) {
-    const primary = locale === "zh" ? `${machine}（机译）` : `${machine} (machine translated)`;
-    return { primary, secondary: dish.originalDescription ? `${locale === "zh" ? "原文：" : "Original: "}${dish.originalDescription}` : null, card: primary };
+    return { primary: machine, secondary: dish.originalDescription || dish.name, card: machine };
   }
   const primary = confirmedName || dish.originalDescription || dish.name;
   return { primary, secondary: null, card: primary };
