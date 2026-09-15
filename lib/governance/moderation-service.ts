@@ -94,7 +94,7 @@ async function verifyName(adminId: string, suggestionId: string, language: strin
     db.prepare("INSERT INTO dish_aliases (id,dish_id,name,normalized_name,language,source,created_by) VALUES (?,?,?,?,?,'admin',?) ON CONFLICT(dish_id,normalized_name) DO UPDATE SET source='admin',language=excluded.language").bind(crypto.randomUUID(), row.dish_id, row.name, row.normalized_name, language, adminId),
     audit(adminId, "verify_name", "suggestion", suggestionId, { dishId: row.dish_id, language }),
   ]);
-  return { suggestionId, status: "verified" };
+  return { suggestionId, dishId: row.dish_id, status: "verified" };
 }
 
 function audit(adminId: string, action: string, targetType: string, targetId: string, details: object, onlyIfChanged = false) {

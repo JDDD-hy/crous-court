@@ -1,7 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { translateEnglishNames, translationCandidate } from "../lib/translation/deepl.ts";
+import { translateEnglishNames, translateChineseNames, chineseTranslationCandidate, translationCandidate } from "../lib/translation/deepl.ts";
 import { dishPresentation } from "../lib/i18n/dish-presentation.ts";
+
+test("Chinese and mixed dish names translate to English without replacing confirmed names", async t => {
+  assert.equal(chineseTranslationCandidate("草莓酸奶"), true);
+  assert.equal(chineseTranslationCandidate("巧克力酱pancake"), true);
+  assert.equal(chineseTranslationCandidate("Rice"), false);
+  t.mock.method(globalThis, "fetch", async (_url: unknown, options?: RequestInit) => {
+    const body = JSON.parse(String(options?.body));
+    assert.equal(body.source_lang, "ZH"); assert.equal(body.target_lang, "EN-GB");
+    return Response.json({ translations: [{ detected_source_language: "ZH", text: "Strawberry yoghurt" }] });
+  });
+  const [name] = await translateChineseNames(["草莓酸奶"], "test-only:fx");
+  const dish = { name: "草莓酸奶", zh: "草莓酸奶", originalDescription: "草莓酸奶", machineNameEn: name };
+  assert.equal(dishPresentation(dish, "en").primary, "Strawberry yoghurt (machine translated)");
+  assert.equal(dishPresentation(dish, "zh").primary, "草莓酸奶");
+  assert.equal(dishPresentation({ ...dish, canonicalNameEn: "Confirmed name" }, "en").primary, "Confirmed name");
+});
 
 test("DeepL Free batches bounded names, retains only detected English, and never confirms a machine name", async (t) => {
   assert.equal(translationCandidate("Roast chicken"), true);

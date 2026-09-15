@@ -1,6 +1,6 @@
 import { localizedJson } from "@/lib/i18n/server";
 import { after } from "next/server";
-import { translateNewDishNames } from "@/lib/translation/translate-dishes";
+import { translateDishNames } from "@/lib/translation/translate-dishes";
 import { assertSameOrigin, AuthError, getEmailUser } from "@/lib/auth/email-auth";
 import { BodyTooLargeError, InvalidBodyError, parseLimitedFormData } from "@/lib/http/read-limited-body";
 import { publishMeal, UploadInputError } from "@/lib/upload/upload-service";
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     if (!user) return localizedJson({ data: null, error: "请先通过邮箱验证码登录", requestId }, { status: 401 });
     const form = await parseLimitedFormData(request, MAX_UPLOAD_BODY_BYTES);
     const { translationCandidates, ...data } = await publishMeal(form, user.userId);
-    after(() => translateNewDishNames(translationCandidates));
+    after(() => translateDishNames(translationCandidates));
     return localizedJson({ data, error: null, requestId }, { status: 201 });
   } catch (error) {
     if (error instanceof AuthError) return localizedJson({ data: null, error: error.message, requestId }, { status: error.status });

@@ -80,6 +80,8 @@ export const dishes = sqliteTable("dishes", {
   canonicalNameFr: text("canonical_name_fr"),
   canonicalNameEn: text("canonical_name_en"),
   machineNameZh: text("machine_name_zh"),
+  machineNameEn: text("machine_name_en"),
+  machineNameEnSource: text("machine_name_en_source"),
   machineNameSource: text("machine_name_source"),
   canonicalNameZh: text("canonical_name_zh"),
   originalDescription: text("original_description").notNull().default(""),

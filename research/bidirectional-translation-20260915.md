@@ -1,0 +1,9 @@
+# Chinese / English dish translation
+
+Chinese submissions now receive an English machine name; English submissions retain the existing Chinese translation path. Both run after successful publication through server-only DeepL Free. Confirming a name also refreshes the opposite language. Originals and manually confirmed names are preserved; source guards reject translations made stale by concurrent edits. Display and candidate search use only translations matching their current source.
+
+Migration 0018 adds separate English machine text and source fields. Migration 0019 backfills 17 existing public Chinese names using DeepL, with dish-ID/source/manual-name guards. It does not modify photos, dates, venues, votes or confirmed names.
+
+Validation: 58 unit tests; lint; TypeScript; production build; governance integration (including naming, merge/split and voting). A real local upload through the compiled worker returned `Strawberry Yoghurt` for `草莓酸奶` and `烤鸡` for `Roast chicken`, persisted both, and displayed them on the respective detail pages. The 390 px English detail had no horizontal overflow. Runnable real-service check: `node scripts/verify-bidirectional-translation.mjs` against the local worker at port 8795 with its server-side DeepL key.
+
+Limits: translation runs after submission, not on every keystroke. It can require a refresh if a page was loaded before translation finished. Machine translations may be inaccurate; short Latin names may be detected as French and skipped. Failures preserve the original and do not block publication; no automatic retry queue. Synthetic uploads were local only.

@@ -11,6 +11,7 @@ export type DishSummary = {
   canonicalNameEn?: string | null;
   canonicalNameZh?: string | null;
   machineNameZh?: string | null;
+  machineNameEn?: string | null;
   originalDescription?: string;
   venue: string;
   date: string;
