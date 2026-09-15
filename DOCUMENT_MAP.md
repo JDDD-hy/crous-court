@@ -14,6 +14,7 @@
 | Versailles 地点匹配算法与官方数据 | `research/versailles-location.md` |
 | multipart 字节限制修复与生产复验记录 | `docs/bugs/BUG-20260913-01-multipart-preparse-resource-exhaustion.md` |
 | 全代码发布审查与修复 | `research/release-review-20260915.md` |
+| 用户确认的历史 Cafétéria 归属迁移 | `research/historical-cafeterias-20260915.md` |
 
 ## 更新矩阵
 
