@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const admin = await requireAdminUser();
     const input = await parseJsonRequest(request);
     const data = await moderate(admin.userId, input);
-    if (input.action === "verify_name" && typeof data.dishId === "string") {
+    if ((input.action === "verify_name" || input.action === "split_serving") && typeof data.dishId === "string") {
       const id = data.dishId;
       after(() => translateDishNames([{ id }]));
     }

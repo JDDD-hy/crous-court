@@ -1,6 +1,6 @@
 # Chinese / English dish translation
 
-Chinese submissions now receive an English machine name; English submissions retain the existing Chinese translation path. Both run after successful publication through server-only DeepL Free. Confirming a name also refreshes the opposite language. Originals and manually confirmed names are preserved; source guards reject translations made stale by concurrent edits. Display and candidate search use only translations matching their current source.
+Chinese submissions now receive an English machine name; English submissions retain the existing Chinese translation path. Both run after successful publication through server-only DeepL Free. Confirming a name also refreshes the opposite language; splitting a serving triggers translation for its new dish. Originals and manually confirmed names are preserved; source guards reject translations made stale by concurrent edits. Display and candidate search use only translations matching their current source. Selecting a candidate retains the diner's bounded input instead of copying a potentially long translation and its label into the submission. Real-service checks scope results to the current upload's photo ID.
 
 Migration 0018 adds separate English machine text and source fields. Migration 0019 backfills 17 existing public Chinese names using DeepL, with dish-ID/source/manual-name guards. It does not modify photos, dates, venues, votes or confirmed names.
 
