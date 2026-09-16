@@ -1,6 +1,7 @@
 import { getRawDb } from "@/db";
 import { GovernanceError } from "./errors";
 import { normalizeDishName } from "./name-utils";
+import { visibleDishIds } from "./visible-dishes";
 
 export async function mergeDish(adminId: string, sourceId: string, targetId: string, suggestionId: string | null = null) {
   if (!sourceId || !targetId || sourceId === targetId) throw new GovernanceError("合并对象无效");
@@ -17,7 +18,8 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
       ))) WHERE EXISTS(
         SELECT 1 FROM dishes s JOIN dishes t ON t.id=? WHERE s.id=? AND s.category=t.category
         AND s.merged_into_dish_id IS NULL AND t.merged_into_dish_id IS NULL)
-      AND (? IS NULL OR EXISTS(SELECT 1 FROM ai_merge_suggestions WHERE id=? AND source_id=? AND target_id=? AND status='pending'))`)
+      AND (? IS NULL OR EXISTS(SELECT 1 FROM ai_merge_suggestions WHERE id=? AND source_id=? AND target_id=? AND status='pending'
+        AND source_id IN (${visibleDishIds}) AND target_id IN (${visibleDishIds})))`)
       .bind(auditId, adminId, sourceId, JSON.stringify({ targetId, suggestionId, rule: "earlier_vote_kept;equal_time_smallest_id" }), sourceId, targetId, sourceId, targetId, targetId, sourceId, suggestionId, suggestionId, sourceId, targetId),
     // Remove only conflicting later votes, then move the surviving source votes in place.
     db.prepare(`DELETE FROM votes WHERE dish_id=? AND ${gate} AND EXISTS(

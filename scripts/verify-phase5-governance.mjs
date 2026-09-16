@@ -8,6 +8,7 @@ import { cleanCanvasJpeg } from "../lib/upload/canvas-jpeg.ts";
 import { verifyAiMergeReview } from "./verify-ai-merge-review.mjs";
 import { verifySplitVotes } from "./verify-split-votes.mjs";
 import { verifyEnglishNames } from "./verify-english-names.mjs";
+import { verifyAdminDishSearch } from "./verify-admin-dish-search.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const persist = path.join(root, ".sites-runtime", "phase5-governance-verification");
@@ -17,12 +18,14 @@ const origin = "http://127.0.0.1:8793";
 const secret = "phase5-governance-verification-secret-at-least-32-chars";
 let modelCalls = 0;
 let mergeCalls = 0;
+const mergeInputs = [];
 const fakeAi = createServer(async (_request, response) => {
   let raw = ""; for await (const chunk of _request) raw += chunk;
   const body = JSON.parse(raw);
   if (body.response_format?.json_schema?.name === "crous_merge_review") {
     mergeCalls += 1;
     const ids = new Set(JSON.parse(body.messages[1].content).dishes.map((d) => d.id));
+    mergeInputs.push(ids);
     const pairs = [["merge-a", "merge-b"], ["merge-c", "merge-d"]].filter(([a, b]) => ids.has(a) && ids.has(b)).map(([sourceId, targetId]) => ({ sourceId, targetId, reason: "名称语义相近", uncertainty: "需要人工核对照片" }));
     response.writeHead(200, { "content-type": "application/json" });
     response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(mergeCalls === 1 ? { pairs: [{ ...pairs[0], targetId: "invented" }] } : { pairs }) } }] }));
@@ -38,7 +41,11 @@ function run(args) { const result = spawnSync(process.execPath, [wrangler, ...ar
 async function request(url, method = "GET", body, cookie) {
   const init = { method, headers: { origin, connection: "close", ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(10_000) };
   try { const response = await fetch(`${origin}${url}`, init); if (response.status === 503 && (await response.clone().text()).includes("worker restarted")) return fetch(`${origin}${url}`, { ...init, signal: AbortSignal.timeout(10_000) }); return response; }
-  catch (error) { throw new Error(`${method} ${url} failed: ${error instanceof Error ? error.message : error}\n${output.slice(-4000)}`); }
+  catch (error) {
+    // Local D1 CLI fixture writes can restart workerd; only read requests are safe to retry.
+    if (method === "GET" && error instanceof TypeError) return fetch(`${origin}${url}`, { ...init, signal: AbortSignal.timeout(10_000) });
+    throw new Error(`${method} ${url} failed: ${error instanceof Error ? error.message : error}\n${output.slice(-4000)}`);
+  }
 }
 async function login(email) { const requested = await request("/api/auth/email/request", "POST", { email }); const challenge = await requested.json(); assert.equal(requested.status, 200, JSON.stringify(challenge)); const verified = await request("/api/auth/email/verify", "POST", { email, challengeId: challenge.data.challengeId, code: challenge.data.devCode }); assert.equal(verified.status, 200); return verified.headers.get("set-cookie").split(";")[0]; }
 
@@ -119,6 +126,8 @@ try {
     const result = run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", command, ...(json ? ["--json"] : [])]);
     return json ? JSON.parse(result) : result;
   } });
+  await verifyAdminDishSearch({ request, admin, ordinary: one, sql: (command) => run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", command]) });
+  assert.ok(mergeInputs.length > 0 && mergeInputs.every(ids=>!ids.has('merge-empty')), 'empty dishes must never reach the AI prompt');
 } finally {
   child.kill();
   await Promise.race([new Promise((resolve) => child.once("exit", resolve)), new Promise((resolve) => setTimeout(resolve, 3_000))]);
