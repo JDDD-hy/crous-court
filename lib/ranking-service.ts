@@ -5,6 +5,7 @@ import type { DishCategory, DishDetail, DishSummary } from "./dish-types";
 import { buildTierHistory, calculateVerdict, compareVerdicts, type Tier } from "./ranking";
 import { getLocale } from "./i18n/server";
 import { translator } from "./i18n/core";
+import { venueLocation } from "./venue-location";
 
 const imageByDish: Record<string, string> = {
   "couscous-boulettes": "/meals/couscous.jpg",
@@ -32,6 +33,8 @@ export async function listRankings(category?: DishCategory, venueIds?: string[])
       originalDescription: servings.originalDescription,
       venueName: venues.canonicalName,
       venueNickname: venues.nickname,
+      venueId: venues.id,
+      venueAddress: venues.address,
       photoId: photos.id,
     }).from(servings)
       .innerJoin(venues, eq(servings.venueId, venues.id))
@@ -73,6 +76,7 @@ export async function listRankings(category?: DishCategory, venueIds?: string[])
         name: dish.canonicalNameFr ?? dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? t("神秘菜品 #{0}", dish.id.slice(-4)),
         zh: dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? (dish.originalDescription || t("等待群众认菜")),
         venue: locale === "en" || serving.venueNickname === serving.venueName ? serving.venueName : `${serving.venueNickname} · ${serving.venueName}`,
+        venueLocation: venueLocation(serving.venueAddress, serving.venueId),
         date: serving.date,
         image: serving.photoId ? `/api/photos/${serving.photoId}` : imageByDish[dish.id] ?? "/file.svg",
         tier: verdict.tier,

@@ -56,5 +56,9 @@ next-env.d.ts
 /work/
 # Local project notes; never publish them with source or deployments.
 /docs/
+/AGENTS.md
+/DOCUMENT_MAP.md
+/CONTEXT.md
+/research/
 # User-owned source photos; only sanitized derivatives belong in public/.
 /pic/
