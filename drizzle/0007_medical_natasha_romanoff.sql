@@ -1,0 +1,1 @@
+ALTER TABLE `servings` ADD `original_description` text DEFAULT '' NOT NULL;
