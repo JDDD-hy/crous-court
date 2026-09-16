@@ -14,6 +14,7 @@ export type DishSummary = {
   machineNameEn?: string | null;
   originalDescription?: string;
   venue: string;
+  venueLocation?: string | null;
   date: string;
   image: string;
   tier: Tier | null;
