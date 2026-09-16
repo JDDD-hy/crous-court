@@ -71,6 +71,12 @@ export default async function StoryPage({ searchParams }: { searchParams: Promis
             <h2 id="story-contact" className="text-2xl font-black sm:text-3xl">{t("来，一起把法庭整大点。")}</h2>
             <p className="mt-6 text-lg leading-loose text-ink/80">{t("我们只是抛砖引玉！有更离谱的点子？欢迎来信")}</p>
             <a href="mailto:xedocjade@agent.qq.com" className="mt-6 inline-flex min-h-11 max-w-full items-center border-2 border-ink bg-paper px-4 py-3 text-base font-bold shadow-[4px_4px_0_#202624] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:px-6"><span className="break-all">xedocjade@agent.qq.com</span></a>
+            <div className="mt-4">
+              <a href="https://github.com/JDDD-hy/crous-court" className="inline-flex min-h-11 max-w-full items-center gap-3 text-base font-bold underline underline-offset-4 hover:text-verdict focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-6 shrink-0"><path d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.334-5.467-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.655 1.652.243 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.628-5.479 5.925.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+                <span className="min-w-0 break-all">github.com/JDDD-hy/crous-court</span>
+              </a>
+            </div>
           </section>
           <footer className="border-t-2 border-dashed border-ink/20 pt-8 text-center text-base leading-relaxed text-ink/65">{t("故事仍在装盘，判决交给你们。")}<p className="mt-2 text-sm">{t("CROUS法庭 · 学生社区，非 CROUS 官方网站")}</p></footer>
         </article>
