@@ -7,6 +7,7 @@ import { useVenueQuery } from "@/lib/use-venue-query";
 
 import { Gavel } from "lucide-react";
 import { UploadNav } from "./UploadNav";
+import { UsageGuide } from "./UsageGuide";
 import { EmailLogoutButton } from "./EmailLogoutButton";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -34,6 +35,7 @@ export function SiteHeader({ authenticated = false, venueQuery = "", scopeContro
           <a href={`/rankings${query}`} className="hidden rounded-full px-3 py-2 hover:bg-ink/5 sm:block">{t("长期榜单")}</a>
           <a href={`/${query}`} className="hidden rounded-full px-3 py-2 hover:bg-ink/5 sm:block">{t("今日开庭")}</a>
           <UploadNav authenticated={authenticated} venueQuery={query} />
+          <UsageGuide />
           {authenticated && <EmailLogoutButton />}
           <LanguageSwitch />
         </nav>
