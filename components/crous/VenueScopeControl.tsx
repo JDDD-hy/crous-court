@@ -18,7 +18,7 @@ export function VenueScopeControl({ options, selectedIds, invalid, pending }: { 
     location.assign(url.pathname + url.search);
   }
   const names = selectedIds === undefined ? (en ? "All venues" : "全部案发地点") : selectedIds.map(id => options.find(option => option.id === id)?.name).filter(Boolean).join(" / ");
-  return <details className="group" onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }}>
+  return <details data-venue-menu className="group" onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }}>
     <summary className="flex min-h-11 max-w-56 cursor-pointer list-none items-center gap-2 rounded-sm px-3 py-2 hover:bg-ink/5 [&::-webkit-details-marker]:hidden"><MapPin aria-hidden="true" className="size-4 shrink-0 text-verdict" /><span className="truncate">{pending || invalid || !names ? (en ? "Crime scene" : "案发地点") : `${en ? "Selected" : "已选地点"} · ${names}`}</span><span aria-hidden="true" className="group-open:rotate-180">⌄</span></summary>
     <section aria-label={en ? "Crime scene filter" : "案发地点筛选"} className="absolute inset-x-0 top-full max-h-[70vh] overflow-y-auto border-b-2 border-ink/20 bg-paper p-4 shadow-md sm:left-auto sm:right-6 sm:w-[32rem] sm:border-2">
       <VenuePicker options={options} onSelect={select} />
