@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, rm } from "node:fs/promises";
+import { readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import path from "node:path";
@@ -49,10 +49,20 @@ async function request(url, method = "GET", body, cookie) {
 }
 async function login(email) { const requested = await request("/api/auth/email/request", "POST", { email }); const challenge = await requested.json(); assert.equal(requested.status, 200, JSON.stringify(challenge)); const verified = await request("/api/auth/email/verify", "POST", { email, challengeId: challenge.data.challengeId, code: challenge.data.devCode }); assert.equal(verified.status, 200); return verified.headers.get("set-cookie").split(";")[0]; }
 
+assert.ok(persist.startsWith(root + path.sep));
 await rm(persist, { recursive: true, force: true });
 run(["d1", "migrations", "apply", "DB", "--local", "--persist-to", persist, "--config", config]);
 run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--file", path.join(root, "db", "fixtures.sql"), "--yes"]);
-const child = spawn(process.execPath, [wrangler, "dev", "--config", config, "--local", "--persist-to", persist, "--ip", "127.0.0.1", "--port", "8793", "--inspector-port", "0", "--var", "AUTH_MODE:local", "--var", `AUTH_HMAC_SECRET:${secret}`, "--var", "ADMIN_EMAILS:admin@example.invalid", "--var", "AI_BASE_URL:http://127.0.0.1:8796/v1", "--var", "AI_API_KEY:test-only", "--var", "AI_MODEL:test-vision"], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+const envFile = path.join(persist, 'test-only.env');
+await mkdir(persist, {recursive:true});
+await writeFile(envFile, `AUTH_MODE=local
+AUTH_HMAC_SECRET=${secret}
+ADMIN_EMAILS=admin@example.invalid
+AI_BASE_URL=http://127.0.0.1:8796/v1
+AI_API_KEY=test-only
+AI_MODEL=test-vision
+`);
+const child = spawn(process.execPath, [wrangler, "dev", "--env-file", envFile, "--config", config, "--local", "--persist-to", persist, "--ip", "127.0.0.1", "--port", "8793", "--inspector-port", "0", "--var", "AUTH_MODE:local", "--var", `AUTH_HMAC_SECRET:${secret}`, "--var", "ADMIN_EMAILS:admin@example.invalid", "--var", "AI_BASE_URL:http://127.0.0.1:8796/v1", "--var", "AI_API_KEY:test-only", "--var", "AI_MODEL:test-vision"], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
 let output = ""; child.stdout.on("data", (chunk) => output += chunk); child.stderr.on("data", (chunk) => output += chunk);
 await new Promise((resolve, reject) => { const timeout = setTimeout(() => reject(new Error(`Worker did not start\n${output.slice(-4000)}`)), 20_000); const ready = (chunk) => { if (String(chunk).includes("Ready on")) { clearTimeout(timeout); resolve(); } }; child.stdout.on("data", ready); child.stderr.on("data", ready); });
 
@@ -68,7 +78,7 @@ try {
   const otherUserSameFile = await upload(two); assert.equal(otherUserSameFile.status, 201, await otherUserSameFile.text());
   const firstSighting = await upload(one, secondImage, "Semoule vue par moi", "couscous-boulettes"); assert.equal(firstSighting.status, 201, await firstSighting.text());
   const secondSighting = await upload(one, thirdImage, "Couscous cette fois", "couscous-boulettes"); assert.equal(secondSighting.status, 201, await secondSighting.text());
-  const initialCandidates = await request("/api/dishes/candidates?category=main&q=lentilles").then((response) => response.json());
+  const initialCandidates = await request("/api/dishes/candidates?category=main&q=lentilles&venue=venue-experimental").then((response) => response.json());
   assert.equal(initialCandidates.data[0].id, "lentilles-saucisse");
   const proposed = await request("/api/dishes/mystery-dessert/names", "POST", { name: "Crème dessert", evidenceType: "ate_today" }, one);
   const proposal = await proposed.json(); assert.equal(proposed.status, 201, JSON.stringify(proposal));
@@ -91,7 +101,7 @@ try {
   const resolvedReport = await request("/api/admin/actions", "POST", { action: "resolve_report", reportId: report.data.id }, admin); assert.equal(resolvedReport.status, 200, await resolvedReport.text());
 
   const merged = await request("/api/admin/actions", "POST", { action: "merge_dish", sourceDishId: "lentilles-saucisse", targetDishId: "couscous-boulettes" }, admin);
-  assert.equal(merged.status, 200, await merged.text());
+  assert.equal(merged.status, 409, await merged.text());
   const split = await request("/api/admin/actions", "POST", { action: "split_serving", servingId: "fixture-serving-01", name: "重新立案的主食" }, admin);
   const splitBody = await split.json();
   assert.equal(split.status, 200, JSON.stringify(splitBody));
@@ -137,7 +147,7 @@ try {
 
 const verified = JSON.parse(run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--command", "SELECT naming_status,canonical_name_fr,original_description FROM dishes WHERE id='mystery-dessert'; SELECT COUNT(*) count FROM moderation_actions; SELECT COUNT(*) count FROM votes GROUP BY dish_id,user_id HAVING count > 1; SELECT merged_into_dish_id FROM dishes WHERE id='lentilles-saucisse'; SELECT status,(SELECT COUNT(*) FROM name_endorsements WHERE suggestion_id=name_suggestions.id) supporters FROM name_suggestions WHERE dish_id='mystery-dessert'; SELECT dish_id FROM dish_aliases WHERE normalized_name='crème dessert'; SELECT attempts FROM ai_rate_limits; SELECT COUNT(*) count FROM ai_identifications; SELECT original_description FROM servings WHERE original_description IN ('Semoule vue par moi','Couscous cette fois') ORDER BY original_description; SELECT COUNT(*) count FROM votes v JOIN users u ON u.id=v.user_id WHERE v.dish_id='couscous-boulettes' AND u.email_digest IS NOT NULL; SELECT attempts FROM governance_rate_limits WHERE action='report'", "--json"]));
 assert.deepEqual(verified[0].results, [{ naming_status: "verified", canonical_name_fr: "Crème dessert", original_description: "巧克力？慕斯？案情复杂" }]);
-assert.ok(verified[1].results[0].count >= 4); assert.deepEqual(verified[2].results, []); assert.equal(verified[3].results[0].merged_into_dish_id, "couscous-boulettes");
+assert.ok(verified[1].results[0].count >= 4); assert.deepEqual(verified[2].results, []); assert.equal(verified[3].results[0].merged_into_dish_id, null);
 assert.deepEqual(verified[4].results, [{ status: "verified", supporters: 3 }]); assert.deepEqual(verified[5].results, [{ dish_id: "mystery-dessert" }]);
 assert.deepEqual(verified[6].results, [{ attempts: 1 }]); assert.deepEqual(verified[7].results, [{ count: 1 }]);
 assert.deepEqual(verified[8].results, [{ original_description: "Couscous cette fois" }, { original_description: "Semoule vue par moi" }]); assert.equal(verified[9].results[0].count, 1);

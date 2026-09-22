@@ -11,13 +11,13 @@ test("failed photo writes roll back, but a lost receipt never deletes committed 
       prepare(sql: string) { return { bind() { return this; }, async first() {
         if (sql.startsWith("SELECT meal_id")) return null;
         if (sql.startsWith("SELECT case_number")) throw new Error("receipt failed");
-        return { display_number: 101, attempts: 1 };
+        return { display_number: 101, active: 1, timezone: "Europe/Paris", attempts: 1 };
       } }; },
       async batch() { if (failure === "database") throw new Error("database failed"); committed = true; },
     };
     const bucket = { async put() { if (++writes === 2 && failure === "storage") throw new Error("storage failed"); }, async delete(key: string) { deleted.push(key); } };
-    const publish = new Function("getBindings", "todayInParis", "checkSanitizedImage", source + "\nreturn publishMeal;")(
-      () => ({ db, bucket }), () => "2026-09-15", async () => ({ width: 1, height: 1, bytes: new ArrayBuffer(1), mediaType: "image/jpeg" }),
+    const publish = new Function("getBindings", "todayInTimezone", "checkSanitizedImage", "catalogById", source + "\nreturn publishMeal;")(
+      () => ({ db, bucket }), () => "2026-09-15", async () => ({ width: 1, height: 1, bytes: new ArrayBuffer(1), mediaType: "image/jpeg" }), new Map(),
     ) as (form: FormData, user: string) => Promise<unknown>;
     const form = new FormData();
     for (const [key, value] of Object.entries({ venueId: "test", eatenOn: "2026-09-15", mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);

@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return {
   title: t("CROUS法庭"),
-  description: t("Télécom Paris / Palaiseau 学生的 CROUS 菜品社区评级网站。"),
+  description: t("法国 CROUS 菜品社区评级网站。"),
   other: {
     "codex-preview": "development",
   },

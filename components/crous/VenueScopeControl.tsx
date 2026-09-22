@@ -1,5 +1,6 @@
 "use client";
 import { MapPin } from "lucide-react";
+import { useState } from "react";
 import { useLocale } from "@/lib/i18n/client";
 import { saveVenuePreference, type VenueOption } from "@/lib/venue-preference";
 import { VenuePicker } from "./VenuePicker";
@@ -11,6 +12,7 @@ export function VenueRequiredNotice() {
 
 export function VenueScopeControl({ options, selectedIds, invalid, pending }: { options: VenueOption[]; selectedIds?: string[]; invalid: boolean; pending: boolean }) {
   const en = useLocale() === "en";
+  const [open, setOpen] = useState(false);
   function select(ids: string[]) {
     saveVenuePreference(ids.length ? ids : ["none"]);
     const url = new URL(location.href); url.searchParams.delete("venue");
@@ -18,13 +20,12 @@ export function VenueScopeControl({ options, selectedIds, invalid, pending }: { 
     location.assign(url.pathname + url.search);
   }
   const names = selectedIds === undefined ? (en ? "All venues" : "全部案发地点") : selectedIds.map(id => options.find(option => option.id === id)?.name).filter(Boolean).join(" / ");
-  return <details data-venue-menu className="group" onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }}>
+  return <details data-venue-menu className="group" onToggle={event=>setOpen(event.currentTarget.open)} onKeyDown={event => { if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); } }}>
     <summary className="flex min-h-11 max-w-56 cursor-pointer list-none items-center gap-2 rounded-sm px-3 py-2 hover:bg-ink/5 [&::-webkit-details-marker]:hidden"><MapPin aria-hidden="true" className="size-4 shrink-0 text-verdict" /><span className="truncate">{pending || invalid || !names ? (en ? "Crime scene" : "案发地点") : `${en ? "Selected" : "已选地点"} · ${names}`}</span><span aria-hidden="true" className="group-open:rotate-180">⌄</span></summary>
-    <section aria-label={en ? "Crime scene filter" : "案发地点筛选"} className="absolute inset-x-0 top-full max-h-[70vh] overflow-y-auto border-b-2 border-ink/20 bg-paper p-4 shadow-md sm:left-auto sm:right-6 sm:w-[32rem] sm:border-2">
-      <VenuePicker options={options} onSelect={select} />
-      <button type="button" onClick={() => select(["all"])} className="mt-3 min-h-11 text-sm underline">{en ? "All venues" : "全部案发地点"}</button>
+    <section aria-label={en ? "Crime scene filter" : "案发地点筛选"} className="absolute inset-x-4 top-full max-h-[min(75vh,26rem)] overflow-y-auto rounded-lg border-2 border-ink/30 bg-paper p-3 shadow-[4px_4px_0_#20262426] sm:left-auto sm:right-6 sm:w-[24rem]">
+      {open && <VenuePicker options={options} onSelect={select} />}
+      <div className="mt-1 flex items-center justify-between gap-2 border-t border-ink/15"><button type="button" onClick={() => select(["all"])} className="min-h-11 text-sm underline decoration-ink/30 underline-offset-4 hover:text-verdict">{en ? "All venues" : "全部案发地点"}</button><span className="text-sm font-normal text-ink/55">{en ? "Rated by venue" : "按餐厅独立评分"}</span></div>
       {invalid && <p role="alert">{en ? "Unknown venue. Choose again." : "地点无效，请重新选择。"}</p>}
-      <p className="mt-2 text-sm font-normal text-ink/65">{en ? "Filters sightings by venue. Ratings include votes from all venues." : "只筛选在这些地点出现过的菜品；评分仍汇总全站投票。"}</p>
     </section>
   </details>;
 }

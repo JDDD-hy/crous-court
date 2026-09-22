@@ -5,7 +5,7 @@ export const mergeReviewSchema = z.object({ pairs: z.array(z.object({
   reason: z.string().trim().min(1).max(500), uncertainty: z.string().trim().min(1).max(500),
 }).strict()).max(20) }).strict();
 
-export function validateMergePairs(value: unknown, dishes: Array<{ id: string; category: string }>) {
+export function validateMergePairs(value: unknown, dishes: Array<{ id: string; category: string; venue_id?: string }>) {
   const parsed = mergeReviewSchema.parse(value);
   const seen = new Set<string>();
   return parsed.pairs.filter((pair) => {
@@ -13,6 +13,7 @@ export function validateMergePairs(value: unknown, dishes: Array<{ id: string; c
     const target = dishes.find((dish) => dish.id === pair.targetId);
     const key = [pair.sourceId, pair.targetId].sort().join(":");
     if (!source || !target || source.id === target.id || source.category !== target.category) throw new Error("AI 返回无效菜品配对");
+    if (!source.venue_id || source.venue_id !== target.venue_id) throw new Error("AI 返回跨餐厅菜品配对");
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

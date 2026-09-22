@@ -10,11 +10,11 @@ import { HomeCourt, HomeExtras } from "./HomeSections";
 import { VenueRequiredNotice } from "./VenueScopeControl";
 import { SiteHeader } from "./SiteHeader";
 
-export function HomePrototype({ meals, courtDates, authenticated, myVotes, scopeControl, needsVenue = false, venueQuery = "" }: { meals: DishSummary[]; courtDates: string[]; authenticated: boolean; myVotes: Record<string, Tier>; scopeControl?: ReactNode; needsVenue?: boolean; venueQuery?: string }) {
+export function HomePrototype({ meals, courtDates, recentIds, authenticated, myVotes, scopeControl, needsVenue = false, venueQuery = "" }: { meals: DishSummary[]; courtDates: string[]; recentIds?: string[]; authenticated: boolean; myVotes: Record<string, Tier>; scopeControl?: ReactNode; needsVenue?: boolean; venueQuery?: string }) {
   const t = useT();
   const [currentMeals, setCurrentMeals] = useState(meals);
   const [currentVotes, setCurrentVotes] = useState(myVotes);
-  const courtMeals = currentMeals.filter((dish) => courtDates.includes(dish.date));
+  const courtMeals = currentMeals.filter((dish) => recentIds ? recentIds.includes(dish.id) : courtDates.includes(dish.date));
   const [featuredIndex, setFeaturedIndex] = useState(() => firstUnreviewedIndex(courtMeals.map((dish) => dish.id), myVotes));
   const [rotationPaused, setRotationPaused] = useState(false);
   const featured = courtMeals[featuredIndex];

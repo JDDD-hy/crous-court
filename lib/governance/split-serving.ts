@@ -24,8 +24,8 @@ export async function splitServing(adminId: string, servingId: string, rawName: 
         WHERE s.id=? AND s.dish_id=? AND s.status='active' AND m.status='active' AND d.merged_into_dish_id IS NULL)
       AND (SELECT count(*) FROM servings WHERE dish_id=? AND id<>?)>0`)
       .bind(auditId, adminId, servingId, JSON.stringify({ fromDishId: serving.dish_id, newDishId: dishId, rule: "linked_vote_moves_or_initial_restored;unattributed_votes_stay" }), servingId, serving.dish_id, serving.dish_id, servingId),
-    db.prepare(`INSERT INTO dishes(id,original_description,category,naming_status)
-      SELECT ?,?,category,'unknown' FROM dishes WHERE id=? AND ${gate}`).bind(dishId, rawName.trim(), serving.dish_id, auditId),
+    db.prepare(`INSERT INTO dishes(id,original_description,category,venue_id,naming_status)
+      SELECT ?,?,category,venue_id,'unknown' FROM dishes WHERE id=? AND venue_id IS NOT NULL AND ${gate}`).bind(dishId, rawName.trim(), serving.dish_id, auditId),
     db.prepare(`UPDATE servings SET dish_id=? WHERE id=? AND ${gate}`).bind(dishId, servingId, auditId),
     db.prepare(`UPDATE votes SET dish_id=? WHERE source_serving_id=? AND ${gate}`).bind(dishId, servingId, auditId),
     initialVote(servingId, auditId),

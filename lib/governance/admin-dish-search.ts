@@ -6,6 +6,7 @@ export type AdminDish = {
   canonical_name_en: string | null; canonical_name_fr: string | null;
   category: "main" | "side"; merged_into_dish_id: string | null;
   votes: number; servings: number; visible: number;
+  venue_id: string | null; venue_name: string | null; legacy_source_id: string | null;
 };
 
 export async function searchAdminDishes(query: string, offset: number) {
@@ -16,6 +17,7 @@ export async function searchAdminDishes(query: string, offset: number) {
   // Literal substring search, as in dish candidates; % and _ are not wildcards.
   const rows = await getRawDb().prepare(`SELECT d.id,d.original_description,d.canonical_name_zh,
     d.canonical_name_en,d.canonical_name_fr,d.category,d.merged_into_dish_id,
+    d.venue_id,d.legacy_source_id,(SELECT canonical_name FROM venues WHERE id=d.venue_id) venue_name,
     (SELECT count(*) FROM votes v WHERE v.dish_id=d.id) votes,
     (SELECT count(*) FROM servings s WHERE s.dish_id=d.id) servings,
     EXISTS(SELECT 1 FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id

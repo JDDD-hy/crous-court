@@ -54,7 +54,7 @@ export const errors: Record<string, string> = {
   "邮件服务尚未配置": "The email service is not configured",
   "验证码无效或已过期": "The verification code is invalid or has expired",
   "合并对象无效": "Invalid merge target",
-  "菜品或建议已变更，只能合并两个有效且同类别的菜品，请刷新": "The dishes or suggestion changed. Only active dishes in the same category can be merged. Please refresh",
+  "菜品或建议已变更，只能合并同一餐厅内两个有效且同类别的菜品，请刷新": "The dishes or suggestion changed. Only active dishes in the same venue and category can be merged. Please refresh",
   "请选择举报原因": "Please select a report reason",
   "举报对象无效": "Invalid report target",
   "举报对象不存在": "The reported record does not exist",

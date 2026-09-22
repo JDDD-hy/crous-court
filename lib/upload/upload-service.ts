@@ -1,5 +1,6 @@
 import { getBindings } from "@/db";
-import { todayInParis } from "@/lib/calendar";
+import { todayInTimezone } from "@/lib/calendar";
+import { catalogById, catalogVenueInsert } from "@/lib/venue-catalog";
 import { checkSanitizedImage } from "./image-validation";
 
 type ItemInput = { slot: "main" | `side_${number}`; name: string; tier: number | null; dishId: string | null };
@@ -20,7 +21,7 @@ export async function publishMeal(form: FormData, userId: string) {
     }),
   ] satisfies ItemInput[]).filter((item) => item.slot === "main" || item.tier !== null);
   if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
-  if (eatenOn > todayInParis()) throw new UploadInputError("用餐日期不能穿越到未来");
+  const catalogVenue = catalogById.get(venueId);
   if (form.get("rightsConfirmed") !== "true") throw new UploadInputError("请确认照片发布权与无人脸信息");
 
   const canonicalFile = form.get("canonical");
@@ -39,8 +40,9 @@ export async function publishMeal(form: FormData, userId: string) {
   const contentSha256 = await sha256(canonical.bytes);
   const duplicate = await db.prepare("SELECT meal_id FROM photos WHERE creator_id = ? AND content_sha256 = ?").bind(userId, contentSha256).first();
   if (duplicate) throw new UploadInputError("这张餐盘已经立过案了，请不要重复提交同一文件");
-  const venue = await db.prepare("SELECT display_number FROM venues WHERE id = ? AND active = 1").bind(venueId).first<{ display_number: number }>();
-  if (!venue) throw new UploadInputError("餐厅不可用");
+  const venue = await db.prepare("SELECT display_number, active, timezone FROM venues WHERE id = ?").bind(venueId).first<{ display_number: number; active: number; timezone: string }>();
+  if (venue ? !venue.active : !catalogVenue) throw new UploadInputError("餐厅不可用");
+  if (eatenOn > todayInTimezone(venue?.timezone ?? catalogVenue!.timezone)) throw new UploadInputError("用餐日期不能穿越到未来");
   const now = Math.floor(Date.now() / 1000);
   const admitted = await db.prepare(`INSERT INTO upload_rate_limits (user_id,window_started_at,attempts) VALUES (?,?,1)
     ON CONFLICT(user_id) DO UPDATE SET
@@ -63,6 +65,7 @@ export async function publishMeal(form: FormData, userId: string) {
     ]);
     if (writes.some(result => result.status === "rejected")) throw new Error("Photo storage failed");
     const statements = [
+      ...(catalogVenue ? [catalogVenueInsert(db, catalogVenue)] : []),
       db.prepare("INSERT INTO users (id) VALUES (?) ON CONFLICT(id) DO NOTHING").bind(userId),
       db.prepare("INSERT INTO daily_case_counters (eaten_on, venue_id, next_sequence) VALUES (?, ?, 1) ON CONFLICT(eaten_on, venue_id) DO UPDATE SET next_sequence = next_sequence + 1").bind(eatenOn, venueId),
       db.prepare("INSERT INTO meals (id, venue_id, creator_id, eaten_on, case_number, display_order) SELECT ?, ?, ?, ?, replace(?, '-', '') || '-' || display_number || '-' || printf('%03d', (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?)), (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?) FROM venues WHERE id = ?").bind(mealId, venueId, userId, eatenOn, eatenOn, eatenOn, venueId, eatenOn, venueId, venueId),
@@ -74,11 +77,11 @@ export async function publishMeal(form: FormData, userId: string) {
       const servingId = crypto.randomUUID();
       if (item.dishId) {
         const expectedCategory = item.slot === "main" ? "main" : "side";
-        const existing = await db.prepare("SELECT id FROM dishes WHERE id = ? AND category = ? AND merged_into_dish_id IS NULL").bind(item.dishId, expectedCategory).first();
+        const existing = await db.prepare("SELECT id FROM dishes WHERE id = ? AND category = ? AND venue_id = ? AND merged_into_dish_id IS NULL").bind(item.dishId, expectedCategory, venueId).first();
         if (!existing) throw new UploadInputError("选择的已有菜品已失效，请重新确认");
       }
       statements.push(
-        ...(item.dishId ? [] : [db.prepare("INSERT INTO dishes (id, original_description, category, naming_status) VALUES (?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side")]),
+        ...(item.dishId ? [] : [db.prepare("INSERT INTO dishes (id, original_description, category, venue_id, naming_status) VALUES (?, ?, ?, ?, 'unknown')").bind(dishId, item.name, item.slot === "main" ? "main" : "side", venueId)]),
         db.prepare("INSERT INTO servings (id, dish_id, venue_id, served_on, creator_id, original_description, initial_tier) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(servingId, dishId, venueId, eatenOn, userId, item.name, item.tier),
         db.prepare("INSERT INTO meal_items (meal_id, serving_id, slot) VALUES (?, ?, ?)").bind(mealId, servingId, item.slot),
         db.prepare("INSERT INTO votes (id, dish_id, user_id, target_tier, source_serving_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT(dish_id,user_id) DO NOTHING").bind(crypto.randomUUID(), dishId, userId, item.tier, servingId),

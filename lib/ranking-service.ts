@@ -1,105 +1,28 @@
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
-import { getDb } from "../db";
-import { dishAliases, dishes, mealItems, meals, photos, servings, venues, votes } from "../db/schema";
-import type { DishCategory, DishDetail, DishSummary } from "./dish-types";
-import { buildTierHistory, calculateVerdict, compareVerdicts, type Tier } from "./ranking";
+import { and, desc, eq } from "drizzle-orm";
+import { getDb, getRawDb } from "../db";
+import { mealItems, meals, photos, servings, venues, votes } from "../db/schema";
+import type { DishCategory, DishDetail } from "./dish-types";
+import { type Tier, type TierHistoryEntry } from "./ranking";
 import { getLocale } from "./i18n/server";
-import { translator } from "./i18n/core";
-import { venueLocation } from "./venue-location";
+import { rankingPage } from "./ranking-summary";
+import { dishHistoryQuery, evidencePageSize, historyPageSize } from './dish-history-query';
+export { rankingPage } from "./ranking-summary";
 
-const imageByDish: Record<string, string> = {
-  "couscous-boulettes": "/meals/couscous.jpg",
-  "lentilles-saucisse": "/meals/lentilles-saucisse.jpg",
-  "mystery-dessert": "/meals/poulet-haricots.jpg",
-};
-
-export async function listRankings(category?: DishCategory, venueIds?: string[]): Promise<DishSummary[]> {
-  if (venueIds && !venueIds.length) return [];
-  const locale = await getLocale();
-  const t = translator(locale);
-  const db = getDb();
-  const dishRows = await db.select().from(dishes).where(category ? and(eq(dishes.category, category), isNull(dishes.mergedIntoDishId)) : isNull(dishes.mergedIntoDishId));
-  if (!dishRows.length) return [];
-
-  const ids = dishRows.map((dish) => dish.id);
-  const [voteRows, servingRows, aliasRows] = await Promise.all([
-    db.select({ dishId: votes.dishId, targetTier: votes.targetTier }).from(votes).where(inArray(votes.dishId, ids)),
-    db.select({
-      id: servings.id,
-      mealId: meals.id,
-      dishId: servings.dishId,
-      date: servings.servedOn,
-      initialTier: servings.initialTier,
-      originalDescription: servings.originalDescription,
-      venueName: venues.canonicalName,
-      venueNickname: venues.nickname,
-      venueId: venues.id,
-      venueAddress: venues.address,
-      photoId: photos.id,
-    }).from(servings)
-      .innerJoin(venues, eq(servings.venueId, venues.id))
-      .innerJoin(mealItems, eq(mealItems.servingId, servings.id))
-      .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
-      .leftJoin(photos, eq(photos.mealId, meals.id))
-      .where(and(inArray(servings.dishId, ids), eq(servings.status, "active"), venueIds ? inArray(servings.venueId, venueIds) : undefined))
-      .orderBy(desc(servings.servedOn)),
-    db.select({ dishId: dishAliases.dishId, name: dishAliases.name }).from(dishAliases).where(inArray(dishAliases.dishId, ids)),
-  ]);
-
-  const targetsByDish = new Map<string, number[]>();
-  for (const vote of voteRows) {
-    const targets = targetsByDish.get(vote.dishId) ?? [];
-    targets.push(vote.targetTier);
-    targetsByDish.set(vote.dishId, targets);
-  }
-  const servingByDish = new Map<string, (typeof servingRows)[number]>();
-  for (const serving of servingRows) {
-    if (!servingByDish.has(serving.dishId)) servingByDish.set(serving.dishId, serving);
-  }
-  const aliasByDish = new Map<string, string>();
-  for (const alias of aliasRows) if (!aliasByDish.has(alias.dishId)) aliasByDish.set(alias.dishId, alias.name);
-
-  return dishRows.flatMap((dish) => {
-    const verdict = calculateVerdict(targetsByDish.get(dish.id) ?? []);
-    const serving = servingByDish.get(dish.id);
-    if (!serving) return [];
-    return [{
-      verdict,
-      dish: {
-        id: dish.id,
-        canonicalNameFr: dish.canonicalNameFr,
-        canonicalNameEn: dish.canonicalNameEn,
-        canonicalNameZh: dish.canonicalNameZh,
-        machineNameZh: dish.machineNameSource === (dish.canonicalNameEn || dish.originalDescription) ? dish.machineNameZh : null,
-        machineNameEn: dish.machineNameEnSource === (dish.canonicalNameZh || dish.originalDescription) ? dish.machineNameEn : null,
-        originalDescription: dish.originalDescription,
-        name: dish.canonicalNameFr ?? dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? t("神秘菜品 #{0}", dish.id.slice(-4)),
-        zh: dish.canonicalNameZh ?? aliasByDish.get(dish.id) ?? (dish.originalDescription || t("等待群众认菜")),
-        venue: locale === "en" || serving.venueNickname === serving.venueName ? serving.venueName : `${serving.venueNickname} · ${serving.venueName}`,
-        venueLocation: venueLocation(serving.venueAddress, serving.venueId),
-        date: serving.date,
-        image: serving.photoId ? `/api/photos/${serving.photoId}` : imageByDish[dish.id] ?? "/file.svg",
-        tier: verdict.tier,
-        initialTier: (serving?.initialTier as Tier | undefined) ?? null,
-        votes: verdict.voteCount,
-        distribution: verdict.distribution,
-        category: dish.category,
-        namingStatus: dish.namingStatus,
-        status: verdict.status,
-      } satisfies DishSummary,
-    }];
-  }).sort((a, b) => compareVerdicts(a.verdict, b.verdict) || a.dish.id.localeCompare(b.dish.id))
-    .map((entry) => entry.dish);
+export async function listRankings(category?: DishCategory, venueIds?: string[]) {
+  return (await rankingPage({ category, venueIds })).dishes;
 }
 
-export async function getDishDetail(id: string): Promise<DishDetail | null> {
+export async function getDishSummary(id: string) { return (await rankingPage({ dishId: id, limit: 1 })).dishes[0] ?? null; }
+
+export async function getDishDetail(id: string, evidencePage = 1, historyPage = 1): Promise<DishDetail | null> {
+  if (!Number.isSafeInteger(evidencePage) || evidencePage < 1 || evidencePage > 10000) throw new RangeError("Invalid evidence page");
   const locale = await getLocale();
-  const rankings = await listRankings();
-  const summary = rankings.find((dish) => dish.id === id);
+  const summary = await getDishSummary(id);
   if (!summary) return null;
 
   const db = getDb();
-  const [servingRows, voteRows] = await Promise.all([db.select({
+  const historyQuery = dishHistoryQuery(id, historyPage);
+  const [servingRows, historyRows, countRow] = await Promise.all([db.select({
       id: servings.id,
       mealId: meals.id,
       date: servings.servedOn,
@@ -114,10 +37,12 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
       .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
       .leftJoin(photos, eq(photos.mealId, meals.id))
       .where(and(eq(servings.dishId, id), eq(servings.status, "active")))
-      .orderBy(desc(servings.servedOn)),
-    db.select({ tier: votes.targetTier, at: votes.createdAt }).from(votes)
-      .where(eq(votes.dishId, id)).orderBy(asc(votes.createdAt), asc(votes.id)),
+      .orderBy(desc(servings.servedOn), desc(servings.createdAt), servings.id, photos.id).limit(evidencePageSize).offset((evidencePage - 1) * evidencePageSize),
+    getRawDb().prepare(historyQuery.sql).bind(...historyQuery.bindings).all<TierHistoryEntry & { total: number }>(),
+    getRawDb().prepare(`SELECT COUNT(*) records, COUNT(DISTINCT s.id) sightings FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id LEFT JOIN photos p ON p.meal_id=m.id WHERE s.dish_id=? AND s.status='active' AND m.status='active'`).bind(id).first<{ records: number; sightings: number }>(),
   ]);
+  if (!servingRows.length && evidencePage > 1) return getDishDetail(id, 1, historyPage);
+  if (!historyRows.results.length && historyPage > 1) return getDishDetail(id, evidencePage, 1);
   const uniqueServings = [...new Map(servingRows.map((serving) => [`${serving.id}:${serving.photoId ?? ""}`, serving])).values()];
   return {
     ...summary,
@@ -130,7 +55,10 @@ export async function getDishDetail(id: string): Promise<DishDetail | null> {
       originalDescription: serving.originalDescription,
       image: serving.photoId ? `/api/photos/${serving.photoId}` : null,
     })),
-    tierHistory: buildTierHistory(voteRows.map((vote) => ({ tier: vote.tier as Tier, at: vote.at }))),
+    tierHistory: historyRows.results.map(({tier,at,voteCount})=>({tier,at,voteCount})),
+    evidencePagination: { page: evidencePage, size: evidencePageSize, total: countRow?.records ?? 0 },
+    historyPagination: { page: historyPage, size: historyPageSize, total: historyRows.results[0]?.total ?? 0 },
+    servingCount: countRow?.sightings ?? 0,
   };
 }
 
@@ -142,7 +70,6 @@ export async function getUserVote(dishId: string, userId: string): Promise<Tier 
 
 export async function getUserVotes(dishIds: string[], userId: string): Promise<Record<string, Tier>> {
   if (!dishIds.length) return {};
-  const rows = await getDb().select({ dishId: votes.dishId, targetTier: votes.targetTier }).from(votes)
-    .where(and(inArray(votes.dishId, dishIds), eq(votes.userId, userId)));
-  return Object.fromEntries(rows.map((row) => [row.dishId, row.targetTier as Tier]));
+  const rows = await getRawDb().prepare("SELECT dish_id, target_tier FROM votes WHERE user_id = ? AND dish_id IN (SELECT value FROM json_each(?))").bind(userId, JSON.stringify(dishIds)).all<{dish_id: string; target_tier: Tier}>();
+  return Object.fromEntries(rows.results.map(row => [row.dish_id, row.target_tier]));
 }

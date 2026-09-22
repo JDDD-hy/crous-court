@@ -2,7 +2,7 @@ import { getRawDb } from "@/db";
 import { normalizeDishName } from "./name-utils";
 import { getLocale, getT } from "@/lib/i18n/server";
 
-export async function findDishCandidates(query: string, category: "main" | "side") {
+export async function findDishCandidates(query: string, category: "main" | "side", venueId: string) {
   const t = await getT();
   const locale = await getLocale();
   const normalized = normalizeDishName(query);
@@ -21,7 +21,7 @@ export async function findDishCandidates(query: string, category: "main" | "side
     JOIN meals m ON m.id = mi.meal_id AND m.status = 'active'
     LEFT JOIN photos p ON p.meal_id = m.id
     LEFT JOIN venues v ON v.id = s.venue_id
-    WHERE d.category = ? AND d.merged_into_dish_id IS NULL AND (
+    WHERE d.category = ? AND d.venue_id = ? AND s.venue_id = d.venue_id AND d.merged_into_dish_id IS NULL AND (
       ? = '' OR instr(lower(coalesce(d.canonical_name_fr,'')), ?) > 0
       OR instr(lower(coalesce(d.canonical_name_en,'')), ?) > 0
       OR instr(lower(coalesce(d.canonical_name_zh,'')), ?) > 0
@@ -31,7 +31,7 @@ export async function findDishCandidates(query: string, category: "main" | "side
       OR instr(coalesce(a.normalized_name,''), ?) > 0))
     SELECT id,name,photo_id,venue,served_on FROM candidates WHERE position = 1
     ORDER BY priority, served_on DESC, id
-    LIMIT 3`).bind(locale, locale, locale, normalized, normalized, category, normalized, normalized, normalized, normalized, normalized, normalized, normalized, normalized).all<{
+    LIMIT 3`).bind(locale, locale, locale, normalized, normalized, category, venueId, normalized, normalized, normalized, normalized, normalized, normalized, normalized, normalized).all<{
       id: string; name: string | null; photo_id: string | null; venue: string | null; served_on: string | null;
     }>();
   return rows.results.map((row) => ({ id: row.id, name: row.name ?? t("神秘菜品 #{0}", row.id.slice(-4)), image: row.photo_id ? `/api/photos/${row.photo_id}` : null, venue: row.venue, date: row.served_on }));

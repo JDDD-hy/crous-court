@@ -1,27 +1,12 @@
 "use client";
 import { useT } from "@/lib/i18n/client";
-
-
 import { Flame } from "lucide-react";
 import type { DishSummary } from "@/lib/dish-types";
 import type { Tier } from "@/lib/ranking";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Ranking } from "./HomeSections";
 
-export function RankingsView({ dishes, authenticated, reviewedDishIds }: { dishes: DishSummary[]; authenticated: boolean; reviewedDishIds: Readonly<Record<string, Tier>> }) {
+export function RankingsView({ dishes, category, venueQuery, offset, authenticated, reviewedDishIds }: { dishes: DishSummary[]; category: "main" | "side"; venueQuery: string; offset: number; authenticated: boolean; reviewedDishIds: Readonly<Record<string,Tier>> }) {
   const t = useT();
-  return (
-    <Tabs defaultValue="main" className="mt-8">
-      <TabsList variant="line" className="h-12 border-b-2 border-ink/20">
-        <TabsTrigger value="main" className="min-w-32 text-base font-black">{t("🍛 主食")}</TabsTrigger>
-        <TabsTrigger value="side" className="min-w-32 text-base font-black">{t("🥄 小菜")}</TabsTrigger>
-      </TabsList>
-      <TabsContent value="main" className="pt-7">
-        <Ranking title={t("主食夯拉榜")} icon={<Flame className="size-6" />} items={dishes.filter((dish) => dish.category === "main")} authenticated={authenticated} reviewedDishIds={reviewedDishIds} />
-      </TabsContent>
-      <TabsContent value="side" className="pt-7">
-        <Ranking title={t("小菜捡漏榜")} icon={<span aria-hidden="true">🥄</span>} items={dishes.filter((dish) => dish.category === "side")} authenticated={authenticated} reviewedDishIds={reviewedDishIds} />
-      </TabsContent>
-    </Tabs>
-  );
+  function href(next:string) { const params = new URLSearchParams(venueQuery); params.set("category",next); return `/rankings?${params}`; }
+  return <div className="mt-8"><nav className="mb-7 flex gap-5 border-b-2 border-ink/20">{(["main","side"] as const).map(value=><a key={value} aria-current={category===value ? "page" : undefined} className={`inline-flex min-h-12 items-center px-2 text-base font-black ${category===value ? "border-b-3 border-verdict" : ""}`} href={href(value)}>{t(value==="main" ? "🍛 主食" : "🥄 小菜")}</a>)}</nav><Ranking title={t(category==="main" ? "主食夯拉榜" : "小菜捡漏榜")} icon={category==="main" ? <Flame className="size-6" /> : <span aria-hidden="true">🥄</span>} items={dishes} offset={offset} authenticated={authenticated} reviewedDishIds={reviewedDishIds} /></div>;
 }

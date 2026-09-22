@@ -95,14 +95,15 @@ test("dish suggestions return unique dishes and their latest visible observation
   const { sqlite, db } = database();
   const find = new Function("getRawDb", "normalizeDishName", "getLocale", "getT", source("lib/governance/dish-candidates.ts") + "\nreturn findDishCandidates;")(
     () => db, (value: string) => value.toLowerCase(), async () => "en", async () => (value: string) => value,
-  ) as (query: string, category: string) => Promise<Array<{ id: string; date: string; image: string }>>;
+  ) as (query: string, category: string, venue: string) => Promise<Array<{ id: string; date: string; image: string }>>;
   try {
     sqlite.exec("UPDATE dishes SET original_description='Test dish'; UPDATE servings SET served_on='2026-09-01' WHERE id='fixture-serving-02'; INSERT INTO dish_aliases(id,dish_id,name,normalized_name,source) VALUES('alias-a','couscous-boulettes','Test alias','test alias','community'),('alias-b','couscous-boulettes','Test second','test second','community')");
-    const rows = await find("test", "main");
-    assert.deepEqual(rows.map(row => row.id), ["couscous-boulettes", "lentilles-saucisse"]);
+    const rows = await find("test", "main", "venue-escoffier");
+    assert.deepEqual(rows.map(row => row.id), ["couscous-boulettes"]);
+    assert.deepEqual((await find("test", "main", "venue-experimental")).map(row=>row.id), ["lentilles-saucisse"]);
     assert.equal(rows[0].date, "2026-09-10");
     sqlite.exec("UPDATE meals SET status='hidden' WHERE id='fixture-meal-01'");
-    assert.equal((await find("test", "main"))[0].date, "2026-09-03");
-    assert.equal((await find("test second", "main"))[0].id, "couscous-boulettes");
+    assert.equal((await find("test", "main", "venue-escoffier"))[0].date, "2026-09-03");
+    assert.equal((await find("test second", "main", "venue-escoffier"))[0].id, "couscous-boulettes");
   } finally { sqlite.close(); }
 });

@@ -48,7 +48,7 @@ export async function verifySplitVotes({ request, admin, ordinary, sql }) {
   assert.equal((await detail(new2)).votes,1);
   const audit = sql("SELECT details_json FROM moderation_actions WHERE action='merge_dish' AND json_extract(details_json,'$.targetId')='split-origin'",true)[0].results;
   assert.equal(JSON.parse(audit[0].details_json).conflictingVotes.length,2);
-  sql(`INSERT INTO dishes(id,category) VALUES ('tie-1a','side'),('tie-1b','side'),('tie-2a','side'),('tie-2b','side');
+  sql(`INSERT INTO dishes(id,category,venue_id) VALUES ('tie-1a','side','venue-escoffier'),('tie-1b','side','venue-escoffier'),('tie-2a','side','venue-escoffier'),('tie-2b','side','venue-escoffier');
     INSERT INTO votes(id,dish_id,user_id,target_tier,created_at) VALUES
     ('a-tie1','tie-1a','fixture-user-01',2,'2026-09-01'),('z-tie1','tie-1b','fixture-user-01',5,'2026-09-01'),
     ('a-tie2','tie-2a','fixture-user-01',2,'2026-09-01'),('z-tie2','tie-2b','fixture-user-01',5,'2026-09-01');`);

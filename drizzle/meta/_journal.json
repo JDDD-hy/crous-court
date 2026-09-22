@@ -99,6 +99,41 @@
       "when": 1789492339941,
       "tag": "0015_dish_machine_translation",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1790115134652,
+      "tag": "0020_national_venues",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1790115669827,
+      "tag": "0021_national_query_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1790115916786,
+      "tag": "0022_restaurant_isolation",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1790115966789,
+      "tag": "0023_isolation_data_gate",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1790117470308,
+      "tag": "0025_vote_history_index",
+      "breakpoints": true
     }
   ]
 }

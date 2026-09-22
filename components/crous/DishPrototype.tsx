@@ -13,14 +13,24 @@ import { SiteHeader } from "./SiteHeader";
 import { DishEvidence } from "./DishEvidence";
 import { VoteControls } from "./VoteControls";
 import { DishNamingPanel } from "./DishNamingPanel";
+import { ResultPages } from './ResultPages';
 import { TierHistory } from "./TierHistory";
 import type { NameSuggestion } from "./DishNamingPanel";
 import { ReportDialog } from "./ReportDialog";
 import { tierById, tiers, type TierId } from "./data";
 
-export function DishPrototype({ dish, authenticated, myVote, nameSuggestions }: { dish: DishDetail; authenticated: boolean; myVote: Tier | null; nameSuggestions: NameSuggestion[] }) {
+export function DishPrototype({ dish, authenticated, myVote, nameSuggestions, historyOpen = false }: { historyOpen?: boolean; dish: DishDetail; authenticated: boolean; myVote: Tier | null; nameSuggestions: NameSuggestion[] }) {
   const t = useT();
   const [currentDish, setCurrentDish] = useState(dish);
+  const [historyStale, setHistoryStale] = useState(false);
+  async function refreshHistory() {
+    setHistoryStale(true);
+    try {
+      const response = await fetch(`/api/dishes/${dish.id}?evidencePage=${dish.evidencePagination?.page ?? 1}&historyPage=${dish.historyPagination?.page ?? 1}`);
+      const result = await response.json() as { data: DishDetail | null };
+      if (response.ok && result.data) { setCurrentDish(result.data); setHistoryStale(false); }
+    } catch { /* The confirmed vote remains valid; the history tab offers a refresh. */ }
+  }
   const labels = dishPresentation(currentDish, useLocale());
   const communityTier = tierById((currentDish.tier ?? currentDish.initialTier ?? 3) as TierId);
   const initialTier = tierById((currentDish.initialTier ?? 3) as TierId);
@@ -31,18 +41,19 @@ export function DishPrototype({ dish, authenticated, myVote, nameSuggestions }: 
     <section className="space-y-6">
       <div><p className="font-mono text-sm font-bold text-verdict">{t("DISH · 菜品档案")}</p><h1 data-dish-title className="mt-2 text-4xl font-black sm:text-5xl"><DishName labels={labels} /></h1><div className="mt-3"><ReportDialog dishId={currentDish.id} mealId={currentDish.servings[0]?.mealId ?? ""} authenticated={authenticated} /></div></div>
       <div className="grid grid-cols-2 gap-3"><Verdict label={t("投稿者初判")} value={`${initialTier.emoji} ${t(initialTier.label)}`} /><Verdict label={statusLabel} value={`${communityTier.emoji} ${t(communityTier.label)}`} strong /></div>
-      <div className="flex flex-wrap gap-4 border-y-2 border-dashed border-ink/30 py-4 text-sm font-bold"><span className="flex items-center gap-1"><MapPin className="size-4" />{new Set(currentDish.servings.map((serving) => serving.venue)).size}  {t("家餐厅")}</span><span className="flex items-center gap-1"><CalendarDays className="size-4" />{currentDish.servings.length}  {t("次被观测")}</span><span className="flex items-center gap-1"><History className="size-4" />{currentDish.votes}  {t("张有效票")}</span></div>
-      <VoteControls dish={currentDish} authenticated={authenticated} myVote={myVote} onChange={(next) => setCurrentDish((current) => ({ ...current, ...next }))} />
-      <DishTabs dish={currentDish} authenticated={authenticated} nameSuggestions={nameSuggestions} />
+      <div className="flex flex-wrap gap-4 border-y-2 border-dashed border-ink/30 py-4 text-sm font-bold"><span className="flex items-center gap-1"><MapPin className="size-4" />{new Set(currentDish.servings.map((serving) => serving.venue)).size}  {t("家餐厅")}</span><span className="flex items-center gap-1"><CalendarDays className="size-4" />{currentDish.servingCount ?? currentDish.servings.length}  {t("次被观测")}</span><span className="flex items-center gap-1"><History className="size-4" />{currentDish.votes}  {t("张有效票")}</span></div>
+      <VoteControls dish={currentDish} authenticated={authenticated} myVote={myVote} onChange={(next) => setCurrentDish((current) => ({ ...current, ...next }))} onVoteConfirmed={() => void refreshHistory()} />
+      <DishTabs historyStale={historyStale} historyOpen={historyOpen} dish={currentDish} authenticated={authenticated} nameSuggestions={nameSuggestions} />
     </section>
   </div></main></div>;
 }
 
-function DishTabs({ dish, authenticated, nameSuggestions }: { dish: DishDetail; authenticated: boolean; nameSuggestions: NameSuggestion[] }) {
+function DishTabs({ dish, authenticated, nameSuggestions, historyOpen, historyStale }: { historyStale: boolean; historyOpen: boolean; dish: DishDetail; authenticated: boolean; nameSuggestions: NameSuggestion[] }) {
   const t = useT();
-  return <Tabs defaultValue="votes"><TabsList variant="line" className="h-11 w-full justify-stretch rounded-none border-b-2 border-ink/30 bg-transparent p-0"><TabsTrigger value="votes" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("票数分布")}</TabsTrigger><TabsTrigger value="history" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("移动历史")}</TabsTrigger><TabsTrigger value="name" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("群众认菜")}</TabsTrigger></TabsList>
+  const en = useLocale() === 'en';
+  return <Tabs defaultValue={historyOpen ? 'history' : 'votes'}><TabsList variant="line" className="h-11 w-full justify-stretch rounded-none border-b-2 border-ink/30 bg-transparent p-0"><TabsTrigger value="votes" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("票数分布")}</TabsTrigger><TabsTrigger value="history" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("移动历史")}</TabsTrigger><TabsTrigger value="name" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("群众认菜")}</TabsTrigger></TabsList>
     <TabsContent value="votes" className="mt-4 space-y-3">{tiers.map((tier, index) => <div key={tier.id} className="grid grid-cols-[6rem_1fr_2rem] items-center gap-3"><strong>{tier.emoji} {t(tier.label)}</strong><div className="h-8 overflow-hidden rounded-sm border-2 border-ink bg-paper"><div className="h-full" style={{ width: `${dish.votes ? dish.distribution[index] / dish.votes * 100 : 0}%`, backgroundColor: tier.color }} /></div><span className="font-mono font-bold">{dish.distribution[index]}</span></div>)}</TabsContent>
-    <TabsContent value="history" className="mt-4"><TierHistory entries={dish.tierHistory} /></TabsContent>
+    <TabsContent value="history" className="mt-4">{historyStale ? <a className="inline-flex min-h-11 items-center underline" href={`/dish/${dish.id}?historyPage=1`}>{en ? "Refresh to view the latest history" : "刷新查看最新判决历史"}</a> : <><TierHistory entries={dish.tierHistory} />{dish.historyPagination && <ResultPages path={`/dish/${dish.id}`} query={`evidencePage=${dish.evidencePagination?.page ?? 1}`} parameter="historyPage" en={en} {...dish.historyPagination} />}</>}</TabsContent>
     <TabsContent value="name"><DishNamingPanel dishId={dish.id} authenticated={authenticated} initialItems={nameSuggestions} /></TabsContent>
   </Tabs>;
 }

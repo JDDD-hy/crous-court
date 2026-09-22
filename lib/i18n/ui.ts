@@ -33,7 +33,7 @@ export const ui: Record<string, string> = {
   "操作仍在进行，请完成后再切换语言。": "An operation is still in progress. Please wait before switching languages.",
   "切换语言会重新加载页面，未提交的内容将丢失。继续切换？": "Switching languages reloads this page and discards unsent changes. Continue?",
   "CROUS法庭": "CROUS Court",
-  "Télécom Paris / Palaiseau 学生的 CROUS 菜品社区评级网站。": "Community ratings of CROUS dishes for students in Télécom Paris and Palaiseau.",
+  "法国 CROUS 菜品社区评级网站。": "Community ratings of CROUS dishes across France.",
   "D1 暂时没开庭": "Court is temporarily unavailable",
   "读取失败，没有写入或丢失任何数据。": "The page could not be loaded. Please try again.",
   "重新读取": "Try again",
