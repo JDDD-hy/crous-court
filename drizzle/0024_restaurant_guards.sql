@@ -9,8 +9,8 @@ BEGIN
   UPDATE dishes SET venue_id=NEW.venue_id WHERE id=NEW.dish_id AND venue_id IS NULL
     AND merged_into_dish_id IS NULL AND legacy_source_id IS NULL
     AND NOT EXISTS(SELECT 1 FROM servings WHERE dish_id=NEW.dish_id);
-  SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM dishes WHERE id=NEW.dish_id AND venue_id=NEW.venue_id AND merged_into_dish_id IS NULL)
-    THEN RAISE(ABORT, 'dish_venue_mismatch') END;
+  SELECT RAISE(ABORT, 'dish_venue_mismatch')
+    WHERE NOT EXISTS(SELECT 1 FROM dishes WHERE id=NEW.dish_id AND venue_id=NEW.venue_id AND merged_into_dish_id IS NULL);
 END;
 --> statement-breakpoint
 CREATE TRIGGER servings_venue_update BEFORE UPDATE OF dish_id,venue_id ON servings

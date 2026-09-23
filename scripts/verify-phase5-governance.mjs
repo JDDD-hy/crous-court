@@ -52,7 +52,10 @@ async function login(email) { const requested = await request("/api/auth/email/r
 assert.ok(persist.startsWith(root + path.sep));
 await rm(persist, { recursive: true, force: true });
 run(["d1", "migrations", "apply", "DB", "--local", "--persist-to", persist, "--config", config]);
-run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--file", path.join(root, "db", "fixtures.sql"), "--yes"]);
+const fixtureFile = path.join(persist, "catalog-fixtures.sql");
+await writeFile(fixtureFile, (await readFile(path.join(root, "db", "fixtures.sql"), "utf8"))
+  .replaceAll("venue-escoffier", "cafeteria-escoffier-2").replaceAll("venue-experimental", "cafeteria-lexperimental-2"));
+run(["d1", "execute", "DB", "--local", "--persist-to", persist, "--config", config, "--file", fixtureFile, "--yes"]);
 const envFile = path.join(persist, 'test-only.env');
 await mkdir(persist, {recursive:true});
 await writeFile(envFile, `AUTH_MODE=local
@@ -72,13 +75,18 @@ try {
   const image = await readFile(path.join(root, "public", "meals", "couscous.jpg"));
   const secondImage = await readFile(path.join(root, "public", "meals", "lentilles-saucisse.jpg"));
   const thirdImage = await readFile(path.join(root, "public", "meals", "poulet-haricots.jpg"));
-  async function upload(cookie, bytes = image, name = "测试主食", dishId = "") { const form = new FormData(); for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2026-09-11", mainName: name, mainDishId: dishId, mainTier: "3", rightsConfirmed: "true" })) form.set(key, value); form.set("canonical", new Blob([bytes], { type: "image/jpeg" }), "meal.jpg"); form.set("thumbnail", new Blob([bytes], { type: "image/jpeg" }), "thumb.jpg"); return fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie }, body: form, signal: AbortSignal.timeout(10_000) }); }
+  async function upload(cookie, bytes = image, name = "测试主食", dishId = "", venueId = "cafeteria-escoffier-2") { const form = new FormData(); for (const [key, value] of Object.entries({ venueId, eatenOn: "2026-09-11", mainName: name, mainDishId: dishId, mainTier: "3", rightsConfirmed: "true" })) form.set(key, value); form.set("canonical", new Blob([bytes], { type: "image/jpeg" }), "meal.jpg"); form.set("thumbnail", new Blob([bytes], { type: "image/jpeg" }), "thumb.jpg"); return fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie }, body: form, signal: AbortSignal.timeout(10_000) }); }
+  for (const legacyId of ["venue-escoffier", "venue-experimental"]) {
+    const rejected = await upload(one, image, "Legacy venue attempt", "", legacyId);
+    assert.equal(rejected.status, 400);
+    assert.ok((await rejected.text()).includes("餐厅不可用"));
+  }
   const firstUpload = await upload(one); assert.equal(firstUpload.status, 201, await firstUpload.text());
   const sameUserDuplicate = await upload(one); assert.equal(sameUserDuplicate.status, 400, await sameUserDuplicate.text());
   const otherUserSameFile = await upload(two); assert.equal(otherUserSameFile.status, 201, await otherUserSameFile.text());
   const firstSighting = await upload(one, secondImage, "Semoule vue par moi", "couscous-boulettes"); assert.equal(firstSighting.status, 201, await firstSighting.text());
   const secondSighting = await upload(one, thirdImage, "Couscous cette fois", "couscous-boulettes"); assert.equal(secondSighting.status, 201, await secondSighting.text());
-  const initialCandidates = await request("/api/dishes/candidates?category=main&q=lentilles&venue=venue-experimental").then((response) => response.json());
+  const initialCandidates = await request("/api/dishes/candidates?category=main&q=lentilles&venue=cafeteria-lexperimental-2").then((response) => response.json());
   assert.equal(initialCandidates.data[0].id, "lentilles-saucisse");
   const proposed = await request("/api/dishes/mystery-dessert/names", "POST", { name: "Crème dessert", evidenceType: "ate_today" }, one);
   const proposal = await proposed.json(); assert.equal(proposed.status, 201, JSON.stringify(proposal));

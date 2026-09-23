@@ -26,6 +26,10 @@ function check(name, sql, shouldReject = true) {
   checks.push({ name, passed: shouldReject ? Boolean(error) : !error, expected: shouldReject ? 'rejected' : 'allowed', actual: error ?? 'allowed' });
 }
 check('Cross-venue serving INSERT', "INSERT INTO servings(id,dish_id,venue_id,served_on,creator_id,initial_tier) VALUES('bad','iso-da','iso-b','2026-09-22','iso-u',3)");
+check('Same-venue serving INSERT allowed', "INSERT INTO servings(id,dish_id,venue_id,served_on,creator_id,initial_tier) VALUES('good','iso-da','iso-a','2026-09-22','iso-u',3)", false);
+check('First serving binds a new unassigned dish', "INSERT INTO dishes(id,category) VALUES('fresh','main'); INSERT INTO servings(id,dish_id,venue_id,served_on,creator_id,initial_tier) VALUES('fresh-s','fresh','iso-a','2026-09-22','iso-u',3); INSERT INTO votes(id,dish_id,user_id,target_tier) VALUES('fresh-v','fresh','iso-u',3)", false);
+check('Legacy shared dish cannot be silently bound by a new serving', "INSERT INTO servings(id,dish_id,venue_id,served_on,creator_id,initial_tier) VALUES('legacy-new','iso-null','iso-a','2026-09-22','iso-u',3)");
+check('Missing dish rejected', "INSERT INTO servings(id,dish_id,venue_id,served_on,creator_id,initial_tier) VALUES('missing-s','missing-d','iso-a','2026-09-22','iso-u',3)");
 check('Cross-venue serving dish UPDATE', "UPDATE servings SET dish_id='iso-db' WHERE id='iso-sa'");
 check('Cross-venue serving venue UPDATE', "UPDATE servings SET venue_id='iso-b' WHERE id='iso-sa'");
 check('Cross-venue serving combined dish+venue UPDATE', "UPDATE servings SET dish_id='iso-db',venue_id='iso-b' WHERE id='iso-sa'");

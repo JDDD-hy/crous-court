@@ -22,6 +22,7 @@ export async function publishMeal(form: FormData, userId: string) {
   ] satisfies ItemInput[]).filter((item) => item.slot === "main" || item.tier !== null);
   if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
   const catalogVenue = catalogById.get(venueId);
+  if (!catalogVenue) throw new UploadInputError("餐厅不可用");
   if (form.get("rightsConfirmed") !== "true") throw new UploadInputError("请确认照片发布权与无人脸信息");
 
   const canonicalFile = form.get("canonical");
@@ -41,8 +42,8 @@ export async function publishMeal(form: FormData, userId: string) {
   const duplicate = await db.prepare("SELECT meal_id FROM photos WHERE creator_id = ? AND content_sha256 = ?").bind(userId, contentSha256).first();
   if (duplicate) throw new UploadInputError("这张餐盘已经立过案了，请不要重复提交同一文件");
   const venue = await db.prepare("SELECT display_number, active, timezone FROM venues WHERE id = ?").bind(venueId).first<{ display_number: number; active: number; timezone: string }>();
-  if (venue ? !venue.active : !catalogVenue) throw new UploadInputError("餐厅不可用");
-  if (eatenOn > todayInTimezone(venue?.timezone ?? catalogVenue!.timezone)) throw new UploadInputError("用餐日期不能穿越到未来");
+  if (venue && !venue.active) throw new UploadInputError("餐厅不可用");
+  if (eatenOn > todayInTimezone(venue?.timezone ?? catalogVenue.timezone)) throw new UploadInputError("用餐日期不能穿越到未来");
   const now = Math.floor(Date.now() / 1000);
   const admitted = await db.prepare(`INSERT INTO upload_rate_limits (user_id,window_started_at,attempts) VALUES (?,?,1)
     ON CONFLICT(user_id) DO UPDATE SET
@@ -65,7 +66,7 @@ export async function publishMeal(form: FormData, userId: string) {
     ]);
     if (writes.some(result => result.status === "rejected")) throw new Error("Photo storage failed");
     const statements = [
-      ...(catalogVenue ? [catalogVenueInsert(db, catalogVenue)] : []),
+      catalogVenueInsert(db, catalogVenue),
       db.prepare("INSERT INTO users (id) VALUES (?) ON CONFLICT(id) DO NOTHING").bind(userId),
       db.prepare("INSERT INTO daily_case_counters (eaten_on, venue_id, next_sequence) VALUES (?, ?, 1) ON CONFLICT(eaten_on, venue_id) DO UPDATE SET next_sequence = next_sequence + 1").bind(eatenOn, venueId),
       db.prepare("INSERT INTO meals (id, venue_id, creator_id, eaten_on, case_number, display_order) SELECT ?, ?, ?, ?, replace(?, '-', '') || '-' || display_number || '-' || printf('%03d', (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?)), (SELECT next_sequence FROM daily_case_counters WHERE eaten_on = ? AND venue_id = ?) FROM venues WHERE id = ?").bind(mealId, venueId, userId, eatenOn, eatenOn, eatenOn, venueId, eatenOn, venueId, venueId),
