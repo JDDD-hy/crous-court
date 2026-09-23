@@ -1,0 +1,355 @@
+{
+  "checkedAt": "2026-09-23T08:23:29.637081+00:00",
+  "liveRecordCount": 980,
+  "feeds": [
+    {
+      "crousId": "versailles",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/versailles/externe/resto.xml",
+      "count": 66,
+      "sha256": "e462f3e8bc4201178e920133b7952df789f5e33389324bde7ea12c9710b13dc0"
+    },
+    {
+      "crousId": "toulouse",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/toulouse/externe/resto.xml",
+      "count": 44,
+      "sha256": "66223b16bb7a4bf0d678c16e248ea597b4fc3778e0fa6e1c0e23e246fbaa4007"
+    },
+    {
+      "crousId": "strasbourg",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/strasbourg/externe/resto.xml",
+      "count": 33,
+      "sha256": "25e060257719d8d9ced57470857d496ae6e0f1ec4ae806ca7c248fd498111a67"
+    },
+    {
+      "crousId": "normandie",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/normandie/externe/resto.xml",
+      "count": 56,
+      "sha256": "2480eee5c96be475ff9ff2c0b36b1df6dd11cf6c1406dae31dd7626be81830ff"
+    },
+    {
+      "crousId": "reunion",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/reunion/externe/resto.xml",
+      "count": 12,
+      "sha256": "5ebe0fdfb375e4a7b89b1b21364dab9839ff13135bf74151f5a98cdab4f38884"
+    },
+    {
+      "crousId": "rennes",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/rennes/externe/resto.xml",
+      "count": 43,
+      "sha256": "94c74dba9a2439282adbc4e8fd292d1e80d0c1ea54d41ded7e0417eb42713601"
+    },
+    {
+      "crousId": "reims",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/reims/externe/resto.xml",
+      "count": 19,
+      "sha256": "a6745547933f8f399e4168b4ee015b4f02daf07fd6fc30f25bad23fe3b13dff0"
+    },
+    {
+      "crousId": "poitiers",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/poitiers/externe/resto.xml",
+      "count": 29,
+      "sha256": "c2d25af0201ccb36c486268dc5102e854c6cfd538d5e91a3c4e2cf3d0d63fedf"
+    },
+    {
+      "crousId": "paris",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/paris/externe/resto.xml",
+      "count": 76,
+      "sha256": "90521e6afdc4e7b17d91a4dbb2780b47c38805343117cdd5b880dc99f2eb3e74"
+    },
+    {
+      "crousId": "orleans.tours",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/orleans.tours/externe/resto.xml",
+      "count": 34,
+      "sha256": "2971dd5f25dfa2d390ff40af58176a952101c19cd551415865d66a942ddd0f31"
+    },
+    {
+      "crousId": "nice",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nice/externe/resto.xml",
+      "count": 20,
+      "sha256": "5122523b7b2e0adb550329e6281f04faf5c80c290c81add20671b53d3b13fa91"
+    },
+    {
+      "crousId": "nantes",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nantes/externe/resto.xml",
+      "count": 60,
+      "sha256": "2a82990d21b6a550d53d83bac420e9dce0b3b6d0bc7153ee05628f310733f9f9"
+    },
+    {
+      "crousId": "nancy.metz",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nancy.metz/externe/resto.xml",
+      "count": 37,
+      "sha256": "e86e39702383490fbfd4240a1e6f6a17413a95013d23cf613bc6857f46280d36"
+    },
+    {
+      "crousId": "montpellier",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/montpellier/externe/resto.xml",
+      "count": 36,
+      "sha256": "eebd3c731c9884d1835816d5c3e3ccb710ede158ec912e417288faf228561858"
+    },
+    {
+      "crousId": "lyon",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/lyon/externe/resto.xml",
+      "count": 36,
+      "sha256": "96db0b16d96bda2d0159917016445e13507b07e535ed04315e6231dbef9d9725"
+    },
+    {
+      "crousId": "limoges",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/limoges/externe/resto.xml",
+      "count": 14,
+      "sha256": "c7124c38c58307ebb1df05bf5483dd38d4519d5854d960cf96277390f5700673"
+    },
+    {
+      "crousId": "lille",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/lille/externe/resto.xml",
+      "count": 64,
+      "sha256": "aac361ae46787e0cffacb22fa267c3438bdc5f234bddeda75f39dcbc67e4c6b1"
+    },
+    {
+      "crousId": "grenoble",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/grenoble/externe/resto.xml",
+      "count": 57,
+      "sha256": "f85bf25c2364643fda450a0ca781b5c6921f7ad8df7938ff51fb872c3a448a8b"
+    },
+    {
+      "crousId": "bfc",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/bfc/externe/resto.xml",
+      "count": 45,
+      "sha256": "19ffd9569b600abb6d218876ec36c6b41892007f5917ad3ce1f9c0fecd5a8182"
+    },
+    {
+      "crousId": "creteil",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/creteil/externe/resto.xml",
+      "count": 38,
+      "sha256": "f55bde3101d5ff9392e0d0807841240bb976517e59036fbfa62f109bcbb7917d"
+    },
+    {
+      "crousId": "corte",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/corte/externe/resto.xml",
+      "count": 5,
+      "sha256": "f1f647b4e91792e3764c3b9f4ac11477313d2171d127b1c988e3d6754cbb24d6"
+    },
+    {
+      "crousId": "clermont.ferrand",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/clermont.ferrand/externe/resto.xml",
+      "count": 25,
+      "sha256": "bf4893ba5cfe747902a741195f4e2e245d65a2d37dfd67e6e9061b42572c8147"
+    },
+    {
+      "crousId": "bordeaux",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/bordeaux/externe/resto.xml",
+      "count": 43,
+      "sha256": "ba6d3a35e8b47a09f75f07aa6cf52724058cb66da9c595b1c79e81afcf880a18"
+    },
+    {
+      "crousId": "antilles.guyane",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/antilles.guyane/externe/resto.xml",
+      "count": 10,
+      "sha256": "d898a927aa5cea628a4f3aa699aaf74541671403eeabf1fba33f5b3912480e55"
+    },
+    {
+      "crousId": "amiens",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/amiens/externe/resto.xml",
+      "count": 30,
+      "sha256": "8af81180eb55b541856e03a5f14e0f758718794502c108f9b08418bcba06a115"
+    },
+    {
+      "crousId": "aix.marseille",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/aix.marseille/externe/resto.xml",
+      "count": 48,
+      "sha256": "18ecfcebdbdd41787ca770660b0c2791ae8d862ec528f30ae2f465da8a0bdd80"
+    }
+  ],
+  "missingRecords": [
+    {
+      "id": "cnous-creteil-r334",
+      "sourceId": "r334",
+      "sourceSha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "officialDirectory": "https://www.crous-creteil.fr/se-restaurer/ou-manger/",
+      "note": "Absent from this XML refresh but still listed on the official website; keep identity and content, do not infer closure."
+    },
+    {
+      "id": "cnous-creteil-r331",
+      "sourceId": "r331",
+      "sourceSha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "officialDirectory": "https://www.crous-creteil.fr/se-restaurer/ou-manger/",
+      "note": "Absent from this XML refresh but still listed on the official website; keep identity and content, do not infer closure."
+    },
+    {
+      "id": "cnous-creteil-r1129",
+      "sourceId": "r1129",
+      "sourceSha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "officialDirectory": "https://www.crous-creteil.fr/se-restaurer/ou-manger/",
+      "note": "Absent from this XML refresh but still listed on the official website; keep identity and content, do not infer closure."
+    },
+    {
+      "id": "cnous-creteil-r300",
+      "sourceId": "r300",
+      "sourceSha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "officialDirectory": "https://www.crous-creteil.fr/se-restaurer/ou-manger/",
+      "note": "Absent from this XML refresh but still listed on the official website; keep identity and content, do not infer closure."
+    },
+    {
+      "id": "cnous-creteil-r1346",
+      "sourceId": "r1346",
+      "sourceSha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "officialDirectory": "https://www.crous-creteil.fr/se-restaurer/ou-manger/",
+      "note": "Absent from this XML refresh but still listed on the official website; keep identity and content, do not infer closure."
+    }
+  ],
+  "geography": [
+    {
+      "id": "cnous-reunion-r1381",
+      "expectedCityCode": null,
+      "city": "Dembeni",
+      "cityCode": "97607",
+      "region": "Mayotte",
+      "regionCode": "06",
+      "sources": [
+        "https://www.crous-reunionmayotte.fr/se-restaurer/comment-fonctionne-le-repas-a-1-e-au-crous-de-la-reunion-et-de-mayotte/",
+        "https://geo.api.gouv.fr/communes/97607?fields=nom,code,codeRegion,codeDepartement"
+      ],
+      "note": "Official Crous announcement confirms Dembeni in Mayotte; do not invent address or coordinates."
+    },
+    {
+      "id": "cnous-versailles-r43",
+      "expectedCityCode": "95500",
+      "city": "Cergy",
+      "cityCode": "95127",
+      "region": "Île-de-France",
+      "regionCode": "11",
+      "sources": [
+        "https://www.crous-versailles.fr/restaurant/ru-les-chenes/",
+        "https://plan.cyu.fr/site-des-chenes-1",
+        "https://geo.api.gouv.fr/communes?lat=49.039683&lon=2.075183&fields=nom,code,codeRegion"
+      ],
+      "note": "Official campus at the same address is in Cergy; do not use campus coordinates as a restaurant entrance."
+    },
+    {
+      "id": "cnous-versailles-r68",
+      "expectedCityCode": "95127",
+      "city": "Cergy",
+      "cityCode": "95127",
+      "region": "Île-de-France",
+      "regionCode": "11",
+      "sources": [
+        "https://plan.cyu.fr/site-des-chenes-1",
+        "https://geo.api.gouv.fr/communes?lat=49.039683&lon=2.075183&fields=nom,code,codeRegion"
+      ],
+      "note": "Cafeteria at the same official campus address; keep source coordinates excluded."
+    },
+    {
+      "id": "cnous-versailles-r1228",
+      "expectedCityCode": "91477",
+      "city": "Palaiseau",
+      "cityCode": "91477",
+      "region": "Île-de-France",
+      "regionCode": "11",
+      "sources": [
+        "https://www.crous-versailles.fr/wp-content/uploads/sites/17/2025/06/Liste_Site_rechargement_espece_Crous-Versailles_20250603.pdf"
+      ],
+      "note": "Official list confirms 91120 Palaiseau; source RU postcode 31120 is a typo; keep source coordinates excluded."
+    }
+  ],
+  "unresolvedGeography": [
+    {
+      "id": "cnous-bfc-r135",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/bfc/externe/resto.xml",
+      "sourceSha256": "936a745062abf2ae387f0fbce446cf046aec300e433129cc94632250b15aae4e",
+      "derivedCity": "Besançon",
+      "derivedCityCode": "25056",
+      "derivedRegion": "Bourgogne-Franche-Comté",
+      "derivedRegionCode": "27",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-clermont-ferrand-r530",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/clermont.ferrand/externe/resto.xml",
+      "sourceSha256": "555afddb12fbdf81273b147519eae53a08a53a7a6299cb45e2d3045b21b8ce42",
+      "derivedCity": "Clermont-Ferrand",
+      "derivedCityCode": "63113",
+      "derivedRegion": "Auvergne-Rhône-Alpes",
+      "derivedRegionCode": "84",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-grenoble-r269",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/grenoble/externe/resto.xml",
+      "sourceSha256": "f85bf25c2364643fda450a0ca781b5c6921f7ad8df7938ff51fb872c3a448a8b",
+      "derivedCity": "Gières",
+      "derivedCityCode": "38179",
+      "derivedRegion": "Auvergne-Rhône-Alpes",
+      "derivedRegionCode": "84",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-limoges-r748",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/limoges/externe/resto.xml",
+      "sourceSha256": "c7124c38c58307ebb1df05bf5483dd38d4519d5854d960cf96277390f5700673",
+      "derivedCity": "Limoges",
+      "derivedCityCode": "87085",
+      "derivedRegion": "Nouvelle-Aquitaine",
+      "derivedRegionCode": "75",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-poitiers-r747",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/poitiers/externe/resto.xml",
+      "sourceSha256": "a558765e0d9afb85dbc09c540c4f3f99839f9874edc006105cea3fd8018351fd",
+      "derivedCity": "Chasseneuil-du-Poitou",
+      "derivedCityCode": "86062",
+      "derivedRegion": "Nouvelle-Aquitaine",
+      "derivedRegionCode": "75",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-rennes-r465",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/rennes/externe/resto.xml",
+      "sourceSha256": "7214a3ba0906706dcd0b1eb315fdbe1c7df1796c450ca51c9a90b5e2dc18bab3",
+      "derivedCity": "Saint-Malo",
+      "derivedCityCode": "35288",
+      "derivedRegion": "Bretagne",
+      "derivedRegionCode": "53",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-strasbourg-r554",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/strasbourg/externe/resto.xml",
+      "sourceSha256": "80ddb93bd91569ff372b1dbe5892c5027a9cd208ae578703179ba69cce30b3e4",
+      "derivedCity": "Strasbourg",
+      "derivedCityCode": "67482",
+      "derivedRegion": "Grand Est",
+      "derivedRegionCode": "44",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-versailles-r44",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/versailles/externe/resto.xml",
+      "sourceSha256": "e462f3e8bc4201178e920133b7952df789f5e33389324bde7ea12c9710b13dc0",
+      "derivedCity": "Neuville-sur-Oise",
+      "derivedCityCode": "95450",
+      "derivedRegion": "Île-de-France",
+      "derivedRegionCode": "11",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-versailles-r65",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/versailles/externe/resto.xml",
+      "sourceSha256": "e462f3e8bc4201178e920133b7952df789f5e33389324bde7ea12c9710b13dc0",
+      "derivedCity": "Neuville-sur-Oise",
+      "derivedCityCode": "95450",
+      "derivedRegion": "Île-de-France",
+      "derivedRegionCode": "11",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    },
+    {
+      "id": "cnous-versailles-r1240",
+      "sourceUrl": "http://webservices-v2.crous-mobile.fr/feed/versailles/externe/resto.xml",
+      "sourceSha256": "e462f3e8bc4201178e920133b7952df789f5e33389324bde7ea12c9710b13dc0",
+      "derivedCity": "Neuville-sur-Oise",
+      "derivedCityCode": "95450",
+      "derivedRegion": "Île-de-France",
+      "derivedRegionCode": "11",
+      "note": "Source coordinates conflict with the address postcode; preserve derived values here but do not assert administrative membership in the selector."
+    }
+  ]
+}

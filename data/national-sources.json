@@ -5,6 +5,12 @@
   "catalog": "https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous",
   "geography": "https://geo.api.gouv.fr/",
   "transport": "Regional feeds are HTTP only; hashes identify snapshots, not authenticated origins.",
+  "review": {
+    "checkedAt": "2026-09-23T08:23:29.637081+00:00",
+    "liveRecordCount": 980,
+    "retainedMissing": 5,
+    "artifact": "data/national-reviews.json"
+  },
   "feeds": [
     {
       "crousId": "aix.marseille",

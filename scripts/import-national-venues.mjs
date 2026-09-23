@@ -6,6 +6,10 @@ const [source, crosswalk] = process.argv.slice(2);
 if (!source || !crosswalk) throw new Error("Usage: node scripts/import-national-venues.mjs <reviewed-snapshot.json> <reviewed-crosswalk.json>");
 const records = JSON.parse(readFileSync(source, "utf8"));
 const mapping = JSON.parse(readFileSync(crosswalk, "utf8"));
+const review = JSON.parse(readFileSync("data/national-reviews.json", "utf8"));
+const geography = new Map(review.geography.map(row => [row.id, row]));
+const missing = new Map(review.missingRecords.map(row => [row.id, row]));
+for (const id of [...geography.keys(), ...missing.keys()]) assert.ok(records.some(row => row.id === id), `Review is stale: ${id}`);
 assert.equal(new Set(records.map(row => row.crousId)).size, 26, "Review incomplete feed coverage");
 assert.ok(records.length >= 900 && records.length <= 2000, "Review changed directory size");
 const old = JSON.parse(readFileSync("data/versailles-venues.json", "utf8")).venues;
@@ -24,16 +28,21 @@ const venues = records.map(row => {
   assert.match(row.sourceUrl, /^http:\/\/webservices-v2\.crous-mobile\.fr\/feed\/[a-z.]+\/externe\/resto\.xml$/);
   const id = mapped.get(row.id) ?? row.id;
   const legacy = existing.get(id);
-  const point = row.nearbyEligible ? { latitude: row.latitude, longitude: row.longitude } : null;
+  const correction = geography.get(row.id);
+  if (correction) assert.equal(row.cityCode, correction.expectedCityCode, `Review geography again: ${row.id}`);
+  if (missing.has(row.id)) assert.equal(row.sourceSha256, missing.get(row.id).sourceSha256, `Review refreshed source before retaining missing status: ${row.id}`);
+  const uncertain = !correction && row.geographyStatus === "coordinate_commune" && row.warnings.includes("source_coordinate_postcode_mismatch");
+  const point = row.nearbyEligible && !missing.has(row.id) ? { latitude: row.latitude, longitude: row.longitude } : null;
   if (point) assert.ok(Number.isFinite(point.latitude) && Math.abs(point.latitude) <= 90 && Number.isFinite(point.longitude) && Math.abs(point.longitude) <= 180 && (point.latitude || point.longitude));
   // Source's explicit Mayotte zone provides timezone; no city/coordinates are guessed.
   const timezone = row.timezone ?? (row.crousId === "reunion" ? (/Mayotte/.test(row.sourceZone) ? "Indian/Mayotte" : "Indian/Reunion") : "Europe/Paris");
   return { id, sourceId: row.sourceId, displayNumber: numbers.get(id) ?? 10000 + Number(row.sourceId.slice(1)),
     name: legacy?.name ?? row.name, address: legacy?.address ?? row.address, points: point ? [point] : [], legacy: false,
-    city: row.cityName, cityCode: row.cityCode, region: row.regionName, regionCode: row.regionCode,
+    city: correction?.city ?? (uncertain ? null : row.cityName), cityCode: correction?.cityCode ?? (uncertain ? null : row.cityCode),
+    region: correction?.region ?? (uncertain ? null : row.regionName), regionCode: correction?.regionCode ?? (uncertain ? null : row.regionCode),
     crous: labels[row.crousId], crousId: row.crousId, type: legacy?.type ?? row.type, timezone,
     officialUrl: legacy?.officialUrl ?? (row.id === "cnous-reunion-r1381" ? "https://www.crous-reunionmayotte.fr/restaurant/restaurant-de-dembeni/" : "https://www.lescrous.fr/votre-crous/"),
-    warnings: row.warnings, sourceArea: row.sourceZone };
+    warnings: [...row.warnings, ...(uncertain ? ["administrative_area_unresolved"] : []), ...(missing.has(row.id) ? ["source_record_missing"] : [])], sourceArea: row.sourceZone };
 }).sort((a,b) => a.id.localeCompare(b.id));
 assert.equal(new Set(venues.map(row=>row.id)).size,venues.length);
 assert.equal(new Set(venues.map(row=>row.displayNumber)).size,venues.length);
@@ -42,5 +51,5 @@ const previous = (()=>{try{return JSON.parse(readFileSync("data/national-venues.
 if(previous) for(const row of previous.venues) { const next=venues.find(item=>item.id===row.id); assert.ok(next, `Missing ${row.id}: review disappearance, do not delete automatically`); assert.equal(next.displayNumber,row.displayNumber); }
 const feeds = [...new Map(records.map(row=>[row.crousId,{crousId:row.crousId,url:row.sourceUrl,sha256:row.sourceSha256,updatedAt:row.sourceUpdatedAt}])).values()];
 writeFileSync("data/national-venues.json", JSON.stringify({ checkedOn: records[0].retrievedAt, venues })+"\n");
-writeFileSync("data/national-sources.json", JSON.stringify({ checkedOn: records[0].retrievedAt, provider:"CNOUS", license:"Licence Ouverte", catalog:"https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous", geography:"https://geo.api.gouv.fr/", transport:"Regional feeds are HTTP only; hashes identify snapshots, not authenticated origins.", feeds, crosswalk:mapping },null,2)+"\n");
+writeFileSync("data/national-sources.json", JSON.stringify({ checkedOn: records[0].retrievedAt, provider:"CNOUS", license:"Licence Ouverte", catalog:"https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous", geography:"https://geo.api.gouv.fr/", transport:"Regional feeds are HTTP only; hashes identify snapshots, not authenticated origins.", review:{checkedAt:review.checkedAt,liveRecordCount:review.liveRecordCount,retainedMissing:review.missingRecords.length,artifact:"data/national-reviews.json"}, feeds, crosswalk:mapping },null,2)+"\n");
 console.log(JSON.stringify({venues:venues.length,crous:feeds.length,nearby:venues.filter(row=>row.points.length).length,preserved:existing.size}));
