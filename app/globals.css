@@ -132,6 +132,7 @@ html[lang="en"] [data-dish-title] {
 html[lang="en"] h1[data-dish-title] { font-size: clamp(1.5rem, 3vw, 2.25rem); }
 html[lang="en"] h2[data-dish-title] { font-size: 1.5rem; }
 html[lang="en"] h3[data-dish-title] { font-size: 1.125rem; }
+html[lang="en"] [data-dish-stack] h3[data-dish-title] { font-size: clamp(1.375rem, 2.5vw, 1.875rem); }
 [data-dish-title] .dish-translation {
   display: block;
   margin-top: 0.35em;

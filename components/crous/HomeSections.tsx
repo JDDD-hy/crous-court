@@ -51,7 +51,7 @@ export function Ranking({ title, icon, items, authenticated, reviewedDishIds, ve
   const t = useT();
   const venueQuery = useVenueQuery(scopeQuery);
   const listRef = useRankingFlip(items.map((dish) => `${dish.id}:${dish.tier}:${dish.votes}`).join("|"));
-  return <section><div className="mb-4 flex items-center gap-2"><span aria-hidden="true">{icon}</span><h2 className="text-3xl font-black">{title}</h2></div><div ref={listRef} className="grid items-start gap-6 md:grid-cols-2">{items.length === 0 ? <p className="border-3 border-dashed border-ink/35 bg-paper p-6 text-ink/65">{t("这里还没有被观测到的菜品。")}</p> : items.map(dish => <DishStack key={`${dish.category}:${dish.groupId ?? dish.id}:${venueQuery}`} dish={dish} venueQuery={venueQuery} authenticated={authenticated} reviewedDishIds={reviewedDishIds} />)}</div></section>;
+  return <section><div className="mb-4 flex items-center gap-2"><span aria-hidden="true" className="shrink-0">{icon}</span><h2 className="min-w-0 break-words text-3xl font-black">{title}</h2></div><div ref={listRef} className="grid items-start gap-6 md:grid-cols-2">{items.length === 0 ? <p className="border-3 border-dashed border-ink/35 bg-paper p-6 text-ink/65">{t("这里还没有被观测到的菜品。")}</p> : items.map(dish => <DishStack key={`${dish.category}:${dish.groupId ?? dish.id}:${venueQuery}`} dish={dish} venueQuery={venueQuery} authenticated={authenticated} reviewedDishIds={reviewedDishIds} />)}</div></section>;
 }
 function NewBadge({ className }: { className: string }) {
   const t = useT(); return <span className={`absolute z-10 rotate-3 border-2 border-ink bg-[#f4ecb8] px-2 py-1 font-mono text-xs font-black shadow-[2px_2px_0_#202624] ${className}`} aria-label={t("尚未审阅")}>NEW</span>; }
