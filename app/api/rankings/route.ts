@@ -3,6 +3,7 @@ import { getUserVotes, rankingPage } from "@/lib/ranking-service";
 import { getEmailUser } from "@/lib/auth/email-auth";
 import { parseRankingPage, rankingPageSize } from "@/lib/ranking-query";
 import { getVenueScope } from "@/lib/venue-scope";
+import { reportServerError } from "@/lib/server-error";
 
 export async function GET(request: Request) {
   const requestId = crypto.randomUUID();
@@ -26,6 +27,7 @@ export async function GET(request: Request) {
     return localizedJson({ data: result.dishes, ...(relatedTo ? { reviewedDishIds } : {}), pagination: { page: result.page, pageSize: limit, total: result.total }, error: null, requestId }, relatedTo ? { headers: { "cache-control": "private, no-store" } } : undefined);
   } catch (error) {
     if (error instanceof RangeError) return localizedJson({ data: null, error: "Invalid ranking page", requestId }, { status: 400 });
+    reportServerError("ranking", requestId, error);
     return localizedJson({ data: null, error: "ranking data is unavailable", requestId }, { status: 500 });
   }
 }

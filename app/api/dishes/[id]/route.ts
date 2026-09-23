@@ -1,6 +1,7 @@
 import { localizedJson } from "@/lib/i18n/server";
 import { getDishDetail } from "@/lib/ranking-service";
 import { parseRankingPage } from "@/lib/ranking-query";
+import { reportServerError } from "@/lib/server-error";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const requestId = crypto.randomUUID();
@@ -12,6 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return localizedJson({ data: dish, error: null, requestId });
   } catch (error) {
     if (error instanceof RangeError) return localizedJson({ data: null, error: "Invalid page", requestId }, { status: 400 });
+    reportServerError("dish_detail", requestId, error);
     return localizedJson({ data: null, error: "dish data is unavailable", requestId }, { status: 500 });
   }
 }

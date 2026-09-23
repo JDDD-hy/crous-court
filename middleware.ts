@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
 import { isolationMigrationId, restaurantIsolationStatements } from "@/lib/restaurant-isolation";
+import { reportServerError } from "@/lib/server-error";
 
 let ready: Promise<void> | undefined;
 async function initialize() {
@@ -14,8 +15,8 @@ export async function middleware() {
     ready ??= initialize().catch(error => { ready = undefined; throw error; });
     await ready;
     return NextResponse.next();
-  } catch {
-    console.error("restaurant isolation initialization failed");
+  } catch (error) {
+    reportServerError("isolation_init", crypto.randomUUID(), error);
     return new Response("数据服务暂时不可用，请稍后重试。 / Data temporarily unavailable.", {
       status: 503, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", "retry-after": "30" },
     });
