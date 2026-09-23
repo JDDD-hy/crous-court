@@ -134,6 +134,13 @@
       "when": 1790117470308,
       "tag": "0025_vote_history_index",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1790198769241,
+      "tag": "0026_dish_history_pages",
+      "breakpoints": true
     }
   ]
 }

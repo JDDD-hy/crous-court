@@ -5,7 +5,7 @@ import type { DishCategory, DishDetail } from "./dish-types";
 import { type Tier, type TierHistoryEntry } from "./ranking";
 import { getLocale } from "./i18n/server";
 import { rankingPage } from "./ranking-summary";
-import { dishHistoryQuery, evidencePageSize, historyPageSize } from './dish-history-query';
+import { dishHistoryPageQueries, evidencePageSize, historyPageSize } from './dish-history-query';
 export { rankingPage } from "./ranking-summary";
 
 export async function listRankings(category?: DishCategory, venueIds?: string[]) {
@@ -21,8 +21,9 @@ export async function getDishDetail(id: string, evidencePage = 1, historyPage = 
   if (!summary) return null;
 
   const db = getDb();
-  const historyQuery = dishHistoryQuery(id, historyPage);
-  const [servingRows, historyRows, countRow] = await Promise.all([db.select({
+  const rawDb = getRawDb();
+  const historyQueries = dishHistoryPageQueries(id, historyPage);
+  const [servingRows, historyBatch, countRow] = await Promise.all([db.select({
       id: servings.id,
       mealId: meals.id,
       date: servings.servedOn,
@@ -38,11 +39,13 @@ export async function getDishDetail(id: string, evidencePage = 1, historyPage = 
       .leftJoin(photos, eq(photos.mealId, meals.id))
       .where(and(eq(servings.dishId, id), eq(servings.status, "active")))
       .orderBy(desc(servings.servedOn), desc(servings.createdAt), servings.id, photos.id).limit(evidencePageSize).offset((evidencePage - 1) * evidencePageSize),
-    getRawDb().prepare(historyQuery.sql).bind(...historyQuery.bindings).all<TierHistoryEntry & { total: number }>(),
+    rawDb.batch<{ page: number; rows_json: string }>(historyQueries.map(query => rawDb.prepare(query.sql).bind(...query.bindings))),
     getRawDb().prepare(`SELECT COUNT(*) records, COUNT(DISTINCT s.id) sightings FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id LEFT JOIN photos p ON p.meal_id=m.id WHERE s.dish_id=? AND s.status='active' AND m.status='active'`).bind(id).first<{ records: number; sightings: number }>(),
   ]);
+  const historyResult = historyBatch.at(-1)?.results[0];
+  const historyRows = JSON.parse(historyResult?.rows_json ?? '[]') as (TierHistoryEntry & { total: number })[];
+  historyPage = historyResult?.page ?? 1;
   if (!servingRows.length && evidencePage > 1) return getDishDetail(id, 1, historyPage);
-  if (!historyRows.results.length && historyPage > 1) return getDishDetail(id, evidencePage, 1);
   const uniqueServings = [...new Map(servingRows.map((serving) => [`${serving.id}:${serving.photoId ?? ""}`, serving])).values()];
   return {
     ...summary,
@@ -55,9 +58,9 @@ export async function getDishDetail(id: string, evidencePage = 1, historyPage = 
       originalDescription: serving.originalDescription,
       image: serving.photoId ? `/api/photos/${serving.photoId}` : null,
     })),
-    tierHistory: historyRows.results.map(({tier,at,voteCount})=>({tier,at,voteCount})),
+    tierHistory: historyRows.map(({tier,at,voteCount})=>({tier,at,voteCount})),
     evidencePagination: { page: evidencePage, size: evidencePageSize, total: countRow?.records ?? 0 },
-    historyPagination: { page: historyPage, size: historyPageSize, total: historyRows.results[0]?.total ?? 0 },
+    historyPagination: { page: historyPage, size: historyPageSize, total: historyRows[0]?.total ?? 0 },
     servingCount: countRow?.sightings ?? 0,
   };
 }

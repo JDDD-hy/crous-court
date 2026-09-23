@@ -106,6 +106,16 @@ export const dishes = sqliteTable("dishes", {
   check("dishes_naming_status_check", sql`${table.namingStatus} in ('unknown', 'suggested', 'community', 'verified')`),
 ]);
 
+// Disposable public history pages; vote triggers invalidate them transactionally.
+export const dishHistoryPages = sqliteTable("dish_history_pages", {
+  dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),
+  page: integer("page").notNull(),
+  rowsJson: text("rows_json").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.dishId, table.page] }),
+  check("dish_history_pages_page_check", sql`${table.page} between 1 and 10000`),
+]);
+
 export const servings = sqliteTable("servings", {
   id: text("id").primaryKey(),
   dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),
