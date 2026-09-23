@@ -70,7 +70,7 @@ test("does not optimistically replace an existing vote", () => {
   assert.equal(reduceVoteState(state, { type: "optimistic", target: 1 }), state);
 });
 
-test("confirmed votes preserve the selected venue observation while updating global scores", () => {
+test("confirmed votes preserve the selected venue observation while updating its restaurant-specific score", () => {
   const dish = { id: "dish", name: "Dish", zh: "菜", venue: "Escoffier", date: "2026-09-11", image: "/local.jpg", tier: 3, initialTier: 3, votes: 1, distribution: [0, 0, 1, 0, 0], category: "main", status: "pending" } satisfies DishSummary;
   const result = reduceVoteState({ dish, myVote: null, error: "" }, { type: "confirmed", myVote: 1, dish: { ...dish, venue: "Experimental", date: "2026-09-15", image: "/other.jpg", initialTier: 5, votes: 2, distribution: [1, 0, 1, 0, 0] } });
   assert.equal(result.dish.venue, "Escoffier");

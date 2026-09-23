@@ -11,7 +11,7 @@ export async function verifyAdminDishSearch({ request, admin, ordinary, sql }) {
   const dish = (await read('couscous-boulettes')).items.find(d=>d.id==='couscous-boulettes');
   assert.ok(dish.visible); assert.ok(dish.votes>0); assert.ok(dish.servings>0);
   const old = (await read('lentilles-saucisse')).items.find(d=>d.id==='lentilles-saucisse');
-  assert.equal(old.merged_into_dish_id,'couscous-boulettes');
+  assert.equal(old.merged_into_dish_id,null);
   sql(`INSERT INTO dishes(id,original_description,category,canonical_name_en) VALUES
     ('lookup-alpha','碎肉、土豆和蔬菜混合主餐','main','Minced meat with vegetables'),
     ('lookup-beta','肉条+土豆+花菜胡萝卜丝','main',NULL);

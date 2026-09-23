@@ -52,6 +52,10 @@ The community verdict is calculated using the **ordered median** of all valid vo
 
 Each user gets **one verdict per dish**.
 
+Dishes and votes belong to one restaurant. The same dish name at another restaurant has its own verdict.
+
+The national directory contains 985 entries from 26 CROUS feeds (snapshot: 23 September 2026). Search by region, city, CROUS or name; nearby discovery stays within 1 km. Coordinates with unresolved conflicts are excluded from nearby results. Directory inclusion does not guarantee that a venue is currently open. Source: [CNOUS open data, Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous).
+
 Once submitted, a verdict cannot be changed — so choose carefully before the gavel falls.
 
 ---

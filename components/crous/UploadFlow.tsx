@@ -12,18 +12,21 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { ExtraSideDishes, type ExtraSide } from "./ExtraSideDishes";
 import { TierPicker } from "./TierPicker";
 import { OptionalTier } from "./DishFields";
-import { DishIdentityField } from "./DishIdentityField";
+import { DishIdentityField, UploadVenueContext } from "./DishIdentityField";
 import { AiDishRecognition, type IdentificationResult } from "./AiDishRecognition";
 import { DishRegionPreview } from "./DishRegionPreview";
 import { sanitizePhoto } from "@/lib/upload/client-image";
 import type { TierId } from "./data";
-import { todayInParis } from "@/lib/calendar";
+import { todayInTimezone } from "@/lib/calendar";
 import type { VenueOption } from "@/lib/venue-preference";
 
 type UploadResult = { mealId: string; photoId: string; caseNumber: string };
 
 export function UploadFlow({ venues }: { venues: VenueOption[] }) {
   const t = useT();
+  const [selectedVenueId, setSelectedVenueId] = useState("");
+  const activeVenueId = venues.some(venue => venue.id === selectedVenueId) ? selectedVenueId : "";
+  const today = todayInTimezone(venues.find(venue => venue.id === activeVenueId)?.timezone ?? "Europe/Paris");
   const formRef = useRef<HTMLFormElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [files, setFiles] = useState<{ canonical: File; thumbnail: File } | null>(null);
@@ -87,7 +90,7 @@ export function UploadFlow({ venues }: { venues: VenueOption[] }) {
 
   if (result) return <Success result={result} onReset={() => { if (preview) URL.revokeObjectURL(preview); setExtraSides([]); setExtraOpen(false); setResult(null); setFiles(null); setPreview(null); formRef.current?.reset(); }} />;
 
-  return <form ref={formRef} onSubmit={submit} onChangeCapture={() => setDirty(true)} data-language-busy={busy} data-language-draft={Boolean(dirty || files || mainName || sideOneName || sideTwoName || extraSides.length || tier !== 3 || rightsConfirmed)} className="space-y-7">
+  return <UploadVenueContext.Provider value={activeVenueId}><form ref={formRef} onSubmit={submit} onChangeCapture={() => setDirty(true)} data-language-busy={busy} data-language-draft={Boolean(dirty || files || mainName || sideOneName || sideTwoName || extraSides.length || tier !== 3 || rightsConfirmed)} className="space-y-7">
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">{t("1. 照片")}</p><h2 className="mt-2 text-2xl font-black">{t("上传整张餐盘")}</h2>
       <label className="mt-5 grid min-h-72 cursor-pointer place-items-center overflow-hidden rounded-lg border-4 border-dashed border-ink/45 bg-[#ded8c9] text-center focus-within:outline-3">{preview ? <img src={preview} alt={t("已清理元数据的餐盘预览")} className="h-72 w-full object-contain" /> : <span><ImagePlus className="mx-auto size-12" /><strong className="mt-3 block text-lg">{t("选择 JPG、PNG 或 HEIC")}</strong><small>{t("原图不离开浏览器；上传前会转为 JPEG 并移除 EXIF/GPS")}</small></span>}<input className="sr-only" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" onChange={(event) => choosePhoto(event.target.files?.[0])} /></label>
@@ -96,7 +99,7 @@ export function UploadFlow({ venues }: { venues: VenueOption[] }) {
 
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">
       <p className="font-mono text-sm font-bold text-verdict">{t("2. 菜品信息")}</p><h2 className="mt-2 text-2xl font-black">{t("同一天可以继续立案")}</h2>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="font-bold">{t("餐厅")}<NativeSelect key={venues.map(venue => venue.id).join(",")} name="venueId" required defaultValue="" className="mt-2 min-h-12 border-2 border-ink bg-paper text-base"><NativeSelectOption value="" disabled>{t("选择案发地点")}</NativeSelectOption>{venues.map(venue => <NativeSelectOption key={venue.id} value={venue.id}>{venue.name}</NativeSelectOption>)}</NativeSelect></label><label className="font-bold">{t("用餐日期")}<input name="eatenOn" type="date" required defaultValue={todayInParis()} max={todayInParis()} className="mt-2 min-h-12 w-full rounded-md border-2 border-ink bg-paper px-3" /></label></div>
+      <div className="mt-5 grid gap-5 sm:grid-cols-2"><label className="font-bold">{t("餐厅")}<NativeSelect key={venues.map(venue => venue.id).join(",")} name="venueId" required value={activeVenueId} onChange={event => setSelectedVenueId(event.target.value)} className="mt-2 min-h-12 border-2 border-ink bg-paper text-base"><NativeSelectOption value="" disabled>{t("选择案发地点")}</NativeSelectOption>{venues.map(venue => <NativeSelectOption key={venue.id} value={venue.id}>{venue.name}</NativeSelectOption>)}</NativeSelect></label><label className="font-bold">{t("用餐日期")}<input key={activeVenueId} name="eatenOn" type="date" required defaultValue={today} max={today} className="mt-2 min-h-12 w-full rounded-md border-2 border-ink bg-paper px-3" /></label></div>
       <div className="mt-6 grid gap-5 sm:grid-cols-3"><DishIdentityField label={t("主食（可未知）")} name="mainName" category="main" value={mainName} onChange={setMainName} candidateSearchEnabled={candidateSearchEnabled} /><div><DishIdentityField label={t("小菜 1（可选）")} name="sideOneName" category="side" value={sideOneName} onChange={setSideOneName} candidateSearchEnabled={candidateSearchEnabled} /><DishRegionPreview imageUrl={preview} region={identification?.side_dishes[0]?.region ?? null} label={t("小菜 1")} /><OptionalTier name="sideOneTier" /></div><div><DishIdentityField label={t("小菜 2（可选）")} name="sideTwoName" category="side" value={sideTwoName} onChange={setSideTwoName} candidateSearchEnabled={candidateSearchEnabled} /><DishRegionPreview imageUrl={preview} region={identification?.side_dishes[1]?.region ?? null} label={t("小菜 2")} /><OptionalTier name="sideTwoTier" /></div></div>
       <ExtraSideDishes sides={extraSides} onChange={setExtraSides} open={extraOpen} onToggle={setExtraOpen} imageUrl={preview} identification={identification} candidateSearchEnabled={candidateSearchEnabled} />
       <p className="mt-4 border-l-4 border-accent pl-3 text-sm">{t("菜名可以先留空。原始文字会保留，后续识别或群众补名不会覆盖它。")}</p>
@@ -108,7 +111,7 @@ export function UploadFlow({ venues }: { venues: VenueOption[] }) {
       {error && <p role="alert" className="mt-4 border-2 border-verdict bg-[#f4d9d4] p-3 font-bold text-verdict">{t(error)}</p>}
       <div className="mt-6 flex items-center justify-between"><span className="flex items-center gap-2 text-sm text-ink/60"><ShieldCheck className="size-4" />{t("登录后立即展示，可被举报后隐藏")}</span><Button type="submit" disabled={busy || !files || !rightsConfirmed} className="min-h-12 bg-ink px-6">{busy ? t("处理中…") : t("发布并立案")}</Button></div>
     </section>
-  </form>;
+  </form></UploadVenueContext.Provider>;
 }
 
 function Success({ result, onReset }: { result: UploadResult; onReset: () => void }) {

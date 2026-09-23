@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 
 export async function verifyAiMergeReview({ request, admin, ordinary, sql }) {
-  sql(`INSERT INTO dishes (id,original_description,category) VALUES
-    ('merge-a','意面豆子加夹心肉排','main'),('merge-b','意面、豆子和夹心肉排','main'),
-    ('merge-c','薯角配鱼排','main'),('merge-d','鱼排和薯角','main'),('merge-empty','薯角配鱼排','main');
+  sql(`INSERT INTO dishes (id,original_description,category,venue_id) VALUES
+    ('merge-a','意面豆子加夹心肉排','main','venue-escoffier'),('merge-b','意面、豆子和夹心肉排','main','venue-escoffier'),
+    ('merge-c','薯角配鱼排','main','venue-escoffier'),('merge-d','鱼排和薯角','main','venue-escoffier'),('merge-empty','薯角配鱼排','main','venue-escoffier');
     INSERT INTO votes (id,dish_id,user_id,target_tier,created_at) VALUES
     ('merge-v1','merge-a','fixture-user-01',1,'2026-09-01'),
     ('merge-v2','merge-b','fixture-user-01',5,'2026-09-02'),

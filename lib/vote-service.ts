@@ -1,16 +1,16 @@
 import { getRawDb } from "@/db";
-import type { DishDetail } from "@/lib/dish-types";
-import { getDishDetail, getUserVote } from "@/lib/ranking-service";
+import type { DishSummary } from "@/lib/dish-types";
+import { getDishSummary, getUserVote } from "@/lib/ranking-service";
 import type { Tier } from "@/lib/ranking";
 
 const RATE_LIMIT = 30;
 const RATE_WINDOW_SECONDS = 60;
 
 export class VoteError extends Error {
-  constructor(message: string, public status: number, public currentVote?: { dish: DishDetail; myVote: Tier }) { super(message); }
+  constructor(message: string, public status: number, public currentVote?: { dish: DishSummary; myVote: Tier }) { super(message); }
 }
 
-export async function submitVote(dishId: string, userId: string, targetTier: unknown): Promise<{ dish: DishDetail; myVote: Tier }> {
+export async function submitVote(dishId: string, userId: string, targetTier: unknown): Promise<{ dish: DishSummary; myVote: Tier }> {
   if (!Number.isInteger(targetTier) || Number(targetTier) < 1 || Number(targetTier) > 5) {
     throw new VoteError("请选择有效等级", 400);
   }
@@ -44,10 +44,10 @@ export async function submitVote(dishId: string, userId: string, targetTier: unk
     throw error;
   }
   if (!created) {
-    const [dish, myVote] = await Promise.all([getDishDetail(dishId), getUserVote(dishId, userId)]);
+    const [dish, myVote] = await Promise.all([getDishSummary(dishId), getUserVote(dishId, userId)]);
     throw new VoteError("这道菜你已经判过了，已同步已有判决", 409, dish && myVote !== null ? { dish, myVote } : undefined);
   }
-  const dish = await getDishDetail(dishId);
+  const dish = await getDishSummary(dishId);
   if (!dish) throw new VoteError("菜品不存在或不可见", 404);
   return { dish, myVote: tier };
 }

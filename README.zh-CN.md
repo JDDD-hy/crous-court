@@ -52,6 +52,10 @@ CROUS 法庭是一个 vibe-coded 的 **CROUS 菜品社区排行榜**。
 
 每个用户对同一道菜只能判一次。
 
+菜品与评分归属于一家餐厅；不同餐厅的同名菜独立计算。
+
+全国目录收录 26 个 CROUS 数据源的 985 条记录（2026 年 9 月 23 日快照），支持按大区、城市、CROUS 和名称查找。附近搜索严格限定 1 km；坐标存在冲突的记录不参与附近搜索。收录不代表当前营业。数据来自 [CNOUS 开放数据，Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous)。
+
 判决提交后不能修改，所以落槌前请认真考虑。
 
 ---

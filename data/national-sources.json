@@ -1,0 +1,1114 @@
+{
+  "checkedOn": "2026-09-23",
+  "provider": "CNOUS",
+  "license": "Licence Ouverte",
+  "catalog": "https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous",
+  "geography": "https://geo.api.gouv.fr/",
+  "transport": "Regional feeds are HTTP only; hashes identify snapshots, not authenticated origins.",
+  "review": {
+    "checkedAt": "2026-09-23T08:23:29.637081+00:00",
+    "liveRecordCount": 980,
+    "retainedMissing": 5,
+    "artifact": "data/national-reviews.json"
+  },
+  "feeds": [
+    {
+      "crousId": "aix.marseille",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/aix.marseille/externe/resto.xml",
+      "sha256": "18ecfcebdbdd41787ca770660b0c2791ae8d862ec528f30ae2f465da8a0bdd80",
+      "updatedAt": "2025-12-16T09:38:08+01:00"
+    },
+    {
+      "crousId": "amiens",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/amiens/externe/resto.xml",
+      "sha256": "913abc1a0589e0003dc6800150dd230f17ddcbcee0b126ec0f7a7d8c5ff6168f",
+      "updatedAt": "2026-09-17T02:00:02+02:00"
+    },
+    {
+      "crousId": "antilles.guyane",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/antilles.guyane/externe/resto.xml",
+      "sha256": "d898a927aa5cea628a4f3aa699aaf74541671403eeabf1fba33f5b3912480e55",
+      "updatedAt": "2026-05-06T16:11:55+02:00"
+    },
+    {
+      "crousId": "bfc",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/bfc/externe/resto.xml",
+      "sha256": "936a745062abf2ae387f0fbce446cf046aec300e433129cc94632250b15aae4e",
+      "updatedAt": "2026-09-18T16:27:10+02:00"
+    },
+    {
+      "crousId": "bordeaux",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/bordeaux/externe/resto.xml",
+      "sha256": "7e40f12b1e7841fb26658a9994192c0d778bbf1d7e610e6770c75293205cebf5",
+      "updatedAt": "2026-09-22T12:02:51+02:00"
+    },
+    {
+      "crousId": "clermont.ferrand",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/clermont.ferrand/externe/resto.xml",
+      "sha256": "555afddb12fbdf81273b147519eae53a08a53a7a6299cb45e2d3045b21b8ce42",
+      "updatedAt": "2026-09-15T08:46:40+02:00"
+    },
+    {
+      "crousId": "corte",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/corte/externe/resto.xml",
+      "sha256": "f1f647b4e91792e3764c3b9f4ac11477313d2171d127b1c988e3d6754cbb24d6",
+      "updatedAt": "2026-08-13T05:56:25+02:00"
+    },
+    {
+      "crousId": "creteil",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/creteil/externe/resto.xml",
+      "sha256": "c33ba467bf5fdfcee438b0eb929d33fb4ffeef5b6d543cd7b1aad79756640c3e",
+      "updatedAt": "2026-09-14T02:00:03+02:00"
+    },
+    {
+      "crousId": "grenoble",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/grenoble/externe/resto.xml",
+      "sha256": "f85bf25c2364643fda450a0ca781b5c6921f7ad8df7938ff51fb872c3a448a8b",
+      "updatedAt": "2026-09-14T09:30:48+02:00"
+    },
+    {
+      "crousId": "lille",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/lille/externe/resto.xml",
+      "sha256": "d32b29d9c6f3669c0e50fa1e3c938f08c5f755adc563a903a00e4eb530907426",
+      "updatedAt": "2026-09-17T10:29:25+02:00"
+    },
+    {
+      "crousId": "limoges",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/limoges/externe/resto.xml",
+      "sha256": "c7124c38c58307ebb1df05bf5483dd38d4519d5854d960cf96277390f5700673",
+      "updatedAt": "2026-09-11T09:34:30+02:00"
+    },
+    {
+      "crousId": "lyon",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/lyon/externe/resto.xml",
+      "sha256": "96db0b16d96bda2d0159917016445e13507b07e535ed04315e6231dbef9d9725",
+      "updatedAt": "2026-09-21T11:29:07+02:00"
+    },
+    {
+      "crousId": "montpellier",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/montpellier/externe/resto.xml",
+      "sha256": "b74676620e672213aa7f18a8839d508054c731165659ee7016d152f7b897f654",
+      "updatedAt": "2026-09-19T02:00:02+02:00"
+    },
+    {
+      "crousId": "nancy.metz",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nancy.metz/externe/resto.xml",
+      "sha256": "5c629c055997f6104480d6d3aa339568ec436692c96b0eb6f39c35cdf0fc841a",
+      "updatedAt": "2026-09-08T13:19:37+02:00"
+    },
+    {
+      "crousId": "nantes",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nantes/externe/resto.xml",
+      "sha256": "38198f3ca85918bf6e42ef5bfa1fd4a2646e040870c939d9d716bce6256ebb26",
+      "updatedAt": "2026-09-22T10:54:47+02:00"
+    },
+    {
+      "crousId": "nice",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/nice/externe/resto.xml",
+      "sha256": "5122523b7b2e0adb550329e6281f04faf5c80c290c81add20671b53d3b13fa91",
+      "updatedAt": "2026-07-01T02:00:05+02:00"
+    },
+    {
+      "crousId": "normandie",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/normandie/externe/resto.xml",
+      "sha256": "2480eee5c96be475ff9ff2c0b36b1df6dd11cf6c1406dae31dd7626be81830ff",
+      "updatedAt": "2026-09-21T08:06:04+02:00"
+    },
+    {
+      "crousId": "orleans.tours",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/orleans.tours/externe/resto.xml",
+      "sha256": "2971dd5f25dfa2d390ff40af58176a952101c19cd551415865d66a942ddd0f31",
+      "updatedAt": "2026-09-10T02:00:03+02:00"
+    },
+    {
+      "crousId": "paris",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/paris/externe/resto.xml",
+      "sha256": "90521e6afdc4e7b17d91a4dbb2780b47c38805343117cdd5b880dc99f2eb3e74",
+      "updatedAt": "2026-09-21T14:09:52+02:00"
+    },
+    {
+      "crousId": "poitiers",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/poitiers/externe/resto.xml",
+      "sha256": "a558765e0d9afb85dbc09c540c4f3f99839f9874edc006105cea3fd8018351fd",
+      "updatedAt": "2026-09-07T08:11:12+02:00"
+    },
+    {
+      "crousId": "reims",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/reims/externe/resto.xml",
+      "sha256": "a6745547933f8f399e4168b4ee015b4f02daf07fd6fc30f25bad23fe3b13dff0",
+      "updatedAt": "2026-09-18T02:00:02+02:00"
+    },
+    {
+      "crousId": "rennes",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/rennes/externe/resto.xml",
+      "sha256": "7214a3ba0906706dcd0b1eb315fdbe1c7df1796c450ca51c9a90b5e2dc18bab3",
+      "updatedAt": "2026-09-18T08:25:07+02:00"
+    },
+    {
+      "crousId": "reunion",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/reunion/externe/resto.xml",
+      "sha256": "5ebe0fdfb375e4a7b89b1b21364dab9839ff13135bf74151f5a98cdab4f38884",
+      "updatedAt": "2026-08-22T02:00:04+02:00"
+    },
+    {
+      "crousId": "strasbourg",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/strasbourg/externe/resto.xml",
+      "sha256": "80ddb93bd91569ff372b1dbe5892c5027a9cd208ae578703179ba69cce30b3e4",
+      "updatedAt": "2026-09-14T10:12:25+02:00"
+    },
+    {
+      "crousId": "toulouse",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/toulouse/externe/resto.xml",
+      "sha256": "792f1c916e946f26a0098d2c691b33d56d38267d1d2b79608a7817e6fa906667",
+      "updatedAt": "2026-09-18T14:16:40+02:00"
+    },
+    {
+      "crousId": "versailles",
+      "url": "http://webservices-v2.crous-mobile.fr/feed/versailles/externe/resto.xml",
+      "sha256": "e462f3e8bc4201178e920133b7952df789f5e33389324bde7ea12c9710b13dc0",
+      "updatedAt": "2026-09-16T12:29:09+02:00"
+    }
+  ],
+  "crosswalk": [
+    {
+      "legacyId": "brasserie-la-coulee-verte-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-coulee-verte-2/",
+      "name": "Brasserie La Coulée Verte",
+      "matches": [
+        {
+          "sourceId": "r74",
+          "nationalId": "cnous-versailles-r74",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "brasserie-la-palette-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-palette-2/",
+      "name": "Brasserie La Palette",
+      "matches": [
+        {
+          "sourceId": "r62",
+          "nationalId": "cnous-versailles-r62",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "brasserie-la-ruche-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/brasserie-la-ruche-2/",
+      "name": "Brasserie La Ruche",
+      "matches": [
+        {
+          "sourceId": "r1274",
+          "nationalId": "cnous-versailles-r1274",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-centralesupelec-breguet-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-centralesupelec-breguet-2/",
+      "name": "Cafétéria CentraleSupélec Breguet",
+      "matches": [
+        {
+          "sourceId": "r88",
+          "nationalId": "cnous-versailles-r88",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-gennevilliers-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-gennevilliers-2/",
+      "name": "Cafétéria de Gennevilliers",
+      "matches": [
+        {
+          "sourceId": "r51",
+          "nationalId": "cnous-versailles-r51",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-lecole-darchitecture-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-lecole-darchitecture-2/",
+      "name": "Cafétéria de l’École d’architecture",
+      "matches": [
+        {
+          "sourceId": "r64",
+          "nationalId": "cnous-versailles-r64",
+          "exactNormalizedName": false,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true,
+          "identityEvidence": "Same exact address, same public telephone and same navigation coordinates. Official page title differs from feed; reviewed as source alias only, not user-content merge.",
+          "telephone": "01 30 21 76 38",
+          "evidenceUrls": [
+            "https://www.crous-versailles.fr/restaurant/cafeteria-de-lecole-darchitecture-2/",
+            "https://www.crous-versailles.fr/restaurant/cafeteria-de-lecole-darchitecture/"
+          ],
+          "verifiedOn": "2026-09-23",
+          "retrievalNote": "Official page text verified using web tool; direct urllib HTTPS rejected expired certificate, no TLS bypass used."
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-linstitut-de-biologie-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-linstitut-de-biologie-2/",
+      "name": "Cafétéria de l’Institut de Biologie",
+      "matches": [
+        {
+          "sourceId": "r144",
+          "nationalId": "cnous-versailles-r144",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-liut-dorsay-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-liut-dorsay-2/",
+      "name": "Cafétéria de l’IUT d’Orsay",
+      "matches": [
+        {
+          "sourceId": "r1224",
+          "nationalId": "cnous-versailles-r1224",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-liut-de-saint-cloud-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-liut-de-saint-cloud-2/",
+      "name": "Cafétéria de l’IUT de Saint-Cloud",
+      "matches": [
+        {
+          "sourceId": "r53",
+          "nationalId": "cnous-versailles-r53",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-la-bu-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-la-bu-2/",
+      "name": "Cafétéria de la BU",
+      "matches": [
+        {
+          "sourceId": "r77",
+          "nationalId": "cnous-versailles-r77",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-de-la-poste-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-de-la-poste-2/",
+      "name": "Cafétéria de La Poste",
+      "matches": [
+        {
+          "sourceId": "r83",
+          "nationalId": "cnous-versailles-r83",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-descartes-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-descartes-2/",
+      "name": "Cafétéria Descartes",
+      "matches": [
+        {
+          "sourceId": "r37",
+          "nationalId": "cnous-versailles-r37",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-eiffel-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-eiffel-2/",
+      "name": "Cafétéria Eiffel",
+      "matches": [
+        {
+          "sourceId": "r1223",
+          "nationalId": "cnous-versailles-r1223",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-ens-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-ens-2/",
+      "name": "Cafétéria ENS",
+      "matches": [
+        {
+          "sourceId": "r1231",
+          "nationalId": "cnous-versailles-r1231",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-escoffier-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-escoffier-2/",
+      "name": "Cafétéria Escoffier",
+      "matches": [
+        {
+          "sourceId": "r1229",
+          "nationalId": "cnous-versailles-r1229",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-henri-moissan-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-henri-moissan-2/",
+      "name": "Cafétéria Henri Moissan",
+      "matches": [
+        {
+          "sourceId": "r1227",
+          "nationalId": "cnous-versailles-r1227",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-jean-monnet-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-jean-monnet-2/",
+      "name": "Cafétéria Jean Monnet",
+      "matches": [
+        {
+          "sourceId": "r75",
+          "nationalId": "cnous-versailles-r75",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-lamphi-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lamphi-2/",
+      "name": "Cafétéria L’Amphi",
+      "matches": [
+        {
+          "sourceId": "r90",
+          "nationalId": "cnous-versailles-r90",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-lank-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lank-2/",
+      "name": "Cafétéria L’An’K",
+      "matches": [
+        {
+          "sourceId": "r1238",
+          "nationalId": "cnous-versailles-r1238",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-lasiatique-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lasiatique-2/",
+      "name": "Cafétéria L’arrêt Café",
+      "matches": [
+        {
+          "sourceId": "r901",
+          "nationalId": "cnous-versailles-r901",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-lexperimental-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lexperimental-2/",
+      "name": "Cafétéria L’Expérimental",
+      "matches": [
+        {
+          "sourceId": "r1233",
+          "nationalId": "cnous-versailles-r1233",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-la-terrasse-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-la-terrasse-2/",
+      "name": "Cafétéria La Terrasse",
+      "matches": [
+        {
+          "sourceId": "r76",
+          "nationalId": "cnous-versailles-r76",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-le-boomerang-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-boomerang-2/",
+      "name": "Caféteria Le Boomerang",
+      "matches": [
+        {
+          "sourceId": "r98",
+          "nationalId": "cnous-versailles-r98",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-le-millenium-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-millenium-2/",
+      "name": "Cafétéria Le Millénium",
+      "matches": [
+        {
+          "sourceId": "r900",
+          "nationalId": "cnous-versailles-r900",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-batiment-g-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-batiment-g-2/",
+      "name": "Cafétéria Le Paradoxe",
+      "matches": [
+        {
+          "sourceId": "r149",
+          "nationalId": "cnous-versailles-r149",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-le-parc-le-kiosque",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-parc-le-kiosque/",
+      "name": "Cafétéria Le Parc – Le Kiosque",
+      "matches": [
+        {
+          "sourceId": "r70",
+          "nationalId": "cnous-versailles-r70",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-le-pelvoux-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-pelvoux-2/",
+      "name": "Cafétéria Le Pelvoux",
+      "matches": [
+        {
+          "sourceId": "r84",
+          "nationalId": "cnous-versailles-r84",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-le-tropical-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-le-tropical-2/",
+      "name": "Cafétéria Le Tropical",
+      "matches": [
+        {
+          "sourceId": "r147",
+          "nationalId": "cnous-versailles-r147",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-les-aviateurs-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-aviateurs-2/",
+      "name": "Cafétéria Les Aviateurs",
+      "matches": [
+        {
+          "sourceId": "r913",
+          "nationalId": "cnous-versailles-r913",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-les-chenes-1-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-chenes-1-2/",
+      "name": "Cafétéria Les Chênes 1",
+      "matches": [
+        {
+          "sourceId": "r68",
+          "nationalId": "cnous-versailles-r68",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-les-chenes-2-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-chenes-2-2/",
+      "name": "Cafétéria Les Chênes 2",
+      "matches": [
+        {
+          "sourceId": "r1239",
+          "nationalId": "cnous-versailles-r1239",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-les-sciences-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-les-sciences-2/",
+      "name": "Cafétéria Les Sciences",
+      "matches": [
+        {
+          "sourceId": "r86",
+          "nationalId": "cnous-versailles-r86",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-libre-service-henri-moissan-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-libre-service-henri-moissan-2/",
+      "name": "Cafétéria libre-service Henri Moissan",
+      "matches": [
+        {
+          "sourceId": "r1226",
+          "nationalId": "cnous-versailles-r1226",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-lieu-de-vie-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-lieu-de-vie-2/",
+      "name": "Cafétéria Lieu de Vie",
+      "matches": [
+        {
+          "sourceId": "r1056",
+          "nationalId": "cnous-versailles-r1056",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-monseigneur-romero-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-monseigneur-romero-2/",
+      "name": "Cafeteria Monseigneur Roméro",
+      "matches": [
+        {
+          "sourceId": "r353",
+          "nationalId": "cnous-versailles-r353",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-neuville-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-neuville-2/",
+      "name": "Cafétéria Neuville",
+      "matches": [
+        {
+          "sourceId": "r65",
+          "nationalId": "cnous-versailles-r65",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-saint-martin-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-saint-martin-2/",
+      "name": "Cafétéria Saint-Martin",
+      "matches": [
+        {
+          "sourceId": "r67",
+          "nationalId": "cnous-versailles-r67",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-la-sandwicherie-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-la-sandwicherie-2/",
+      "name": "Cafétéria Science Pause",
+      "matches": [
+        {
+          "sourceId": "r78",
+          "nationalId": "cnous-versailles-r78",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-soft-rock-vauban-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-soft-rock-vauban-2/",
+      "name": "Cafétéria Soft Rock – Vauban",
+      "matches": [
+        {
+          "sourceId": "r94",
+          "nationalId": "cnous-versailles-r94",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "cafeteria-ville-davray-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/cafeteria-ville-davray-2/",
+      "name": "Cafétéria Ville d’Avray",
+      "matches": [
+        {
+          "sourceId": "r1220",
+          "nationalId": "cnous-versailles-r1220",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-centralesupelec-eiffel-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-centralesupelec-eiffel-2/",
+      "name": "RU CentraleSupélec Eiffel",
+      "matches": [
+        {
+          "sourceId": "r352",
+          "nationalId": "cnous-versailles-r352",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-de-liut-ville-davray-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-de-liut-ville-davray-2/",
+      "name": "RU de l’IUT Ville d’Avray",
+      "matches": [
+        {
+          "sourceId": "r54",
+          "nationalId": "cnous-versailles-r54",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-ens-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-ens-2/",
+      "name": "RU ENS",
+      "matches": [
+        {
+          "sourceId": "r1230",
+          "nationalId": "cnous-versailles-r1230",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-escoffier-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-escoffier-2/",
+      "name": "RU Escoffier",
+      "matches": [
+        {
+          "sourceId": "r1228",
+          "nationalId": "cnous-versailles-r1228",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-et-snack-saint-germain",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-et-snack-saint-germain/",
+      "name": "RU et snack Saint-Germain",
+      "matches": [
+        {
+          "sourceId": "r63",
+          "nationalId": "cnous-versailles-r63",
+          "exactNormalizedName": false,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true,
+          "identityEvidence": "Same exact address, same public telephone and same navigation coordinates. Official page title differs from feed; reviewed as source alias only, not user-content merge.",
+          "telephone": "01 39 73 40 95",
+          "evidenceUrls": [
+            "https://www.crous-versailles.fr/restaurant/ru-et-snack-saint-germain/",
+            "https://www.crous-versailles.fr/restaurant/ru-et-snack-saint-germain/"
+          ],
+          "verifiedOn": "2026-09-23",
+          "retrievalNote": "Official page text verified using web tool; direct urllib HTTPS rejected expired certificate, no TLS bypass used."
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-henri-moissan-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-henri-moissan-2/",
+      "name": "RU Henri Moissan",
+      "matches": [
+        {
+          "sourceId": "r1225",
+          "nationalId": "cnous-versailles-r1225",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-lexperimental-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-lexperimental-2/",
+      "name": "RU L’Expérimental",
+      "matches": [
+        {
+          "sourceId": "r1232",
+          "nationalId": "cnous-versailles-r1232",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-la-coulee-verte-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-la-coulee-verte-2/",
+      "name": "RU La Coulée Verte",
+      "matches": [
+        {
+          "sourceId": "r49",
+          "nationalId": "cnous-versailles-r49",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-la-terrasse-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-la-terrasse-2/",
+      "name": "RU La Terrasse",
+      "matches": [
+        {
+          "sourceId": "r1236",
+          "nationalId": "cnous-versailles-r1236",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-boomerang-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-boomerang-2/",
+      "name": "RU Le Boomerang",
+      "matches": [
+        {
+          "sourceId": "r56",
+          "nationalId": "cnous-versailles-r56",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-jardin-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-jardin-2/",
+      "name": "RU Le Jardin",
+      "matches": [
+        {
+          "sourceId": "r1237",
+          "nationalId": "cnous-versailles-r1237",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-parc-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-parc-2/",
+      "name": "RU Le Parc",
+      "matches": [
+        {
+          "sourceId": "r46",
+          "nationalId": "cnous-versailles-r46",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-sablier-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-sablier-2/",
+      "name": "RU Le Sablier",
+      "matches": [
+        {
+          "sourceId": "r57",
+          "nationalId": "cnous-versailles-r57",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-tex-mex-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-tex-mex-2/",
+      "name": "RU Le Tex Mex",
+      "matches": [
+        {
+          "sourceId": "r1234",
+          "nationalId": "cnous-versailles-r1234",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-le-vip-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-le-vip-2/",
+      "name": "RU Le VIP",
+      "matches": [
+        {
+          "sourceId": "r1235",
+          "nationalId": "cnous-versailles-r1235",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-les-aviateurs-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-aviateurs-2/",
+      "name": "RU Les Aviateurs",
+      "matches": [
+        {
+          "sourceId": "r39",
+          "nationalId": "cnous-versailles-r39",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-les-cedres-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-cedres-2/",
+      "name": "RU Les Cèdres",
+      "matches": [
+        {
+          "sourceId": "r60",
+          "nationalId": "cnous-versailles-r60",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-les-chenes-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-chenes-2/",
+      "name": "RU Les Chênes",
+      "matches": [
+        {
+          "sourceId": "r43",
+          "nationalId": "cnous-versailles-r43",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-les-etats-unis-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-les-etats-unis-2/",
+      "name": "RU Les États-Unis",
+      "matches": [
+        {
+          "sourceId": "r21",
+          "nationalId": "cnous-versailles-r21",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-lieu-de-vie-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-lieu-de-vie-2/",
+      "name": "RU Lieu de Vie",
+      "matches": [
+        {
+          "sourceId": "r1055",
+          "nationalId": "cnous-versailles-r1055",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-monseigneur-romero-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-monseigneur-romero-2/",
+      "name": "RU Monseigneur Roméro",
+      "matches": [
+        {
+          "sourceId": "r55",
+          "nationalId": "cnous-versailles-r55",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-nanterre-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-nanterre-2/",
+      "name": "RU Nanterre",
+      "matches": [
+        {
+          "sourceId": "r52",
+          "nationalId": "cnous-versailles-r52",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-neuville-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-neuville-2/",
+      "name": "RU Neuville",
+      "matches": [
+        {
+          "sourceId": "r44",
+          "nationalId": "cnous-versailles-r44",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-saint-martin-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-saint-martin-2/",
+      "name": "RU Saint-Martin",
+      "matches": [
+        {
+          "sourceId": "r42",
+          "nationalId": "cnous-versailles-r42",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "ru-vauban-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-vauban-2/",
+      "name": "RU Vauban",
+      "matches": [
+        {
+          "sourceId": "r38",
+          "nationalId": "cnous-versailles-r38",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    },
+    {
+      "legacyId": "snack-neuville-2",
+      "officialUrl": "https://www.crous-versailles.fr/restaurant/snack-neuville-2/",
+      "name": "Snack Neuville",
+      "matches": [
+        {
+          "sourceId": "r1240",
+          "nationalId": "cnous-versailles-r1240",
+          "exactNormalizedName": true,
+          "exactNormalizedAddress": true,
+          "coordinatesWithin1m": true
+        }
+      ]
+    }
+  ]
+}

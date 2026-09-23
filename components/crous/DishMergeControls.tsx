@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n/client";
+import { useT, useLocale } from "@/lib/i18n/client";
 import type { AdminDish } from "@/lib/governance/admin-dish-search";
 
 const nameOf = (dish: AdminDish) => dish.original_description || dish.canonical_name_zh || dish.canonical_name_en || dish.canonical_name_fr || dish.id;
 
 export function DishMergeControls({ act }: { act: (body: Record<string, unknown>) => Promise<void> }) {
   const t = useT();
+  const en = useLocale() === "en";
   const [query, setQuery] = useState(""); const [searched, setSearched] = useState<string | null>(null);
   const [items, setItems] = useState<AdminDish[]>([]); const [next, setNext] = useState<number | null>(null);
   const [source, setSource] = useState(""); const [target, setTarget] = useState("");
@@ -47,13 +48,15 @@ export function DishMergeControls({ act }: { act: (body: Record<string, unknown>
     {searched !== null && !items.length && <p>{t("没有匹配的菜品，请尝试更短的关键词。")}</p>}
     <div className="space-y-3">{items.map((dish) => <article key={dish.id} className="space-y-2 border border-ink/30 p-3">
       <strong className="break-words">{nameOf(dish)}</strong>
+      <p className="text-sm font-bold">{dish.venue_name ?? (en ? "Historical record — venue unassigned" : "历史记录 · 餐厅归属未确定")}</p>
+      {dish.legacy_source_id && <p className="break-all text-sm">{en ? "Historical source" : "历史来源"}：{dish.legacy_source_id}</p>}
       <p className="text-sm break-words">{[...new Set([dish.canonical_name_zh, dish.canonical_name_en, dish.canonical_name_fr].filter((name) => name && name !== nameOf(dish)))].join(" · ")}</p>
       <p className="text-sm">{t(dish.category === "main" ? "主食" : "小菜")} · {t("{0} 票 · {1} 次行踪", dish.votes, dish.servings)} · {t(dish.merged_into_dish_id ? "已合并" : dish.visible ? "未合并" : "暂无可见行踪")}</p>
       <code className="block select-all break-all text-sm">{dish.id}</code>
       {dish.merged_into_dish_id && <p className="break-all text-sm">{t("合并目标")}：{dish.merged_into_dish_id}</p>}
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={() => void copy(dish.id)}>{t("复制 ID")}</Button>
-        {!dish.merged_into_dish_id && <><Button size="sm" disabled={busy} onClick={() => setSource(dish.id)}>{t("填入来源")}</Button><Button size="sm" disabled={busy} onClick={() => setTarget(dish.id)}>{t("填入目标")}</Button></>}
+        {!dish.merged_into_dish_id && dish.venue_id && <><Button size="sm" disabled={busy} onClick={() => setSource(dish.id)}>{t("填入来源")}</Button><Button size="sm" disabled={busy} onClick={() => setTarget(dish.id)}>{t("填入目标")}</Button></>}
         {!dish.merged_into_dish_id && Boolean(dish.visible) && <a className="inline-flex min-h-10 items-center underline" href={`/dish/${dish.id}`} target="_blank" rel="noreferrer">{t("查看菜品")}</a>}
       </div>
     </article>)}</div>

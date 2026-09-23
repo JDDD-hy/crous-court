@@ -3,6 +3,12 @@ import { check, index, integer, primaryKey, sqliteTable, text, uniqueIndex } fro
 
 const createdAt = () => text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`);
 
+export const appDataMigrations = sqliteTable("app_data_migrations", {
+  id: text("id").primaryKey(),
+  runId: text("run_id").notNull(),
+  completedAt: createdAt(),
+});
+
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   emailDigest: text("email_digest"),
@@ -42,9 +48,10 @@ export const venues = sqliteTable("venues", {
   longitude: integer("longitude"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   displayNumber: integer("display_number").notNull(),
+  timezone: text("timezone").notNull().default("Europe/Paris"),
   createdAt: createdAt(),
 }, (table) => [
-  uniqueIndex("venues_canonical_name_unique").on(table.canonicalName),
+  index("venues_canonical_name_idx").on(table.canonicalName),
   uniqueIndex("venues_display_number_unique").on(table.displayNumber),
   check("venues_active_check", sql`${table.active} in (0, 1)`),
 ]);
@@ -77,6 +84,8 @@ export const dailyCaseCounters = sqliteTable("daily_case_counters", {
 
 export const dishes = sqliteTable("dishes", {
   id: text("id").primaryKey(),
+  venueId: text("venue_id").references(() => venues.id, { onDelete: "restrict" }),
+  legacySourceId: text("legacy_source_id"),
   canonicalNameFr: text("canonical_name_fr"),
   canonicalNameEn: text("canonical_name_en"),
   machineNameZh: text("machine_name_zh"),
@@ -91,8 +100,20 @@ export const dishes = sqliteTable("dishes", {
   createdAt: createdAt(),
 }, (table) => [
   index("dishes_category_idx").on(table.category),
+  index("dishes_venue_category_idx").on(table.venueId, table.category),
+  uniqueIndex("dishes_legacy_venue_unique").on(table.legacySourceId, table.venueId),
   check("dishes_category_check", sql`${table.category} in ('main', 'side')`),
   check("dishes_naming_status_check", sql`${table.namingStatus} in ('unknown', 'suggested', 'community', 'verified')`),
+]);
+
+// Disposable public history pages; vote triggers invalidate them transactionally.
+export const dishHistoryPages = sqliteTable("dish_history_pages", {
+  dishId: text("dish_id").notNull().references(() => dishes.id, { onDelete: "cascade" }),
+  page: integer("page").notNull(),
+  rowsJson: text("rows_json").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.dishId, table.page] }),
+  check("dish_history_pages_page_check", sql`${table.page} between 1 and 10000`),
 ]);
 
 export const servings = sqliteTable("servings", {
@@ -107,6 +128,7 @@ export const servings = sqliteTable("servings", {
   createdAt: createdAt(),
 }, (table) => [
   index("servings_venue_date_idx").on(table.venueId, table.servedOn),
+  index("servings_dish_status_date_idx").on(table.dishId, table.status, table.servedOn),
   check("servings_initial_tier_check", sql`${table.initialTier} between 1 and 5`),
   check("servings_status_check", sql`${table.status} in ('active', 'hidden')`),
 ]);
@@ -118,6 +140,7 @@ export const mealItems = sqliteTable("meal_items", {
 }, (table) => [
   primaryKey({ columns: [table.mealId, table.slot] }),
   uniqueIndex("meal_items_meal_serving_unique").on(table.mealId, table.servingId),
+  index("meal_items_serving_meal_idx").on(table.servingId, table.mealId),
   check("meal_items_slot_check", sql`${table.slot} in ('main', 'side_1', 'side_2', 'side_3', 'side_4', 'side_5', 'side_6', 'side_7', 'side_8')`),
 ]);
 
@@ -137,6 +160,7 @@ export const photos = sqliteTable("photos", {
   uniqueIndex("photos_canonical_key_unique").on(table.canonicalKey),
   uniqueIndex("photos_thumbnail_key_unique").on(table.thumbnailKey),
   uniqueIndex("photos_creator_sha256_unique").on(table.creatorId, table.contentSha256),
+  index("photos_meal_id_idx").on(table.mealId, table.id),
   check("photos_media_type_check", sql`${table.mediaType} in ('image/jpeg', 'image/png')`),
   check("photos_dimensions_check", sql`${table.width} > 0 and ${table.height} > 0`),
   check("photos_byte_size_check", sql`${table.byteSize} > 0`),
@@ -153,6 +177,7 @@ export const votes = sqliteTable("votes", {
 }, (table) => [
   uniqueIndex("votes_dish_user_unique").on(table.dishId, table.userId),
   index("votes_dish_tier_idx").on(table.dishId, table.targetTier),
+  index("votes_dish_history_idx").on(table.dishId, table.createdAt, table.id, table.targetTier),
   check("votes_target_tier_check", sql`${table.targetTier} between 1 and 5`),
 ]);
 

@@ -1,0 +1,1 @@
+CREATE INDEX `votes_dish_history_idx` ON `votes` (`dish_id`,`created_at`,`id`,`target_tier`);

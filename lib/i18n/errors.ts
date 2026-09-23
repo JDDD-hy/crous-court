@@ -1,4 +1,5 @@
 export const errors: Record<string, string> = {
+  "合并会丢失跨店关联，请保留带有关联的菜品作为目标；不同关联的菜品暂不能合并": "This merge would lose a cross-venue link. Keep the linked dish as the target; dishes with different links cannot be merged.",
   "菜品无效": "Invalid dish",
   "名称候选暂时不可用": "Name suggestions are temporarily unavailable",
   "请先使用邮箱验证码登录": "Please sign in with an email code first",
@@ -54,7 +55,7 @@ export const errors: Record<string, string> = {
   "邮件服务尚未配置": "The email service is not configured",
   "验证码无效或已过期": "The verification code is invalid or has expired",
   "合并对象无效": "Invalid merge target",
-  "菜品或建议已变更，只能合并两个有效且同类别的菜品，请刷新": "The dishes or suggestion changed. Only active dishes in the same category can be merged. Please refresh",
+  "菜品或建议已变更，只能合并同一餐厅内两个有效且同类别的菜品，请刷新": "The dishes or suggestion changed. Only active dishes in the same venue and category can be merged. Please refresh",
   "请选择举报原因": "Please select a report reason",
   "举报对象无效": "Invalid report target",
   "举报对象不存在": "The reported record does not exist",

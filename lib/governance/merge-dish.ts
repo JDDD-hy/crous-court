@@ -17,6 +17,8 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
         FROM votes v WHERE v.dish_id IN (?,?) AND EXISTS(SELECT 1 FROM votes other WHERE other.user_id=v.user_id AND other.dish_id IN (?,?) AND other.dish_id<>v.dish_id)
       ))) WHERE EXISTS(
         SELECT 1 FROM dishes s JOIN dishes t ON t.id=? WHERE s.id=? AND s.category=t.category
+        AND s.venue_id IS NOT NULL AND s.venue_id=t.venue_id
+        AND (s.legacy_source_id IS NULL OR s.legacy_source_id=t.legacy_source_id)
         AND s.merged_into_dish_id IS NULL AND t.merged_into_dish_id IS NULL)
       AND (? IS NULL OR EXISTS(SELECT 1 FROM ai_merge_suggestions WHERE id=? AND source_id=? AND target_id=? AND status='pending'
         AND source_id IN (${visibleDishIds}) AND target_id IN (${visibleDishIds})))`)
@@ -48,6 +50,10 @@ export async function mergeDish(adminId: string, sourceId: string, targetId: str
       .bind(adminId, sourceId, targetId, targetId, sourceId, auditId),
   );
   const result = await db.batch(statements);
-  if (result[0].meta.changes !== 1) throw new GovernanceError("菜品或建议已变更，只能合并两个有效且同类别的菜品，请刷新", 409);
+  if (result[0].meta.changes !== 1) {
+    const breaksGroup = await db.prepare("SELECT 1 FROM dishes s JOIN dishes t ON t.id=? WHERE s.id=? AND s.legacy_source_id IS NOT NULL AND (t.legacy_source_id IS NULL OR s.legacy_source_id<>t.legacy_source_id)").bind(targetId, sourceId).first();
+    if (breaksGroup) throw new GovernanceError("合并会丢失跨店关联，请保留带有关联的菜品作为目标；不同关联的菜品暂不能合并", 409);
+    throw new GovernanceError("菜品或建议已变更，只能合并同一餐厅内两个有效且同类别的菜品，请刷新", 409);
+  }
   return { sourceId, targetId };
 }

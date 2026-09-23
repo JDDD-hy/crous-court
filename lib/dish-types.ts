@@ -5,6 +5,9 @@ export type DishNamingStatus = "unknown" | "suggested" | "community" | "verified
 
 export type DishSummary = {
   id: string;
+  groupId?: string;
+  groupSize?: number;
+  venueId?: string;
   name: string;
   zh: string;
   canonicalNameFr?: string | null;
@@ -16,6 +19,7 @@ export type DishSummary = {
   venue: string;
   venueLocation?: string | null;
   date: string;
+  timezone?: string;
   image: string;
   tier: Tier | null;
   initialTier: Tier | null;
@@ -27,6 +31,9 @@ export type DishSummary = {
 };
 
 export type DishDetail = DishSummary & {
+  servingCount?: number;
+  evidencePagination?: { page: number; size: number; total: number };
+  historyPagination?: { page: number; size: number; total: number };
   servings: Array<{ id: string; mealId: string; date: string; venue: string; originalDescription: string; initialTier: Tier; image: string | null }>;
   tierHistory: TierHistoryEntry[];
 };

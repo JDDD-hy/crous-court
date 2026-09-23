@@ -18,7 +18,8 @@
     "test:governance": "npm run build && node scripts/verify-phase5-governance.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "node ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local --persist-to .wrangler/crous-court --config dist/server/wrangler.json",
-    "db:fixtures:local": "node ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --persist-to .wrangler/crous-court --config dist/server/wrangler.json --file db/fixtures.sql --yes"
+    "db:fixtures:local": "node ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --persist-to .wrangler/crous-court --config dist/server/wrangler.json --file db/fixtures.sql --yes",
+    "test:isolation": "node scripts/verify-restaurant-guards.mjs && node scripts/verify-restaurant-isolation.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

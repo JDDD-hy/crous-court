@@ -11,17 +11,23 @@ export type Verdict = {
 export type TierHistoryEntry = { tier: Tier; at: string; voteCount: number };
 
 export function calculateVerdict(targets: readonly number[]): Verdict {
-  const sorted = [...targets].sort((a, b) => a - b);
-  if (sorted.some((tier) => !Number.isInteger(tier) || tier < 1 || tier > 5)) {
+  if (targets.some((tier) => !Number.isInteger(tier) || tier < 1 || tier > 5)) {
     throw new RangeError("target tier must be an integer from 1 to 5");
   }
 
-  const voteCount = sorted.length;
   const distribution: Verdict["distribution"] = [0, 0, 0, 0, 0];
-  for (const tier of sorted) distribution[tier - 1] += 1;
+  for (const tier of targets) distribution[tier - 1] += 1;
+  return verdictFromDistribution(distribution);
+}
 
+export function verdictFromDistribution(distribution: Verdict["distribution"]): Verdict {
+  if (distribution.some(count => !Number.isSafeInteger(count) || count < 0)) throw new RangeError("Invalid vote count");
+  const voteCount = distribution.reduce((sum, count) => sum + count, 0);
+  let cumulative = 0;
+  const middle = Math.floor(voteCount / 2);
+  const index = distribution.findIndex(count => { cumulative += count; return cumulative > middle; });
   return {
-    tier: voteCount ? sorted[Math.floor(voteCount / 2)] as Tier : null,
+    tier: voteCount ? (index + 1) as Tier : null,
     voteCount,
     status: voteCount >= 15 ? "official" : voteCount >= 5 ? "provisional" : "pending",
     distribution,
@@ -35,22 +41,22 @@ export function compareVerdicts(a: Verdict, b: Verdict) {
 }
 
 export function buildTierHistory(votes: readonly { tier: Tier; at: string }[]): TierHistoryEntry[] {
-  const targets: Tier[] = [];
+  const distribution: Verdict["distribution"] = [0, 0, 0, 0, 0];
   const history: TierHistoryEntry[] = [];
   for (const vote of votes) {
-    targets.push(vote.tier);
-    const tier = calculateVerdict(targets).tier!;
-    if (history.at(-1)?.tier !== tier) history.push({ tier, at: vote.at, voteCount: targets.length });
+    if (!Number.isInteger(vote.tier) || vote.tier < 1 || vote.tier > 5) throw new RangeError("Invalid tier");
+    distribution[vote.tier - 1]++;
+    const verdict = verdictFromDistribution(distribution);
+    if (history.at(-1)?.tier !== verdict.tier) history.push({ tier: verdict.tier!, at: vote.at, voteCount: verdict.voteCount });
   }
   return history;
 }
 
 export function previewVote(distribution: Verdict["distribution"], previous: Tier | null, next: Tier): Verdict {
-  const targets = distribution.flatMap((count, index) => Array<Tier>(count).fill((index + 1) as Tier));
-  if (previous !== null) {
-    const index = targets.indexOf(previous);
-    if (index >= 0) targets.splice(index, 1);
-  }
-  targets.push(next);
-  return calculateVerdict(targets);
+  verdictFromDistribution(distribution);
+  if (!Number.isInteger(next) || next < 1 || next > 5) throw new RangeError("Invalid tier");
+  const counts: Verdict["distribution"] = [...distribution];
+  if (previous !== null && counts[previous - 1] > 0) counts[previous - 1]--;
+  counts[next - 1]++;
+  return verdictFromDistribution(counts);
 }
