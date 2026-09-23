@@ -1,5 +1,6 @@
 // Local-only closed-loop HTTP load test. Uses a new disposable database, never production.
 // Run after npm run build: node scripts/benchmark-concurrency.mjs [--smoke] [--authenticated] [--mixed-only]
+// Compare warm history reads with --history-only [--worker-config=path/to/saved-build/wrangler.json].
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -11,11 +12,12 @@ import { DatabaseSync } from 'node:sqlite';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const smoke=process.argv.includes('--smoke'), levels=smoke?[1,5]:[1,5,10,20,50], durationMs=smoke?1000:10000;
+const historyOnly=process.argv.includes('--history-only');
+const smoke=process.argv.includes('--smoke'), levels=historyOnly?[50]:smoke?[1,5]:[1,5,10,20,50], durationMs=smoke?1000:10000;
 const authenticated=process.argv.includes('--authenticated'), viewerCount=authenticated?50:0;
-const workloads=process.argv.includes('--mixed-only')?['mixed']:authenticated?['read','mixed']:['read','write','mixed'];
+const workloads=historyOnly?['read']:process.argv.includes('--mixed-only')?['mixed']:authenticated?['read','mixed']:['read','write','mixed'];
 const persist=path.join(root,'.sites-runtime',`concurrency-${Date.now()}`), port=8814, origin=`http://127.0.0.1:${port}`;
-const wrangler=path.join(root,'node_modules/wrangler/bin/wrangler.js'),config=path.join(root,'dist/server/wrangler.json');
+const wrangler=path.join(root,'node_modules/wrangler/bin/wrangler.js'),config=path.resolve(root,process.argv.find(arg=>arg.startsWith('--worker-config='))?.slice(16)??'dist/server/wrangler.json');
 const poolSize=20000, baselineVotes=25751+viewerCount;
 mkdirSync(persist,{recursive:true});
 function run(args) {const result=spawnSync(process.execPath,[wrangler,...args],{cwd:root,encoding:'utf8',maxBuffer:8*1024*1024});assert.equal(result.status,0,result.stdout+result.stderr);return result.stdout;}
@@ -54,6 +56,7 @@ async function reset() {
 }
 const report={recordedAt:new Date().toISOString(),head:spawnSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).stdout.trim(),runtime:process.version,hardware:{cpu:cpus()[0].model,logicalCpus:cpus().length,ramGiB:+(totalmem()/2**30).toFixed(1)},smoke,persist,levels,durationMs,dishes:1051,baselineVotes,venues:14,groups:76,stages:[],correctness:[],sourceHashes:Object.fromEntries(['lib/vote-service.ts','lib/ranking-query.ts','dist/server/index.js','dist/server/wrangler.json'].map(file=>[file,createHash('sha256').update(readFileSync(path.join(root,file))).digest('hex')]))};
 report.authenticated=authenticated;report.viewerAccounts=viewerCount;report.workloads=workloads;report.scenarios={};
+report.historyOnly=historyOnly;report.actualConfig=config;report.loadedBundleSha256=createHash('sha256').update(readFileSync(path.join(path.dirname(config),'index.js'))).digest('hex');
 const reportFile=path.join(persist,'results.json');
 const child=spawn(process.execPath,[wrangler,'dev','--local','--config',config,'--persist-to',persist,'--ip','127.0.0.1','--port',String(port),'--inspector-port','0','--env-file',envFile],{cwd:root,stdio:['ignore','pipe','pipe']});
 let logs='';const log=data=>{logs=(logs+String(data)).slice(-12000);};child.stdout.on('data',log);child.stderr.on('data',log);
@@ -61,7 +64,7 @@ const readCases=[
  ['html','/rankings?venue=all'],['all','/api/rankings?venue=all'],['hot','/api/dishes/load-hot'],
  ['html','/rankings?venue=all'],['single','/api/rankings?venue=load-v0'],['related','/api/rankings?venue=all&relatedTo=load-d0'],
  ['hot','/api/dishes/load-hot'],['html','/rankings?venue=all'],['directory','/api/venues'],['all','/api/rankings?venue=all']
-];
+].filter(([kind])=>!historyOnly||kind==='hot');
 async function request(kind,url,user,tier) {
  const start=performance.now();let row;
  try {
@@ -128,7 +131,7 @@ async function stage(workload,concurrency) {
 try {
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error(logs.slice(-1800))),30000);const ready=data=>{if(String(data).includes('Ready on')){clearTimeout(timer);resolve();}};child.stdout.on('data',ready);child.stderr.on('data',ready);child.once('error',reject);});
  for(let i=0;i<20;i++){const [kind,url]=readCases[i%readCases.length];const row=await request(kind,url,authenticated?poolSize+i%viewerCount:undefined);assert.equal(row.status,200);assert.equal(row.error,undefined);}
- for(let i=0;i<10;i++)assert.equal((await request('vote','/api/dishes/load-hot/vote',i,3)).status,200);await reset();
+ if(!historyOnly){for(let i=0;i<10;i++)assert.equal((await request('vote','/api/dishes/load-hot/vote',i,3)).status,200);await reset();}
  console.log(JSON.stringify({ready:true,reportFile,levels,durationMs}));
  for(const workload of workloads)for(const concurrency of levels)await stage(workload,concurrency);
  if(authenticated) {
