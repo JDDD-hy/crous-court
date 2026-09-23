@@ -43,6 +43,8 @@ export const ui: Record<string, string> = {
   "书记员工作台": "Clerk’s desk",
   "复核与归档": "Review and archive",
   "长期判决": "Community verdicts",
+  "呈堂证物": "Exhibit",
+  "群众说了算": "The jury decides",
   "从夯到拉排行榜": "From GOAT to Trash",
   "同一道菜，在哪天、哪个食堂撞见都算同一位嫌疑人。每次被观测都添一份证物，所有有效票一起把它送进该待的档位。": "The same dish shares one case across dates and dining locations. Each sighting adds evidence; all valid votes determine its tier.",
   "证物提交处": "Evidence submission",
