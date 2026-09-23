@@ -31,6 +31,27 @@ function source(file: string) {
   return stripTypeScriptTypes(readFileSync(file, "utf8").replace(/^import .*;\r?\n/gm, "")).replaceAll("export ", "");
 }
 
+test("merging preserves restaurant group provenance or rejects without changing votes or audits", async () => {
+  const { sqlite, db } = database();
+  const merge = new Function("getRawDb", "GovernanceError", "normalizeDishName", "visibleDishIds", source("lib/governance/merge-dish.ts") + "\nreturn mergeDish;")(
+    () => db, GovernanceError, (value: string) => value.toLowerCase(), "SELECT id FROM dishes",
+  );
+  try {
+    sqlite.exec("INSERT INTO dishes(id,venue_id,category,legacy_source_id,original_description) VALUES('linked','venue-escoffier','main','root-g','Linked'),('unlinked','venue-escoffier','main',NULL,'Unlinked'),('other-root','venue-escoffier','main','root-h','Other'); INSERT INTO votes(id,dish_id,user_id,target_tier) VALUES('group-vote','unlinked','fixture-user-01',2)");
+    const audits = sqlite.prepare("SELECT count(*) n FROM moderation_actions").get()!.n;
+    for (const [from,to] of [["linked","unlinked"],["other-root","linked"]]) {
+      await assert.rejects(merge("fixture-user-01",from,to), (error: unknown) => error instanceof GovernanceError && error.status === 409);
+      assert.equal(sqlite.prepare("SELECT count(*) n FROM moderation_actions").get()!.n,audits);
+      assert.equal(sqlite.prepare("SELECT dish_id FROM votes WHERE id='group-vote'").get()!.dish_id,"unlinked");
+      assert.equal(sqlite.prepare("SELECT merged_into_dish_id FROM dishes WHERE id=?").get(from)!.merged_into_dish_id,null);
+    }
+    await merge("fixture-user-01","unlinked","linked");
+    assert.equal(sqlite.prepare("SELECT legacy_source_id FROM dishes WHERE id='linked'").get()!.legacy_source_id,"root-g");
+    assert.equal(sqlite.prepare("SELECT dish_id FROM votes WHERE id='group-vote'").get()!.dish_id,"linked");
+    assert.equal(sqlite.prepare("SELECT merged_into_dish_id FROM dishes WHERE id='unlinked'").get()!.merged_into_dish_id,"linked");
+  } finally { sqlite.close(); }
+});
+
 test("bidirectional translations persist separately and stale results cannot overwrite edited sources", async () => {
   const { sqlite, db } = database();
   const translate = new Function("env", "getRawDb", "translateChineseNames", "translateEnglishNames", "chineseTranslationCandidate", "translationCandidate", source("lib/translation/translate-dishes.ts") + "\nreturn translateDishNames;")(

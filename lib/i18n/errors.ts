@@ -1,4 +1,5 @@
 export const errors: Record<string, string> = {
+  "合并会丢失跨店关联，请保留带有关联的菜品作为目标；不同关联的菜品暂不能合并": "This merge would lose a cross-venue link. Keep the linked dish as the target; dishes with different links cannot be merged.",
   "菜品无效": "Invalid dish",
   "名称候选暂时不可用": "Name suggestions are temporarily unavailable",
   "请先使用邮箱验证码登录": "Please sign in with an email code first",

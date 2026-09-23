@@ -6,7 +6,7 @@ export function parseRankingPage(value: string | string[] | undefined) {
   if (typeof value !== "string" || !/^[1-9]\d{0,4}$/.test(value) || Number(value) > 10000) throw new RangeError("Invalid ranking page");
   return Number(value);
 }
-export type RankingQuery = { category?: "main" | "side"; venueIds?: string[]; dishId?: string; recent?: boolean; unknown?: boolean; page?: number; limit?: number };
+export type RankingQuery = { category?: "main" | "side"; venueIds?: string[]; dishId?: string; relatedTo?: string; grouped?: boolean; recent?: boolean; unknown?: boolean; page?: number; limit?: number };
 
 // JSON table parameters keep binding count constant as the directory grows.
 export function rankingQuery(input: RankingQuery, now = new Date()) {
@@ -18,11 +18,17 @@ export function rankingQuery(input: RankingQuery, now = new Date()) {
   if (input.venueIds !== undefined) { filters.push("s.venue_id IN (SELECT value FROM json_each(?))"); bindings.push(JSON.stringify(input.venueIds)); }
   if (input.category) { filters.push("d.category = ?"); bindings.push(input.category); }
   if (input.dishId) { filters.push("d.id = ?"); bindings.push(input.dishId); }
+  // Only explicit shared provenance links restaurant identities; names are not a grouping key.
+  if (input.relatedTo) {
+    filters.push("(COALESCE(d.legacy_source_id,d.id),d.category) = (SELECT COALESCE(legacy_source_id,id),category FROM dishes WHERE id=? AND merged_into_dish_id IS NULL)");
+    bindings.push(input.relatedTo);
+  }
   if (input.unknown) filters.push("d.naming_status IN ('unknown','suggested')");
   if (input.recent) {
     filters.push("EXISTS (SELECT 1 FROM json_each(?) dates WHERE json_extract(dates.value, '$.zone') = v.timezone AND s.served_on BETWEEN json_extract(dates.value, '$.yesterday') AND json_extract(dates.value, '$.today'))");
     bindings.push(JSON.stringify(courtDateRanges(now)));
   }
+  const order = `${input.recent ? "served_on DESC," : ""} sort_tier, vote_count DESC, id`;
   return { sql: `WITH sightings AS (
     SELECT s.dish_id, s.id serving_id, s.served_on, s.initial_tier,
       v.id venue_id, v.canonical_name venue_name, v.nickname venue_nickname, v.address venue_address, v.timezone,
@@ -40,9 +46,12 @@ export function rankingQuery(input: RankingQuery, now = new Date()) {
       CASE WHEN t.vote_count IS NULL THEN 6 WHEN n1 > t.vote_count / 2 THEN 1 WHEN n1+n2 > t.vote_count / 2 THEN 2
       WHEN n1+n2+n3 > t.vote_count / 2 THEN 3 WHEN n1+n2+n3+n4 > t.vote_count / 2 THEN 4 ELSE 5 END sort_tier
     FROM candidates c JOIN dishes d ON d.id = c.dish_id LEFT JOIN totals t ON t.dish_id = d.id
-  ) SELECT *, COUNT(*) OVER () total_count,
-    (SELECT id FROM photos WHERE meal_id = ranked.meal_id ORDER BY id LIMIT 1) photo_id,
-    (SELECT name FROM dish_aliases WHERE dish_id = ranked.id ORDER BY name LIMIT 1) alias_name
-    FROM ranked ORDER BY ${input.recent ? "served_on DESC," : ""} sort_tier, vote_count DESC, id LIMIT ? OFFSET ?`,
+  )${input.grouped ? `, grouped AS (
+    SELECT *, COUNT(*) OVER (PARTITION BY COALESCE(legacy_source_id,id),category) group_size,
+      ROW_NUMBER() OVER (PARTITION BY COALESCE(legacy_source_id,id),category ORDER BY ${order}) group_rank FROM ranked
+  )` : ""} SELECT *, COALESCE(legacy_source_id,id) group_id, ${input.grouped ? "" : "1 group_size,"} COUNT(*) OVER () total_count,
+    (SELECT id FROM photos WHERE meal_id = listing.meal_id ORDER BY id LIMIT 1) photo_id,
+    (SELECT name FROM dish_aliases WHERE dish_id = listing.id ORDER BY name LIMIT 1) alias_name
+    FROM ${input.grouped ? "grouped" : "ranked"} listing ${input.grouped ? "WHERE group_rank=1" : ""} ORDER BY ${order} LIMIT ? OFFSET ?`,
   bindings: [...bindings, limit, (page - 1) * limit] };
 }

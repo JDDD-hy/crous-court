@@ -7,6 +7,7 @@ import { venueLocation } from "./venue-location";
 import type { DishSummary } from "./dish-types";
 
 type SummaryRow = {
+  group_id: string; group_size: number;
   id: string; category: DishSummary["category"]; naming_status: DishSummary["namingStatus"];
   canonical_name_fr: string | null; canonical_name_en: string | null; canonical_name_zh: string | null;
   machine_name_zh: string | null; machine_name_source: string | null; machine_name_en: string | null; machine_name_en_source: string | null;
@@ -27,7 +28,7 @@ export async function rankingPage(input: RankingQuery = {}) {
     const distribution: Verdict["distribution"] = [row.n1, row.n2, row.n3, row.n4, row.n5];
     const verdict = verdictFromDistribution(distribution);
     return {
-      id: row.id, category: row.category, namingStatus: row.naming_status,
+      id: row.id, groupId: row.group_id, groupSize: row.group_size, venueId: row.venue_id, category: row.category, namingStatus: row.naming_status,
       canonicalNameFr: row.canonical_name_fr, canonicalNameEn: row.canonical_name_en, canonicalNameZh: row.canonical_name_zh,
       machineNameZh: row.machine_name_source === (row.canonical_name_en || row.original_description) ? row.machine_name_zh : null,
       machineNameEn: row.machine_name_en_source === (row.canonical_name_zh || row.original_description) ? row.machine_name_en : null,

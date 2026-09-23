@@ -5,6 +5,9 @@ export type DishNamingStatus = "unknown" | "suggested" | "community" | "verified
 
 export type DishSummary = {
   id: string;
+  groupId?: string;
+  groupSize?: number;
+  venueId?: string;
   name: string;
   zh: string;
   canonicalNameFr?: string | null;
