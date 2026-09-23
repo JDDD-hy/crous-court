@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n/client";
 import { matchVenue, maxVenueSelection, nearbyVenues, venueResultPageSize, type VenueOption } from "@/lib/venue-preference";
 import { validCoordinates } from "@/lib/venue-search";
@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, ExternalLink, LocateFixed, Search, SlidersHorizo
 
 export function VenuePicker({ options, onSelect, autoLocate = false, compact = true }: { options: VenueOption[]; onSelect: (ids: string[], selected: VenueOption[]) => void; autoLocate?: boolean; compact?: boolean }) {
   const en = useLocale() === "en";
+  const filterId = useId();
   const [catalog, setCatalog] = useState(options);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,9 +60,10 @@ export function VenuePicker({ options, onSelect, autoLocate = false, compact = t
   return <div data-venue-picker className="space-y-2 font-normal">
     <div className="flex gap-2"><label className="relative min-w-0 flex-1"><span className="sr-only">{en ? "Venue name or town" : "餐厅名称或城市"}</span><Search aria-hidden="true" className="absolute left-3 top-3.5 size-4 text-ink/65" /><input type="search" disabled={!ready} value={query} onChange={event=>{searchChanged();setQuery(event.target.value);}} maxLength={160} placeholder={en ? "Venue or town" : "搜索餐厅、城市"} className={`w-full pl-9 ${control}`} /></label><button type="button" disabled={!ready} onClick={()=>busy ? searchChanged() : locate()} className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md bg-[#a74436] px-3 text-sm font-bold text-white hover:brightness-90 disabled:opacity-50"><LocateFixed aria-hidden="true" className={`size-4 ${busy ? "animate-pulse" : ""}`} />{busy ? (en ? "Cancel" : "取消") : (en ? "Near me" : "附近 1 km")}</button></div>
     <details data-venue-filters className="group/filters"><summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-bold text-ink/65 [&::-webkit-details-marker]:hidden"><SlidersHorizontal aria-hidden="true" className="size-4" />{en ? "Region / city / CROUS" : "大区 / 城市 / CROUS"}{(region || city || crous) && <span className="rounded bg-accent px-2 py-0.5 text-ink">{en ? "Filtered" : "已筛选"}</span>}<span aria-hidden="true" className="ml-auto group-open/filters:rotate-180">⌄</span></summary>
-      <div className="mb-2 grid grid-cols-2 gap-2 rounded-md bg-ink/5 p-2"><NativeSelect aria-label={en ? "Region" : "大区"} value={region} onChange={event=>{searchChanged();setRegion(event.target.value);setCity("");}} className={`w-full ${control}`}><NativeSelectOption value="">{en ? "All regions" : "全部大区"}</NativeSelectOption>{regions.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect>
-        <NativeSelect aria-label={en ? "City" : "城市"} value={city} disabled={!region} onChange={event=>{searchChanged();setCity(event.target.value);}} className={`w-full ${control}`}><NativeSelectOption value="">{region ? (en ? "All cities" : "全部城市") : (en ? "Choose region first" : "先选大区")}</NativeSelectOption>{cities.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect>
-        <div className="col-span-2"><NativeSelect aria-label="CROUS" value={crous} onChange={event=>{searchChanged();setCrous(event.target.value);}} className={`w-full ${control}`}><NativeSelectOption value="">{en ? "All CROUS" : "全部 CROUS"}</NativeSelectOption>{institutions.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect></div></div>
+      <div className="mb-2 grid grid-cols-2 gap-2 rounded-md bg-ink/5 p-2 [&_[data-slot=native-select-wrapper]]:w-full">
+        <div className="min-w-0"><label htmlFor={`${filterId}-region`} className="mb-1 block text-sm font-bold text-ink/70">{en ? "Region" : "行政大区"}</label><NativeSelect id={`${filterId}-region`} value={region} onChange={event=>{searchChanged();setRegion(event.target.value);setCity("");}} className={`w-full ${control}`}><NativeSelectOption value="">{en ? "All regions" : "全部大区"}</NativeSelectOption>{regions.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect></div>
+        <div className="min-w-0"><label htmlFor={`${filterId}-city`} className="mb-1 block text-sm font-bold text-ink/70">{en ? "City" : "城市"}</label><NativeSelect id={`${filterId}-city`} value={city} disabled={!region} onChange={event=>{searchChanged();setCity(event.target.value);}} className={`w-full ${control}`}><NativeSelectOption value="">{region ? (en ? "All cities" : "全部城市") : (en ? "Choose region first" : "先选大区")}</NativeSelectOption>{cities.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect></div>
+        <div className="col-span-2 min-w-0"><label htmlFor={`${filterId}-crous`} className="mb-1 block text-sm font-bold text-ink/70">{en ? "CROUS organization" : "CROUS 机构"}</label><NativeSelect id={`${filterId}-crous`} value={crous} onChange={event=>{searchChanged();setCrous(event.target.value);}} className={`w-full ${control}`}><NativeSelectOption value="">{en ? "All CROUS" : "全部 CROUS"}</NativeSelectOption>{institutions.map(([id,name])=><NativeSelectOption key={id} value={id}>{name}</NativeSelectOption>)}</NativeSelect></div></div>
     </details>
     {loading && <p role="status" className="text-sm text-ink/60">{en ? "Loading venues…" : "正在加载地点…"}</p>}
     {error && <p role="alert" className="rounded border-l-3 border-verdict bg-verdict/10 p-2 text-sm text-ink">{error}</p>}
