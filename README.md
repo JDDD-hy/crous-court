@@ -34,12 +34,13 @@ Take a photo of what you actually ate, rate the main dish and sides, and let oth
 
 ## 🧾 What can you do?
 
-* 🏆 **Browse rankings** by CROUS venue
+* 🏆 **Browse rankings** with independent ratings for each CROUS venue
+* 🗂️ **Expand related dishes across venues** without combining their votes
 * 📸 **Upload real tray photos**
 * 🗳️ **Vote** for the tier a dish deserves
 * 🕵️ **Identify mystery dishes** with the community
 * ✨ **Ask AI for clues** when nobody knows what is on the plate
-* 📍 **Find CROUS venues** nearby or by search
+* 📍 **Find CROUS venues across France** by region, city, CROUS, name or nearby search
 * 🚩 **Report** incorrect or inappropriate content
 
 ---
@@ -54,9 +55,23 @@ Each user gets **one verdict per dish**.
 
 Dishes and votes belong to one restaurant. The same dish name at another restaurant has its own verdict.
 
-The national directory contains 985 entries from 26 CROUS feeds (snapshot: 23 September 2026). Search by region, city, CROUS or name; nearby discovery stays within 1 km. Coordinates with unresolved conflicts are excluded from nearby results. Directory inclusion does not guarantee that a venue is currently open. Source: [CNOUS open data, Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous).
+Related dishes with a recorded shared origin can appear as a stack. Each venue keeps its own score, vote count and dish page; matching names alone do not create a group. Groups expand independently on desktop and mobile.
 
 Once submitted, a verdict cannot be changed — so choose carefully before the gavel falls.
+
+---
+
+## 📍 Coverage and venue search
+
+The national directory retains **985 entries from 26 CROUS feeds**, with **18 administrative regions and 249 identified cities**. The full source check on **23 September 2026** returned 980 entries; five older entries remain with a status warning. Thirteen entries have no confirmed city.
+
+Search by region, city, CROUS institution or name. Regions and cities are linked filters; CROUS institutions are a separate filter. Results are paginated in groups of 12, and the directory loads when the selector opens.
+
+Nearby discovery stays within **1 km**. Entries with missing or conflicting coordinates, or uncertain listing status, are excluded from nearby results but remain searchable. Device coordinates are used in the browser and are not sent to the application's server. This is a searchable directory with location filtering; an interactive map is not implemented.
+
+Directory inclusion does not guarantee that a venue is currently open. Source: [CNOUS open data, Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous).
+
+Performance measurements, concurrency results and their limitations are recorded in [PERFORMANCE.md](./PERFORMANCE.md).
 
 ---
 
@@ -103,7 +118,7 @@ The court is still under construction.
 
 Things I am considering next:
 
-1. More CROUS venues and regions
+1. Keeping the national directory up to date and resolving uncertain venue records
 2. A French version of the site
 
 Bug fixes, wild ideas, UI improvements, better data, new features, and code contributions are all welcome through **Issues** and **Pull Requests**.
