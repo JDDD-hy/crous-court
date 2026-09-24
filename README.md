@@ -35,7 +35,7 @@ Take a photo of what you actually ate, rate the main dish and sides, and let oth
 ## 🧾 What can you do?
 
 * 🏆 **Browse rankings** with independent ratings for each CROUS venue
-* 🗂️ **Expand related dishes across venues** without combining their votes
+* 🗂️ **Open related cases across venues**, each with its own verdict
 * 📸 **Upload real tray photos**
 * 🗳️ **Vote** for the tier a dish deserves
 * 🕵️ **Identify mystery dishes** with the community
@@ -55,7 +55,7 @@ Each user gets **one verdict per dish**.
 
 Dishes and votes belong to one restaurant. The same dish name at another restaurant has its own verdict.
 
-Related dishes with a recorded shared origin can appear as a stack. Each venue keeps its own score, vote count and dish page; matching names alone do not create a group. Groups expand independently on desktop and mobile.
+Related dishes with a recorded shared origin can appear as a stack of case files. Open each stack to see every venue's score, vote count and dish page. Groups expand independently on desktop and mobile.
 
 Once submitted, a verdict cannot be changed — so choose carefully before the gavel falls.
 
@@ -65,13 +65,13 @@ Once submitted, a verdict cannot be changed — so choose carefully before the g
 
 The national directory retains **985 entries from 26 CROUS feeds**, with **18 administrative regions and 249 identified cities**. The full source check on **23 September 2026** returned 980 entries; five older entries remain with a status warning. Thirteen entries have no confirmed city.
 
-Search by region, city, CROUS institution or name. Regions and cities are linked filters; CROUS institutions are a separate filter. Results are paginated in groups of 12, and the directory loads when the selector opens.
+Find your next crime scene by region, city, CROUS institution or name. Pick a region to narrow down the cities, or filter by CROUS. Browse 12 venues at a time.
 
-Nearby discovery stays within **1 km**. Entries with missing or conflicting coordinates, or uncertain listing status, are excluded from nearby results but remain searchable. Device coordinates are used in the browser and are not sent to the application's server. This is a searchable directory with location filtering; an interactive map is not implemented.
+The **Near me** button finds venues within **1 km**, using your position locally in the browser. Venues with uncertain locations or listing status remain available through search while their details are checked.
 
-Directory inclusion does not guarantee that a venue is currently open. Source: [CNOUS open data, Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous).
+Check the venue's official page for current opening hours. Directory source: [CNOUS open data, Licence Ouverte](https://www.data.gouv.fr/datasets/restaurants-brasseries-et-cafeterias-des-crous).
 
-Performance measurements, concurrency results and their limitations are recorded in [PERFORMANCE.md](./PERFORMANCE.md).
+For a look behind the courtroom: [performance measurements and concurrency tests](./PERFORMANCE.md).
 
 ---
 
