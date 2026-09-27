@@ -58,3 +58,38 @@ test("rejects excessive multipart parts", async () => {
   const request = new Request("https://example.test", { method: "POST", headers: { "content-type": `multipart/form-data; boundary=${boundary}`, "content-length": String(Buffer.byteLength(body)) }, body });
   await assert.rejects(parseLimitedFormData(request, 8192), (error: unknown) => error instanceof InvalidBodyError && error.status === 413);
 });
+
+test("oversized bodies reject even when producer cancellation never settles", { timeout: 1000 }, async () => {
+  for (const contentType of ["multipart/form-data; boundary=test", "application/json"]) {
+    let cancelled = false;
+    const body = new ReadableStream({
+      pull(controller) { controller.enqueue(new Uint8Array(65)); },
+      cancel() { cancelled = true; return new Promise<void>(() => {}); },
+    }, { highWaterMark: 0 });
+    const request = new Request("https://example.test", { method: "POST", headers: { "content-type": contentType }, body, duplex: "half" } as RequestInit);
+    await assert.rejects(parseLimitedFormData(request, 64), BodyTooLargeError);
+    assert.equal(cancelled, true);
+  }
+});
+
+test("declared oversized bodies cancel without reading or waiting for the producer", { timeout: 1000 }, async () => {
+  let reads = 0;
+  let cancelled = false;
+  const body = new ReadableStream({
+    pull() { reads++; },
+    cancel() { cancelled = true; return new Promise<void>(() => {}); },
+  }, { highWaterMark: 0 });
+  const request = new Request("https://example.test", { method: "POST", headers: { "content-length": "65" }, body, duplex: "half" } as RequestInit);
+  await assert.rejects(readLimitedText(request, 64), BodyTooLargeError);
+  assert.equal(reads, 0);
+  assert.equal(cancelled, true);
+});
+
+test("producer cancellation failures do not replace the size error", async () => {
+  const body = new ReadableStream({
+    pull(controller) { controller.enqueue(new Uint8Array(65)); },
+    cancel() { return Promise.reject(new Error("producer failure")); },
+  }, { highWaterMark: 0 });
+  const request = new Request("https://example.test", { method: "POST", body, duplex: "half" } as RequestInit);
+  await assert.rejects(readLimitedText(request, 64), BodyTooLargeError);
+});

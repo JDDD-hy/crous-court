@@ -35,7 +35,7 @@ function snapshot(sqlite) {return JSON.stringify(['dishes','servings','votes','m
 const middlewareSource=readFileSync(new URL('middleware.ts',root),'utf8');
 function worker(api) {
   const code=stripTypeScriptTypes(middlewareSource.replace(/^import .*;\r?\n/gm,'')).replaceAll('export ','');
-  return new Function('NextResponse','getRawDb','isolationMigrationId','restaurantIsolationStatements','console',code+'\nreturn middleware;')({next:()=>new Response(null,{status:200})},()=>api,isolationMigrationId,restaurantIsolationStatements,{error(){}});
+  return new Function('NextResponse','getRawDb','isolationMigrationId','restaurantIsolationStatements','reportServerError',code+'\nreturn middleware;')({next:()=>new Response(null,{status:200})},()=>api,isolationMigrationId,restaurantIsolationStatements,()=>{});
 }
 function verifyData(sqlite,oldVotes,oldMeals) {
   assert.equal(sqlite.prepare("SELECT venue_id FROM dishes WHERE id='single'").get().venue_id,'cafeteria-escoffier-2');

@@ -91,8 +91,12 @@ try {
   const proposed = await request("/api/dishes/mystery-dessert/names", "POST", { name: "Crème dessert", evidenceType: "ate_today" }, one);
   const proposal = await proposed.json(); assert.equal(proposed.status, 201, JSON.stringify(proposal));
   assert.equal(proposal.data.supporters, 0);
+  const duplicateProposal = await request("/api/dishes/mystery-dessert/names", "POST", { name: "Crème dessert", evidenceType: "ate_today" }, one);
+  assert.equal(duplicateProposal.status, 409, await duplicateProposal.text());
   const selfEndorsement = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, one); assert.equal(selfEndorsement.status, 409); await selfEndorsement.text();
   const endorsedTwo = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, two); assert.equal(endorsedTwo.status, 200); await endorsedTwo.text();
+  const duplicateEndorsement = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, two);
+  assert.equal(duplicateEndorsement.status, 409, await duplicateEndorsement.text());
   const endorsedThree = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, three); assert.equal(endorsedThree.status, 200); await endorsedThree.text();
   const endorsedAdmin = await request(`/api/dishes/mystery-dessert/names/${proposal.data.id}/endorse`, "POST", {}, admin); assert.equal(endorsedAdmin.status, 200); await endorsedAdmin.text();
   await new Promise((resolve) => setTimeout(resolve, 500));

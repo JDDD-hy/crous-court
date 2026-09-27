@@ -33,11 +33,16 @@ export async function suggestName(dishId: string, userId: string, input: Record<
   if (!dish) throw new GovernanceError("菜品不存在", 404);
   const id = crypto.randomUUID();
   try {
-    await db.batch([
-      db.prepare("INSERT INTO name_suggestions (id,dish_id,proposer_id,name,normalized_name,evidence_type,evidence_note) VALUES (?,?,?,?,?,?,?)").bind(id, dishId, userId, name, normalizeDishName(name), input.evidenceType, note || null),
-      db.prepare("UPDATE dishes SET naming_status = 'suggested' WHERE id = ? AND naming_status = 'unknown'").bind(dishId),
+    const [inserted] = await db.batch([
+      db.prepare(`INSERT INTO name_suggestions (id,dish_id,proposer_id,name,normalized_name,evidence_type,evidence_note)
+        SELECT ?,?,?,?,?,?,? WHERE EXISTS(${visibleDish})`).bind(id, dishId, userId, name, normalizeDishName(name), input.evidenceType, note || null, dishId),
+      db.prepare("UPDATE dishes SET naming_status = 'suggested' WHERE id = ? AND naming_status = 'unknown' AND EXISTS(SELECT 1 FROM name_suggestions WHERE id=?)").bind(dishId, id),
     ]);
-  } catch { throw new GovernanceError("你已经提交过这个名称", 409); }
+    if (inserted.meta.changes !== 1) throw new GovernanceError("菜品不存在", 404);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("UNIQUE constraint failed: name_suggestions.dish_id, name_suggestions.proposer_id, name_suggestions.normalized_name")) throw new GovernanceError("你已经提交过这个名称", 409);
+    throw error;
+  }
   return { id, name, evidenceType: input.evidenceType, evidenceNote: note || null, status: "pending", supporters: 0 };
 }
 
@@ -48,14 +53,28 @@ export async function endorseName(dishId: string, suggestionId: string, userId: 
   const suggestion = await db.prepare("SELECT name,normalized_name,proposer_id FROM name_suggestions WHERE id = ? AND dish_id = ? AND status IN ('pending','community')").bind(suggestionId, dishId).first<{ name: string; normalized_name: string; proposer_id: string }>();
   if (!suggestion) throw new GovernanceError("名称候选不存在", 404);
   if (suggestion.proposer_id === userId) throw new GovernanceError("提议者不能支持自己的名称", 409);
-  const inserted = await db.prepare("INSERT INTO name_endorsements (suggestion_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING").bind(suggestionId, userId).run();
-  if (inserted.meta.changes !== 1) throw new GovernanceError("你已经支持过这个名称", 409);
-  const count = await db.prepare("SELECT COUNT(*) AS count FROM name_endorsements WHERE suggestion_id = ?").bind(suggestionId).first<{ count: number }>();
-  const supporters = Number(count?.count ?? 0);
-  if (supporters >= 3) await db.batch([
-    db.prepare("UPDATE name_suggestions SET status = 'community' WHERE id = ? AND status = 'pending'").bind(suggestionId),
-    db.prepare("UPDATE dishes SET naming_status = 'community' WHERE id = ? AND naming_status <> 'verified'").bind(dishId),
-    db.prepare("INSERT INTO dish_aliases (id,dish_id,name,normalized_name,source,created_by) VALUES (?,?,?,?, 'community', ?) ON CONFLICT(dish_id,normalized_name) DO NOTHING").bind(crypto.randomUUID(), dishId, suggestion.name, suggestion.normalized_name, userId),
-  ]);
-  return { supporters, status: supporters >= 3 ? "community" : "pending" };
+  const eligible = `SELECT 1 FROM name_suggestions ns WHERE ns.id=? AND ns.dish_id=?
+    AND ns.status IN ('pending','community') AND ns.proposer_id<>? AND EXISTS(${visibleDish})`;
+  const eligibility = [suggestionId, dishId, userId, dishId];
+  try {
+    // A duplicate aborts the batch; every subsequent write also checks current eligibility.
+    const results = await db.batch<{ supporters: number; status: string }>([
+      db.prepare(`INSERT INTO name_endorsements (suggestion_id,user_id) SELECT ?,? WHERE EXISTS(${eligible})`).bind(suggestionId, userId, ...eligibility),
+      db.prepare(`UPDATE name_suggestions SET status='community' WHERE id=? AND EXISTS(${eligible})
+        AND (SELECT COUNT(*) FROM name_endorsements WHERE suggestion_id=?)>=3`).bind(suggestionId, ...eligibility, suggestionId),
+      db.prepare(`UPDATE dishes SET naming_status='community' WHERE id=? AND naming_status<>'verified'
+        AND EXISTS(${eligible}) AND EXISTS(SELECT 1 FROM name_suggestions WHERE id=? AND status='community')`).bind(dishId, ...eligibility, suggestionId),
+      db.prepare(`INSERT INTO dish_aliases (id,dish_id,name,normalized_name,source,created_by)
+        SELECT ?,dish_id,name,normalized_name,'community',? FROM name_suggestions WHERE id=? AND status='community'
+        AND EXISTS(${eligible}) ON CONFLICT(dish_id,normalized_name) DO NOTHING`).bind(crypto.randomUUID(), userId, suggestionId, ...eligibility),
+      db.prepare(`SELECT status,(SELECT COUNT(*) FROM name_endorsements WHERE suggestion_id=?) supporters
+        FROM name_suggestions WHERE id=?`).bind(suggestionId, suggestionId),
+    ]);
+    if (results[0].meta.changes !== 1) throw new GovernanceError("名称候选不存在", 404);
+    const result = results.at(-1)!.results[0];
+    return { supporters: Number(result.supporters), status: result.status };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("UNIQUE constraint failed: name_endorsements.suggestion_id, name_endorsements.user_id")) throw new GovernanceError("你已经支持过这个名称", 409);
+    throw error;
+  }
 }

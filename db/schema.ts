@@ -277,7 +277,7 @@ export const aiRateLimits = sqliteTable("ai_rate_limits", {
 
 export const governanceRateLimits = sqliteTable("governance_rate_limits", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  action: text("action", { enum: ["suggest_name", "endorse_name", "report", "merge_review"] }).notNull(),
+  action: text("action", { enum: ["suggest_name", "endorse_name", "report", "merge_review", "upload_body", "identify_body"] }).notNull(),
   windowStartedAt: integer("window_started_at").notNull(),
   attempts: integer("attempts").notNull(),
 }, (table) => [

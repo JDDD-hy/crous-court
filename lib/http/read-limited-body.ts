@@ -4,13 +4,21 @@ export class InvalidBodyError extends Error {
   constructor(message: string, status = 400) { super(message); this.status = status; }
 }
 
+export function cancelRequestBody(request: Request) {
+  // Cancellation is advisory: an untrusted producer must not delay rejection.
+  void request.body?.cancel().catch(() => {});
+}
+
 export async function readLimitedText(request: Request, maxBytes: number) {
   return new TextDecoder().decode(await readLimitedBytes(request, maxBytes));
 }
 
 export async function readLimitedBytes(request: Request, maxBytes: number) {
   const declared = request.headers.get("content-length");
-  if (declared && (!/^\d+$/.test(declared) || Number(declared) > maxBytes)) throw new BodyTooLargeError();
+  if (declared && (!/^\d+$/.test(declared) || Number(declared) > maxBytes)) {
+    cancelRequestBody(request);
+    throw new BodyTooLargeError();
+  }
   if (!request.body) return new Uint8Array();
   const reader = request.body.getReader();
   let size = 0;
@@ -25,7 +33,7 @@ export async function readLimitedBytes(request: Request, maxBytes: number) {
     }
     size += value.byteLength;
     if (size > maxBytes) {
-      await reader.cancel();
+      void reader.cancel().catch(() => {});
       throw new BodyTooLargeError();
     }
     chunks.push(value);
@@ -35,7 +43,10 @@ export async function readLimitedBytes(request: Request, maxBytes: number) {
 export async function parseLimitedFormData(request: Request, maxBytes: number) {
   const contentType = request.headers.get("content-type") ?? "";
   const declared = request.headers.get("content-length");
-  if (declared && (!/^\d+$/.test(declared) || Number(declared) > maxBytes)) throw new BodyTooLargeError();
+  if (declared && (!/^\d+$/.test(declared) || Number(declared) > maxBytes)) {
+    cancelRequestBody(request);
+    throw new BodyTooLargeError();
+  }
   const boundaryMatch = contentType.match(/(?:^|;)\s*boundary=("[^"]+"|[^;\s]+)/i);
   if (!/^multipart\/form-data\s*;/i.test(contentType) || !boundaryMatch) {
     await discardLimitedBytes(request, maxBytes);
@@ -69,6 +80,6 @@ async function discardLimitedBytes(request: Request, maxBytes: number) {
     const { done, value } = await reader.read();
     if (done) return;
     size += value.byteLength;
-    if (size > maxBytes) { await reader.cancel(); throw new BodyTooLargeError(); }
+    if (size > maxBytes) { void reader.cancel().catch(() => {}); throw new BodyTooLargeError(); }
   }
 }

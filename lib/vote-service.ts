@@ -36,15 +36,19 @@ export async function submitVote(dishId: string, userId: string, targetTier: unk
 
   let created;
   try {
-    created = await db.prepare(`INSERT INTO votes (id,dish_id,user_id,target_tier) VALUES (?,?,?,?)
+    created = await db.prepare(`INSERT INTO votes (id,dish_id,user_id,target_tier)
+      SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM dishes d WHERE d.id=? AND d.merged_into_dish_id IS NULL
+        AND EXISTS(SELECT 1 FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id
+          WHERE s.dish_id=d.id AND s.status='active' AND m.status='active'))
       ON CONFLICT(dish_id,user_id) DO NOTHING RETURNING id`)
-      .bind(crypto.randomUUID(), dishId, userId, tier).first();
+      .bind(crypto.randomUUID(), dishId, userId, tier, dishId).first();
   } catch (error) {
     if (error instanceof Error && error.message.includes("dish_no_longer_active")) throw new VoteError("菜品刚刚被合并，请刷新后再投票", 409);
     throw error;
   }
   if (!created) {
     const [dish, myVote] = await Promise.all([getDishSummary(dishId), getUserVote(dishId, userId)]);
+    if (!dish) throw new VoteError("菜品不存在或不可见", 404);
     throw new VoteError("这道菜你已经判过了，已同步已有判决", 409, dish && myVote !== null ? { dish, myVote } : undefined);
   }
   const dish = await getDishSummary(dishId);

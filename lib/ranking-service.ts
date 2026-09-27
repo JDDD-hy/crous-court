@@ -23,7 +23,7 @@ export async function getDishDetail(id: string, evidencePage = 1, historyPage = 
   const db = getDb();
   const rawDb = getRawDb();
   const historyQueries = dishHistoryPageQueries(id, historyPage);
-  const [servingRows, historyBatch, countRow] = await Promise.all([db.select({
+  const readServings = (page: number) => db.select({
       id: servings.id,
       mealId: meals.id,
       date: servings.servedOn,
@@ -38,14 +38,19 @@ export async function getDishDetail(id: string, evidencePage = 1, historyPage = 
       .innerJoin(meals, and(eq(meals.id, mealItems.mealId), eq(meals.status, "active")))
       .leftJoin(photos, eq(photos.mealId, meals.id))
       .where(and(eq(servings.dishId, id), eq(servings.status, "active")))
-      .orderBy(desc(servings.servedOn), desc(servings.createdAt), servings.id, photos.id).limit(evidencePageSize).offset((evidencePage - 1) * evidencePageSize),
+      .orderBy(desc(servings.servedOn), desc(servings.createdAt), servings.id, photos.id).limit(evidencePageSize).offset((page - 1) * evidencePageSize);
+  const [requestedServings, historyBatch, countRow] = await Promise.all([readServings(evidencePage),
     rawDb.batch<{ page: number; rows_json: string }>(historyQueries.map(query => rawDb.prepare(query.sql).bind(...query.bindings))),
     getRawDb().prepare(`SELECT COUNT(*) records, COUNT(DISTINCT s.id) sightings FROM servings s JOIN meal_items mi ON mi.serving_id=s.id JOIN meals m ON m.id=mi.meal_id LEFT JOIN photos p ON p.meal_id=m.id WHERE s.dish_id=? AND s.status='active' AND m.status='active'`).bind(id).first<{ records: number; sightings: number }>(),
   ]);
   const historyResult = historyBatch.at(-1)?.results[0];
   const historyRows = JSON.parse(historyResult?.rows_json ?? '[]') as (TierHistoryEntry & { total: number })[];
   historyPage = historyResult?.page ?? 1;
-  if (!servingRows.length && evidencePage > 1) return getDishDetail(id, 1, historyPage);
+  let servingRows = requestedServings;
+  if (!servingRows.length && evidencePage > 1) {
+    evidencePage = 1;
+    servingRows = await readServings(evidencePage);
+  }
   const uniqueServings = [...new Map(servingRows.map((serving) => [`${serving.id}:${serving.photoId ?? ""}`, serving])).values()];
   return {
     ...summary,
