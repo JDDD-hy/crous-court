@@ -88,7 +88,12 @@ export function UploadFlow({ venues }: { venues: VenueOption[] }) {
     }
   }
 
-  if (result) return <Success result={result} onReset={() => { if (preview) URL.revokeObjectURL(preview); setExtraSides([]); setExtraOpen(false); setResult(null); setFiles(null); setPreview(null); formRef.current?.reset(); }} />;
+  if (result) return <Success result={result} onReset={() => {
+    if (preview) URL.revokeObjectURL(preview);
+    setResult(null); setFiles(null); setPreview(null); setError("");
+    setMainName(""); setSideOneName(""); setSideTwoName(""); setExtraSides([]); setExtraOpen(false);
+    setTier(3); setRightsConfirmed(false); setDirty(false); setIdentification(null); setCandidateSearchEnabled(false);
+  }} />;
 
   return <UploadVenueContext.Provider value={activeVenueId}><form ref={formRef} onSubmit={submit} onChangeCapture={() => setDirty(true)} data-language-busy={busy} data-language-draft={Boolean(dirty || files || mainName || sideOneName || sideTwoName || extraSides.length || tier !== 3 || rightsConfirmed)} className="space-y-7">
     <section className="border-4 border-ink bg-paper p-6 shadow-[7px_7px_0_#202624]">

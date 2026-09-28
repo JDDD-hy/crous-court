@@ -26,15 +26,18 @@ export async function identifyDish(file: File, userId: string) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const result = await callModel(image.bytes, image.mediaType, attempt > 0, locale);
-      await db.prepare("INSERT INTO ai_identifications (id,user_id,image_sha256,model,prompt_version,result_json) VALUES (?,?,?,?,?,?)")
-        .bind(crypto.randomUUID(), userId, imageSha256, env.AI_MODEL, promptVersion, JSON.stringify(result)).run();
-      return result;
+      const saved = await db.prepare(`INSERT INTO ai_identifications (id,user_id,image_sha256,model,prompt_version,result_json) VALUES (?,?,?,?,?,?)
+        ON CONFLICT(user_id,image_sha256,model,prompt_version) DO UPDATE SET result_json=ai_identifications.result_json
+        RETURNING result_json`)
+        .bind(crypto.randomUUID(), userId, imageSha256, env.AI_MODEL, promptVersion, JSON.stringify(result)).first<{ result_json: string }>();
+      return identificationSchema.parse(JSON.parse(saved!.result_json));
     } catch (error) {
       lastError = error;
       if (!(error instanceof IdentificationError) || error.message !== "AI 返回字段不完整") break;
     }
   }
-  throw new IdentificationError(lastError instanceof IdentificationError ? lastError.message : "AI 看饿了，但没敢乱认。请自己填写或交给群众", 502);
+  if (lastError instanceof IdentificationError) throw lastError;
+  throw new IdentificationError("AI 看饿了，但没敢乱认。请自己填写或交给群众", 502);
 }
 
 async function callModel(bytes: ArrayBuffer, mediaType: string, retry: boolean, locale: Locale) {

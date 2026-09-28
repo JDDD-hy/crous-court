@@ -96,6 +96,7 @@ export async function publishMeal(form: FormData, userId: string) {
     return { mealId, photoId, caseNumber: meal.case_number, translationCandidates };
   } catch (error) {
     if (!committed) await Promise.allSettled([bucket.delete(canonicalKey), bucket.delete(thumbnailKey)]);
+    if (error instanceof Error && error.message.includes("UNIQUE constraint failed: photos.creator_id, photos.content_sha256")) throw new UploadInputError("这张餐盘已经立过案了，请不要重复提交同一文件");
     if (error instanceof Error && error.message.includes("dish_no_longer_active")) throw new UploadInputError("菜品刚刚被合并，请刷新后重新选择");
     throw error;
   }

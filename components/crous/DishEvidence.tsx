@@ -1,6 +1,7 @@
 "use client";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { dishPresentation } from "@/lib/i18n/dish-presentation";
+import { useSearchParams } from "next/navigation";
 
 
 import { ResultPages } from './ResultPages';
@@ -10,6 +11,7 @@ import type { DishDetail } from "@/lib/dish-types";
 export function DishEvidence({ dish }: { dish: DishDetail }) {
   const t = useT();
   const locale = useLocale();
+  const query = useSearchParams();
   const labels = dishPresentation(dish, locale);
   const originalServings = [...new Map(dish.servings.filter(serving => serving.originalDescription).map(serving => [serving.id, serving])).values()];
   const otherPhotos = dish.servings.filter((serving) => serving.image && serving.image !== dish.image);
@@ -17,7 +19,7 @@ export function DishEvidence({ dish }: { dish: DishDetail }) {
   return <section><div className="relative rotate-[-1deg] border-[10px] border-paper bg-paper shadow-[7px_8px_0_#202624]"><Image src={dish.image} alt={t("{0} 的{1}{2}餐盘", dish.venue, labels.card, category)} width={1206} height={678} priority className="h-[28rem] w-full bg-ink/10 object-contain" draggable={false} /><p className="p-3 font-mono text-sm">{t("证物 A ·")} {category} · {dish.date} · {dish.venue}</p></div>
     <h2 className="mt-8 text-xl font-black">{t("嫌疑人行踪")}</h2>{otherPhotos.length ? <details className="mt-3 border-2 border-ink/30 bg-paper/45 p-3"><summary className="flex min-h-11 cursor-pointer items-center font-bold focus-visible:outline-3 focus-visible:outline-offset-2">{t("展开")} {otherPhotos.length}  {t("次其他行踪")}</summary><div className="mt-4 grid grid-cols-2 gap-4">{otherPhotos.map((serving, index) => <Photo key={`${serving.id}:${serving.image}`} src={serving.image!} label={`${serving.date} · ${serving.venue}${serving.originalDescription ? t(" · 投稿者称“{0}”", serving.originalDescription) : ""}`} index={index} />)}</div></details> : <div className="mt-3"><EmptyPhoto /></div>}
     {originalServings.length > 0 && <details className="mt-4 border-2 border-ink/30 bg-paper/45 p-3"><summary className="min-h-11 cursor-pointer py-2 font-bold">{t("投稿原文")}</summary><ul className="space-y-2 text-sm">{originalServings.map(serving => <li key={serving.id}>{serving.date} · {serving.venue}{t(" · 投稿者称“{0}”", serving.originalDescription)}</li>)}</ul></details>}
-    {dish.evidencePagination && <ResultPages path={`/dish/${dish.id}`} query="" parameter="evidencePage" en={locale === 'en'} {...dish.evidencePagination} />}
+    {dish.evidencePagination && <ResultPages path={`/dish/${dish.id}`} query={query.toString()} parameter="evidencePage" en={locale === 'en'} {...dish.evidencePagination} />}
   </section>;
 }
 

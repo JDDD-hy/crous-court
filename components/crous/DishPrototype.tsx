@@ -5,6 +5,7 @@ import { dishPresentation } from "@/lib/i18n/dish-presentation";
 
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CalendarDays, History, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { DishDetail } from "@/lib/dish-types";
@@ -51,9 +52,13 @@ export function DishPrototype({ dish, authenticated, myVote, nameSuggestions, hi
 function DishTabs({ dish, authenticated, nameSuggestions, historyOpen, historyStale }: { historyStale: boolean; historyOpen: boolean; dish: DishDetail; authenticated: boolean; nameSuggestions: NameSuggestion[] }) {
   const t = useT();
   const en = useLocale() === 'en';
+  const query = new URLSearchParams(useSearchParams().toString());
+  query.set("evidencePage", String(dish.evidencePagination?.page ?? 1));
+  const refreshQuery = new URLSearchParams(query);
+  refreshQuery.set("historyPage", "1");
   return <Tabs defaultValue={historyOpen ? 'history' : 'votes'}><TabsList variant="line" className="h-11 w-full justify-stretch rounded-none border-b-2 border-ink/30 bg-transparent p-0"><TabsTrigger value="votes" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("票数分布")}</TabsTrigger><TabsTrigger value="history" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("移动历史")}</TabsTrigger><TabsTrigger value="name" className="min-h-11 rounded-none font-bold data-[state=active]:text-verdict">{t("群众认菜")}</TabsTrigger></TabsList>
     <TabsContent value="votes" className="mt-4 space-y-3">{tiers.map((tier, index) => <div key={tier.id} className="grid grid-cols-[6rem_1fr_2rem] items-center gap-3"><strong>{tier.emoji} {t(tier.label)}</strong><div className="h-8 overflow-hidden rounded-sm border-2 border-ink bg-paper"><div className="h-full" style={{ width: `${dish.votes ? dish.distribution[index] / dish.votes * 100 : 0}%`, backgroundColor: tier.color }} /></div><span className="font-mono font-bold">{dish.distribution[index]}</span></div>)}</TabsContent>
-    <TabsContent value="history" className="mt-4">{historyStale ? <a className="inline-flex min-h-11 items-center underline" href={`/dish/${dish.id}?historyPage=1`}>{en ? "Refresh to view the latest history" : "刷新查看最新判决历史"}</a> : <><TierHistory entries={dish.tierHistory} />{dish.historyPagination && <ResultPages path={`/dish/${dish.id}`} query={`evidencePage=${dish.evidencePagination?.page ?? 1}`} parameter="historyPage" en={en} {...dish.historyPagination} />}</>}</TabsContent>
+    <TabsContent value="history" className="mt-4">{historyStale ? <a className="inline-flex min-h-11 items-center underline" href={`/dish/${dish.id}?${refreshQuery}`}>{en ? "Refresh to view the latest history" : "刷新查看最新判决历史"}</a> : <><TierHistory entries={dish.tierHistory} />{dish.historyPagination && <ResultPages path={`/dish/${dish.id}`} query={query.toString()} parameter="historyPage" en={en} {...dish.historyPagination} />}</>}</TabsContent>
     <TabsContent value="name"><DishNamingPanel dishId={dish.id} authenticated={authenticated} initialItems={nameSuggestions} /></TabsContent>
   </Tabs>;
 }

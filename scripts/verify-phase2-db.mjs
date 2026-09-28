@@ -31,7 +31,8 @@ run(["d1", "execute", ...base, "--file", path.join(projectRoot, "db", "fixtures.
 const tables = execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' AND name NOT LIKE 'sqlite_%' ORDER BY name").map((row) => row.name);
 for (const table of ["auth_sessions", "daily_case_counters", "dishes", "email_otp_challenges", "meal_items", "meals", "photos", "servings", "users", "venues", "vote_rate_limits", "votes"]) assert.ok(tables.includes(table));
 
-assert.deepEqual(execute("SELECT id, canonical_name, nickname, display_number, active FROM venues ORDER BY id"), [
+// Later migrations seed additional venues; this assertion verifies the two fixture venues.
+assert.deepEqual(execute("SELECT id, canonical_name, nickname, display_number, active FROM venues WHERE id IN ('venue-escoffier','venue-experimental') ORDER BY id"), [
   { id: "venue-escoffier", canonical_name: "Escoffier", nickname: "学校 CROUS / Télécom 附近", display_number: 0, active: 1 },
   { id: "venue-experimental", canonical_name: "L’Expérimental", nickname: "宿舍 CROUS / All Suites 附近", display_number: 1, active: 1 },
 ]);
