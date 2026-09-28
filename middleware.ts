@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
 import { isolationMigrationId, restaurantIsolationStatements } from "@/lib/restaurant-isolation";
 import { reportServerError } from "@/lib/server-error";
+import { correctHistoricalVenues } from "@/lib/historical-venue-correction";
 
 let ready: Promise<void> | undefined;
 async function initialize() {
   const db = getRawDb();
-  if (await db.prepare("SELECT id FROM app_data_migrations WHERE id=?").bind(isolationMigrationId).first()) return;
-  await db.batch(restaurantIsolationStatements(db,crypto.randomUUID()));
+  if (!await db.prepare("SELECT id FROM app_data_migrations WHERE id=?").bind(isolationMigrationId).first()) {
+    await db.batch(restaurantIsolationStatements(db,crypto.randomUUID()));
+  }
+  await correctHistoricalVenues(db);
 }
 
 export async function middleware() {

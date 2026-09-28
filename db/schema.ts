@@ -6,6 +6,7 @@ const createdAt = () => text("created_at").notNull().default(sql`CURRENT_TIMESTA
 export const appDataMigrations = sqliteTable("app_data_migrations", {
   id: text("id").primaryKey(),
   runId: text("run_id").notNull(),
+  detailsJson: text("details_json").notNull().default("{}"),
   completedAt: createdAt(),
 });
 

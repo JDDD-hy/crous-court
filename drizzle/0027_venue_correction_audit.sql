@@ -1,0 +1,1 @@
+ALTER TABLE `app_data_migrations` ADD `details_json` text DEFAULT '{}' NOT NULL;
