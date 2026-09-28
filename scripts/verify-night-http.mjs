@@ -22,7 +22,7 @@ async function identify(user, bytes = image(0)) {
 }
 async function upload(user, bytes = image(1)) {
   const form = new FormData();
-  for (const [key, value] of Object.entries({ venueId: 'cafeteria-escoffier-2', eatenOn: '2026-09-01', mainName: 'Synthetic HTTP tray', mainTier: '3', rightsConfirmed: 'true' })) form.set(key, value);
+  for (const [key, value] of Object.entries({ venueId: 'ru-escoffier-2', eatenOn: '2026-09-01', mainName: 'Synthetic HTTP tray', mainTier: '3', rightsConfirmed: 'true' })) form.set(key, value);
   form.set('canonical', new Blob([bytes], { type: 'image/jpeg' }), 'synthetic.jpg');
   form.set('thumbnail', new Blob([bytes], { type: 'image/jpeg' }), 'synthetic.jpg');
   const response = await fetch(`${origin}/api/uploads`, { method: 'POST', headers: { origin, cookie: cookies[user] + '; crous-locale=en' }, body: form, signal: AbortSignal.timeout(10000) });

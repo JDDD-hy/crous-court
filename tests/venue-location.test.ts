@@ -5,6 +5,10 @@ import { DatabaseSync } from "node:sqlite";
 import { venueLocation } from "../lib/venue-location.ts";
 
 test("all directory and migrated venues have compact postal locations; unknowns stay empty", () => {
+  for (const file of ["data/national-venues.json", "data/versailles-venues.json"]) {
+    const venue = JSON.parse(readFileSync(file,"utf8")).venues.find((row: {id:string}) => row.id === "ru-escoffier-2");
+    assert.match(venue.address, /91120 Palaiseau$/);
+  }
   const directory = JSON.parse(readFileSync("data/versailles-venues.json", "utf8"));
   for (const venue of directory.venues) {
     const code = venue.id === "ru-escoffier-2" ? "91120" : venue.postalCode;

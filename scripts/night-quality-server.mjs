@@ -24,7 +24,7 @@ const directory = path.join(persist, 'v3/d1/miniflare-D1DatabaseObject');
 const sqlitePath = path.join(directory, readdirSync(directory).find(name => name.endsWith('.sqlite') && name !== 'metadata.sqlite'));
 const db = new DatabaseSync(sqlitePath);
 db.exec('PRAGMA foreign_keys=ON');
-db.exec(readFileSync(path.join(root, 'db/fixtures.sql'), 'utf8').replaceAll('venue-escoffier', 'cafeteria-escoffier-2').replaceAll('venue-experimental', 'cafeteria-lexperimental-2'));
+db.exec(readFileSync(path.join(root, 'db/fixtures.sql'), 'utf8').replaceAll('venue-escoffier', 'ru-escoffier-2').replaceAll('venue-experimental', 'ru-lexperimental-2'));
 const cookies = {};
 const now = Math.floor(Date.now() / 1000);
 for (const user of ['one', 'two', 'three', 'four', 'admin']) {
@@ -37,15 +37,15 @@ const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 
 db.exec('BEGIN');
 for (let i = 0; i < 60; i++) {
   const id = `night-d${i}`;
-  db.prepare("INSERT INTO dishes(id,venue_id,category,original_description) VALUES(?,'cafeteria-escoffier-2','main',?)").run(id, `合成菜品 Synthetic dish ${i}`);
-  db.prepare("INSERT INTO meals(id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES(?,'cafeteria-escoffier-2','night-one',?,?,?)").run(id, date, id, 1000 + i);
-  db.prepare("INSERT INTO servings(id,dish_id,venue_id,creator_id,served_on,initial_tier) VALUES(?,?,'cafeteria-escoffier-2','night-one',?,3)").run(id, id, date);
+  db.prepare("INSERT INTO dishes(id,venue_id,category,original_description) VALUES(?,'ru-escoffier-2','main',?)").run(id, `合成菜品 Synthetic dish ${i}`);
+  db.prepare("INSERT INTO meals(id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES(?,'ru-escoffier-2','night-one',?,?,?)").run(id, date, id, 1000 + i);
+  db.prepare("INSERT INTO servings(id,dish_id,venue_id,creator_id,served_on,initial_tier) VALUES(?,?,'ru-escoffier-2','night-one',?,3)").run(id, id, date);
   db.prepare("INSERT INTO meal_items(meal_id,serving_id,slot) VALUES(?,?,'main')").run(id, id);
 }
 for (let i = 0; i < 30; i++) {
   const id = `night-evidence${i}`;
-  db.prepare("INSERT INTO meals(id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES(?,'cafeteria-escoffier-2','night-one',?,?,?)").run(id, date, id, 2000 + i);
-  db.prepare("INSERT INTO servings(id,dish_id,venue_id,creator_id,served_on,initial_tier,original_description) VALUES(?,'night-d0','cafeteria-escoffier-2','night-one',?,3,?)").run(id, date, `Synthetic sighting ${i}`);
+  db.prepare("INSERT INTO meals(id,venue_id,creator_id,eaten_on,case_number,display_order) VALUES(?,'ru-escoffier-2','night-one',?,?,?)").run(id, date, id, 2000 + i);
+  db.prepare("INSERT INTO servings(id,dish_id,venue_id,creator_id,served_on,initial_tier,original_description) VALUES(?,'night-d0','ru-escoffier-2','night-one',?,3,?)").run(id, date, `Synthetic sighting ${i}`);
   db.prepare("INSERT INTO meal_items(meal_id,serving_id,slot) VALUES(?,?,'main')").run(id, id);
 }
 for (let i = 0; i < 101; i++) {

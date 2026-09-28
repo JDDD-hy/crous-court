@@ -4,6 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { identificationSchema } from "../lib/ai/dish-identification-schema.ts";
+import { isCafeteria } from "../lib/venue-preference.ts";
 
 function fixture(afterRead?: (sql: string) => Promise<void>) {
   const sqlite = new DatabaseSync(":memory:");
@@ -40,10 +41,10 @@ test("simultaneous identical uploads return the duplicate error, roll back the l
   const objects = new Set<string>();
   const bucket = { async put(key: string) { objects.add(key); }, async delete(key: string) { objects.delete(key); } };
   const image = async () => ({ width: 1, height: 1, bytes: new ArrayBuffer(1), mediaType: "image/jpeg" });
-  const publish = new Function("getBindings", "todayInTimezone", "checkSanitizedImage", "catalogById", "catalogVenueInsert",
+  const publish = new Function("getBindings", "todayInTimezone", "checkSanitizedImage", "catalogById", "catalogVenueInsert", "isCafeteria",
     source("lib/upload/upload-service.ts") + "\nreturn publishMeal;")(
     () => ({ db, bucket }), () => "2026-09-28", image, new Map([["venue-escoffier", { timezone: "Europe/Paris" }]]),
-    () => db.prepare("SELECT 1"),
+    () => db.prepare("SELECT 1"), isCafeteria,
   ) as (form: FormData, user: string) => Promise<unknown>;
   const form = new FormData();
   for (const [key, value] of Object.entries({ venueId: "venue-escoffier", eatenOn: "2026-09-28", mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);

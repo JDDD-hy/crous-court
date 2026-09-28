@@ -24,20 +24,20 @@ try {
   await page.getByRole('button', { name: '再看 12 家', exact: true }).click();
   assert.notEqual(await page.locator('[data-venue-id]').first().getAttribute('data-venue-id'), first);
   await page.getByRole('searchbox', { name: '餐厅名称或城市' }).fill('Escoffier');
-  await page.locator('[data-venue-id="cafeteria-escoffier-2"] button').click();
-  assert.ok((await context.cookies()).some(cookie => cookie.name === 'crous-venues' && decodeURIComponent(cookie.value) === 'cafeteria-escoffier-2'));
+  await page.locator('[data-venue-id="ru-escoffier-2"] button').click();
+  assert.ok((await context.cookies()).some(cookie => cookie.name === 'crous-venues' && decodeURIComponent(cookie.value) === 'ru-escoffier-2'));
   checks.push('venue search, 12-item pagination and explicit selection persist');
   await goto('/rankings');
   assert.ok(await page.locator('[data-ranking-card]').count());
-  assert.ok((await page.locator('[data-ranking-card]').first().getAttribute('href')).includes('venue=cafeteria-escoffier-2'));
+  assert.ok((await page.locator('[data-ranking-card]').first().getAttribute('href')).includes('venue=ru-escoffier-2'));
   checks.push('saved venue restores ranking navigation');
   // Local geolocation permission only; the live site is never visited.
-  const venue = (await (await fetch(origin + '/api/venues')).json()).data.find(venue => venue.id === 'cafeteria-escoffier-2');
+  const venue = (await (await fetch(origin + '/api/venues')).json()).data.find(venue => venue.id === 'ru-lexperimental-2');
   await context.grantPermissions(['geolocation'], { origin });
   await context.setGeolocation(venue.points.find(Boolean));
   await goto('/venues');
   await page.getByRole('button', { name: '附近 1 km', exact: true }).click();
-  await page.locator('[data-venue-id="cafeteria-escoffier-2"]').waitFor();
+  await page.locator('[data-venue-id="ru-lexperimental-2"]').waitFor();
   const distances = await page.locator('[data-venue-id] button').allTextContents();
   assert.ok(distances.every(text => Number(text.match(/(\d+) m ·/)?.[1]) <= 1000));
   checks.push('nearby geolocation returns only <=1 km results');
