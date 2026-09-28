@@ -32,7 +32,7 @@ const venues = records.map(row => {
   if (correction) assert.equal(row.cityCode, correction.expectedCityCode, `Review geography again: ${row.id}`);
   if (missing.has(row.id)) assert.equal(row.sourceSha256, missing.get(row.id).sourceSha256, `Review refreshed source before retaining missing status: ${row.id}`);
   const uncertain = !correction && row.geographyStatus === "coordinate_commune" && row.warnings.includes("source_coordinate_postcode_mismatch");
-  const point = row.nearbyEligible && !missing.has(row.id) ? { latitude: row.latitude, longitude: row.longitude } : null;
+  const point = missing.has(row.id) ? null : correction?.coordinates ?? (row.nearbyEligible ? { latitude: row.latitude, longitude: row.longitude } : null);
   if (point) assert.ok(Number.isFinite(point.latitude) && Math.abs(point.latitude) <= 90 && Number.isFinite(point.longitude) && Math.abs(point.longitude) <= 180 && (point.latitude || point.longitude));
   // Source's explicit Mayotte zone provides timezone; no city/coordinates are guessed.
   const timezone = row.timezone ?? (row.crousId === "reunion" ? (/Mayotte/.test(row.sourceZone) ? "Indian/Mayotte" : "Indian/Reunion") : "Europe/Paris");
@@ -42,7 +42,7 @@ const venues = records.map(row => {
     region: correction?.region ?? (uncertain ? null : row.regionName), regionCode: correction?.regionCode ?? (uncertain ? null : row.regionCode),
     crous: labels[row.crousId], crousId: row.crousId, type: legacy?.type ?? row.type, timezone,
     officialUrl: legacy?.officialUrl ?? (row.id === "cnous-reunion-r1381" ? "https://www.crous-reunionmayotte.fr/restaurant/restaurant-de-dembeni/" : "https://www.lescrous.fr/votre-crous/"),
-    warnings: [...row.warnings, ...(uncertain ? ["administrative_area_unresolved"] : []), ...(missing.has(row.id) ? ["source_record_missing"] : [])], sourceArea: row.sourceZone };
+    warnings: [...row.warnings.filter(warning => !(correction?.coordinates && warning === "source_coordinate_postcode_mismatch")), ...(uncertain ? ["administrative_area_unresolved"] : []), ...(missing.has(row.id) ? ["source_record_missing"] : [])], sourceArea: row.sourceZone };
 }).sort((a,b) => a.id.localeCompare(b.id));
 assert.equal(new Set(venues.map(row=>row.id)).size,venues.length);
 assert.equal(new Set(venues.map(row=>row.displayNumber)).size,venues.length);

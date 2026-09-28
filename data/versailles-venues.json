@@ -617,9 +617,7 @@
         "longitude": 2.2051491197628
       },
       "officialUrl": "https://www.crous-versailles.fr/restaurant/ru-escoffier-2/",
-      "warnings": [
-        "postal-code-outside-idf"
-      ]
+      "warnings": []
     },
     {
       "id": "ru-et-snack-saint-germain",

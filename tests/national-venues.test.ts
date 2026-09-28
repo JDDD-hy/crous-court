@@ -30,7 +30,11 @@ test("national catalog preserves identities and 26 feeds, quarantines suspect GP
   const old = JSON.parse(readFileSync("data/versailles-venues.json","utf8"));
   for(const venue of old.venues) assert.equal(catalog.venues.find(v=>v.id===venue.id)?.name,venue.name);
   const eligible = catalog.venues.filter(v=>v.points.length);
-  assert.equal(eligible.length,910);
+  assert.equal(eligible.length,911);
+  const escoffier = catalog.venues.find(v=>v.id === "ru-escoffier-2")!;
+  assert.deepEqual(escoffier.points,[{latitude:48.712795393198,longitude:2.2051491197628}]);
+  assert.ok(nearbyVenues([escoffier],{latitude:48.712793,longitude:2.199441}).some(v=>v.option.id===escoffier.id));
+  assert.equal(nearbyVenues([escoffier],{latitude:48.732795,longitude:2.205149}).length,0);
   const overseas = eligible.find(v=>v.timezone === "Indian/Reunion")!;
   assert.ok(nearbyVenues(catalog.venues,overseas.points[0]!).some(v=>v.option.id===overseas.id));
   assert.ok(catalog.venues.some(v=>matchVenue(v,"Dembeni") && !v.points.length));

@@ -247,7 +247,8 @@
       "sources": [
         "https://www.crous-versailles.fr/wp-content/uploads/sites/17/2025/06/Liste_Site_rechargement_espece_Crous-Versailles_20250603.pdf"
       ],
-      "note": "Official list confirms 91120 Palaiseau; source RU postcode 31120 is a typo; keep source coordinates excluded."
+      "coordinates": { "latitude": 48.712795393198, "longitude": 2.2051491197628 },
+      "note": "Official list confirms 91120 Palaiseau; owner confirmed restoring the original RU coordinates on 2026-09-28."
     }
   ],
   "unresolvedGeography": [
