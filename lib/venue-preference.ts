@@ -7,6 +7,10 @@ export const venueCookie = "crous-venues";
 export const maxVenueSelection = 32;
 export const venueResultPageSize = 12;
 
+export function isCafeteria(venue: Pick<VenueOption, "name" | "type">) {
+  return /\bcafet(?:eria)?\b/.test(normalizeVenueText(`${venue.type ?? ""} ${venue.name}`));
+}
+
 export function nearbyVenues(options: VenueOption[], position: Coordinates) {
   if (!validCoordinates(position)) return [];
   return options.filter(option => !option.legacy).map(option => ({ option, distance: Math.min(...option.points.filter((point): point is Coordinates => Boolean(point && validCoordinates(point))).map(point => distanceMeters(position, point))) }))

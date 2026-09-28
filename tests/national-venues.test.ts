@@ -2,11 +2,27 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
-import { matchVenue, nearbyVenues, type VenueOption } from "../lib/venue-preference.ts";
+import { stripTypeScriptTypes } from "node:module";
+import { isCafeteria, matchVenue, nearbyVenues, type VenueOption } from "../lib/venue-preference.ts";
 import { parseVenueScope } from "../lib/venue-scope-input.ts";
 import { todayInTimezone, courtDateRanges } from "../lib/calendar.ts";
 
 const catalog = JSON.parse(readFileSync("data/national-venues.json","utf8")) as {venues: (VenueOption & {displayNumber:number;sourceId:string})[]};
+
+test("cafeterias are excluded from the directory and explicit scopes while archival identities remain intact", async () => {
+  for (const venue of [{name:"Escoffier",type:"cafeteria"},{name:"Le Patio",type:"Cafétéria"},{name:"Cafet' Insa",type:"other"},{name:"Cafétéria Grands Moulins",type:"Restaurant"}]) assert.ok(isCafeteria(venue));
+  assert.equal(isCafeteria({name:"RU Escoffier",type:"ru"}),false);
+  const rows = [{id:"cafeteria-escoffier-2",name:"Cafétéria Escoffier",active:1},{id:"historical-cafe",name:"Cafétéria archive",active:1}];
+  const db = {prepare() {return {bind() {return this;},async all() {return {results:rows};}};}};
+  const source = stripTypeScriptTypes(readFileSync("lib/venue-catalog.ts","utf8").replace(/^import .*;\r?\n/gm,"")).replaceAll("export ","");
+  const getVenues = new Function("directory","getRawDb","isCafeteria",source+"\nreturn getSelectableVenues;")(catalog,()=>db,isCafeteria) as (ids?:string[])=>Promise<VenueOption[]>;
+  const venues=await getVenues();
+  assert.equal(venues.length,catalog.venues.filter(v=>!isCafeteria(v)).length);
+  assert.equal(venues.some(isCafeteria),false);
+  assert.ok(venues.some(v=>v.id==="ru-escoffier-2"));
+  assert.ok(venues.some(v=>v.id==="ru-lexperimental-2"));
+  assert.deepEqual(await getVenues(["cafeteria-escoffier-2","historical-cafe"]),[]);
+});
 test("national catalog preserves identities and 26 feeds, quarantines suspect GPS and searches overseas", t => {
   assert.equal(catalog.venues.length,985);
   assert.equal(new Set(catalog.venues.map(v=>v.crousId)).size,26);

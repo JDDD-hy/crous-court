@@ -1,6 +1,6 @@
 import directory from "@/data/national-venues.json";
 import { getRawDb } from "@/db";
-import type { VenueOption } from "./venue-preference";
+import { isCafeteria, type VenueOption } from "./venue-preference";
 
 export type CatalogVenue = VenueOption & { displayNumber: number; sourceId: string; timezone: string };
 export const catalogVenues: CatalogVenue[] = directory.venues;
@@ -11,10 +11,10 @@ export async function getSelectableVenues(ids?: string[]) {
     .bind(...(ids ? [JSON.stringify(ids)] : [])).all<{ id: string; name: string; address: string | null; active: number; timezone: string }>();
   const stored = new Map(rows.results.map(row => [row.id, row]));
   const requested = ids ? new Set(ids) : null;
-  const options: VenueOption[] = catalogVenues.filter(venue => (!requested || requested.has(venue.id)) && stored.get(venue.id)?.active !== 0)
+  const options: VenueOption[] = catalogVenues.filter(venue => !isCafeteria(venue) && (!requested || requested.has(venue.id)) && stored.get(venue.id)?.active !== 0)
     .map(venue => ({ id: venue.id, name: venue.name, address: venue.address, points: venue.points, legacy: false, city: venue.city, cityCode: venue.cityCode, region: venue.region, regionCode: venue.regionCode, crous: venue.crous, crousId: venue.crousId, type: venue.type, timezone: venue.timezone, officialUrl: venue.officialUrl, warnings: venue.warnings }));
   // Historical identities remain resolvable; they are never offered as new choices.
-  for (const row of rows.results) if (row.active && !catalogById.has(row.id)) options.push({ ...row, points: [], legacy: true });
+  for (const row of rows.results) if (row.active && !catalogById.has(row.id) && !isCafeteria(row)) options.push({ ...row, points: [], legacy: true });
   return options;
 }
 

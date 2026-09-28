@@ -1,6 +1,7 @@
 import { getBindings } from "@/db";
 import { todayInTimezone } from "@/lib/calendar";
 import { catalogById, catalogVenueInsert } from "@/lib/venue-catalog";
+import { isCafeteria } from "@/lib/venue-preference";
 import { checkSanitizedImage } from "./image-validation";
 
 type ItemInput = { slot: "main" | `side_${number}`; name: string; tier: number | null; dishId: string | null };
@@ -22,7 +23,7 @@ export async function publishMeal(form: FormData, userId: string) {
   ] satisfies ItemInput[]).filter((item) => item.slot === "main" || item.tier !== null);
   if (!isIsoDate(eatenOn)) throw new UploadInputError("请选择有效日期");
   const catalogVenue = catalogById.get(venueId);
-  if (!catalogVenue) throw new UploadInputError("餐厅不可用");
+  if (!catalogVenue || isCafeteria(catalogVenue)) throw new UploadInputError("餐厅不可用");
   if (form.get("rightsConfirmed") !== "true") throw new UploadInputError("请确认照片发布权与无人脸信息");
 
   const canonicalFile = form.get("canonical");

@@ -95,14 +95,14 @@ try {
   const unconfiguredAi = await fetch(`${origin}/api/ai/identify`, { method: "POST", headers: { origin, cookie: rawCookie }, body: aiForm });
   assert.equal(unconfiguredAi.status, 503);
   const futureForm = new FormData();
-  for (const [key, value] of Object.entries({ venueId: "cafeteria-escoffier-2", eatenOn: "2999-01-01", mainName: "", mainTier: "3", rightsConfirmed: "true" })) futureForm.set(key, value);
+  for (const [key, value] of Object.entries({ venueId: "ru-escoffier-2", eatenOn: "2999-01-01", mainName: "", mainTier: "3", rightsConfirmed: "true" })) futureForm.set(key, value);
   futureForm.set("canonical", new Blob([image], { type: "image/jpeg" }), "future.jpg");
   futureForm.set("thumbnail", new Blob([image], { type: "image/jpeg" }), "future-thumb.jpg");
   const futureUpload = await fetch(`${origin}/api/uploads`, { method: "POST", headers: { origin, cookie: rawCookie }, body: futureForm });
   assert.equal(futureUpload.status, 400);
   const upload = (index) => {
     const form = new FormData();
-    for (const [key, value] of Object.entries({ venueId: "cafeteria-escoffier-2", eatenOn: "2026-09-11", mainName: `并发测试 ${index}`, mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);
+    for (const [key, value] of Object.entries({ venueId: "ru-escoffier-2", eatenOn: "2026-09-11", mainName: `并发测试 ${index}`, mainTier: "3", rightsConfirmed: "true" })) form.set(key, value);
     form.set("mainDishId", "");
     for (let side = 1; side <= 8; side++) {
       const prefix = side === 1 ? "sideOne" : side === 2 ? "sideTwo" : `side${side}`;
